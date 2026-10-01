@@ -1,0 +1,66 @@
+# =================================================================
+# HyVision - Plataforma IoT para Monitoreo de Energía Solar
+# Infraestructura: ThingsBoard 4.3 LTS (Apache 2.0) + TimescaleDB
+# Compatible con Windows (Docker Desktop) y Ubuntu (Docker Engine)
+# =================================================================
+
+services:
+  hyvision-db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: hyvision-timescaledb
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hyvision}
+      POSTGRES_USER: ${POSTGRES_USER:-hyvision}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hyvision_secure_pass_2026}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - hyvision-db-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hyvision} -d ${POSTGRES_DB:-hyvision}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 4096M
+
+  hyvision-app:
+    image: thingsboard/tb-postgres:${HYVISION_VERSION:-4.3.1.6}
+    container_name: hyvision-app
+    restart: always
+    depends_on:
+      hyvision-db:
+        condition: service_healthy
+    ports:
+      - "${HYVISION_HTTP_PORT:-8080}:8080"
+      - "${HYVISION_MQTT_PORT:-1883}:1883"
+      - "${HYVISION_EDGE_PORT:-7070}:7070"
+      - "${HYVISION_COAP_PORT:-5683}:5683/udp"
+    environment:
+      TB_QUEUE_TYPE: in-memory
+      DATABASE_TS_TYPE: sql
+      SPRING_DATASOURCE_URL: jdbc:postgresql://hyvision-db:5432/${POSTGRES_DB:-hyvision}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-hyvision}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-hyvision_secure_pass_2026}
+      SPRING_DRIVER_CLASS_NAME: org.postgresql.Driver
+      JAVA_OPTS: ${JAVA_OPTS:--Xms2048m -Xmx6144m -XX:+UseG1GC}
+    volumes:
+      - hyvision-app-data:/data
+      - hyvision-app-logs:/var/log/thingsboard
+    deploy:
+      resources:
+        limits:
+          memory: 8192M
+
+volumes:
+  hyvision-db-data:
+    name: hyvision_timescaledb_data
+  hyvision-app-data:
+    name: hyvision_app_data
+  hyvision-app-logs:
+    name: hyvision_app_logs
