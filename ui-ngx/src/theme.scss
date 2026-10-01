@@ -10,21 +10,21 @@
 @include mat.elevation-classes();
 @include mat.app-background();
 
-$tb-mat-indigo: (
-  50: #e8eaf6,
-  100: #c5cae9,
-  200: #9fa8da,
+$tb-mat-green: (
+  50: #edf4eb,
+  100: #d3e4cf,
+  200: #b2d0ab,
   300: $tb-primary-color-light,
-  400: #5c6bc0,
+  400: #52814a,
   500: $tb-primary-color,
   600: $tb-secondary-color,
-  700: #303f9f,
-  800: #283593,
-  900: #1a237e,
+  700: #253e21,
+  800: #1b2f18,
+  900: #101e0e,
   A100: $tb-hue3-color,
-  A200: #536dfe,
-  A400: #3d5afe,
-  A700: #304ffe,
+  A200: #62a356,
+  A400: #49823f,
+  A700: #376a2e,
   contrast: (
     50: rgba(black, 0.87),
     100: rgba(black, 0.87),
@@ -43,7 +43,7 @@ $tb-mat-indigo: (
   )
 );
 
-$tb-primary: mat.m2-define-palette($tb-mat-indigo);
+$tb-primary: mat.m2-define-palette($tb-mat-green);
 $tb-accent: mat.m2-define-palette(mat.$m2-deep-orange-palette);
 
 $tb-mat-theme: mat.m2-define-light-theme((
