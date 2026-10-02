@@ -93,6 +93,25 @@ def save_config(config):
         print(f"Error saving config: {e}")
         return False
 
+import base64
+
+def is_admin_token(auth_header):
+    if not auth_header:
+        return False
+    try:
+        token = auth_header.replace("Bearer ", "").strip()
+        parts = token.split(".")
+        if len(parts) < 2:
+            return False
+        payload_b64 = parts[1]
+        payload_b64 += "=" * (-len(payload_b64) % 4)
+        payload = json.loads(base64.urlsafe_b64decode(payload_b64).decode("utf-8"))
+        scopes = payload.get("scopes", [])
+        return "TENANT_ADMIN" in scopes or "SYS_ADMIN" in scopes
+    except Exception as e:
+        print(f"Auth check error: {e}")
+        return False
+
 class BrandingHandler(BaseHTTPRequestHandler):
     def _send_cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -120,6 +139,18 @@ class BrandingHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
+        auth_header = self.headers.get("X-Authorization") or self.headers.get("Authorization")
+        if not is_admin_token(auth_header):
+            self.send_response(403)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self._send_cors()
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "status": "forbidden",
+                "message": "Acceso denegado: solo administradores (Tenant / Sysadmin) pueden modificar la configuración"
+            }).encode("utf-8"))
+            return
+
         if self.path.startswith("/api/hyvision/branding/reset"):
             save_config(DEFAULT_CONFIG)
             data = json.dumps({"status": "ok", "message": "Restablecido a valores de fábrica", "config": DEFAULT_CONFIG}).encode("utf-8")

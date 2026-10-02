@@ -102,44 +102,50 @@
     return false;
   }
 
-  // Check if an authenticated user session is active
-  function isAuthenticated() {
+  // Strictly decode JWT token to check if user has TENANT_ADMIN or SYS_ADMIN authority
+  function isAuthorizedAdmin() {
     try {
       var token = localStorage.getItem('jwt_token');
-      return !!token;
+      if (!token) return false;
+      var parts = token.split('.');
+      if (parts.length < 2) return false;
+      var base64Url = parts[1];
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      var payload = JSON.parse(jsonPayload);
+      var scopes = payload.scopes || [];
+      // STRICT RBAC: Customer Users (CUSTOMER_USER) are NOT authorized!
+      return scopes.indexOf('TENANT_ADMIN') !== -1 || scopes.indexOf('SYS_ADMIN') !== -1;
     } catch (e) {
       return false;
     }
   }
 
-  // 5. Update Trigger Button Visibility
+  // 5. Update Trigger Button Visibility (Role-Based Access Control)
   function updateTriggerVisibility() {
     var existingBtn = document.querySelector('.hyvision-wl-trigger');
 
-    // Rule: NEVER show on login page!
-    if (isLoginPage()) {
+    // Rule 1: NEVER show on login page!
+    // Rule 2: NEVER show for Customer Users or unauthenticated guests!
+    if (isLoginPage() || !isAuthorizedAdmin()) {
       if (existingBtn) {
         existingBtn.remove();
       }
       return;
     }
 
-    // Only show if logged in and not on login page
-    if (isAuthenticated()) {
-      if (!existingBtn) {
-        createTriggerButton();
-      }
-    } else {
-      if (existingBtn) {
-        existingBtn.remove();
-      }
+    // Only show if user is TENANT_ADMIN or SYS_ADMIN inside the platform
+    if (!existingBtn) {
+      createTriggerButton();
     }
   }
 
-  // 6. Create Trigger Button
+  // 6. Create Trigger Button (Only for Tenant Admin & SysAdmin)
   function createTriggerButton() {
     if (document.querySelector('.hyvision-wl-trigger')) return;
-    if (isLoginPage()) return;
+    if (isLoginPage() || !isAuthorizedAdmin()) return;
 
     var btn = document.createElement('button');
     btn.className = 'hyvision-wl-trigger';
@@ -342,9 +348,13 @@
         customCss: document.getElementById('wl-customCss').value
       };
 
+      var token = localStorage.getItem('jwt_token') || '';
       fetch('/api/hyvision/branding', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': 'Bearer ' + token
+        },
         body: JSON.stringify(newCfg)
       })
       .then(function(res) { return res.json(); })
@@ -358,7 +368,7 @@
           showToast('¡Configuración guardada y aplicada!');
           closeModal();
         } else {
-          alert('Error: ' + data.message);
+          alert('Error: ' + (data.message || 'No autorizado'));
         }
       })
       .catch(function(err) {
@@ -371,7 +381,13 @@
     // Reset Action
     document.getElementById('wl-btn-reset').addEventListener('click', function() {
       if (confirm('¿Deseas restablecer todos los valores originales de fábrica de HyVision?')) {
-        fetch('/api/hyvision/branding/reset', { method: 'POST' })
+        var token = localStorage.getItem('jwt_token') || '';
+        fetch('/api/hyvision/branding/reset', {
+          method: 'POST',
+          headers: {
+            'X-Authorization': 'Bearer ' + token
+          }
+        })
           .then(function(r) { return r.json(); })
           .then(function(data) {
             currentConfig = data.config;
@@ -413,6 +429,10 @@
   }
 
   function openModal() {
+    if (!isAuthorizedAdmin()) {
+      alert("Acceso restringido: Solo los administradores (Tenant / Sysadmin) pueden modificar la Marca Blanca.");
+      return;
+    }
     createWhiteLabelModal();
     populateForm(currentConfig);
     var overlay = document.querySelector('.hyvision-wl-overlay');
