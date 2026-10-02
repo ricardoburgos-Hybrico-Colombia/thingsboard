@@ -237,7 +237,48 @@
     }
   }
 
-  // 7. Update Trigger Button Visibility (Role-Based Access Control)
+  // 7. Filter Customer Sidebar (Hide "Entidades" & "Instancias de edge" strictly for Customer Users)
+  function filterCustomerSidebar() {
+    if (isLoginPage() || !isLoggedIn()) return;
+
+    var isAdmin = isAuthorizedAdmin();
+
+    // Toggle role class on body
+    if (isAdmin) {
+      document.body.classList.remove('hyvision-role-customer');
+      document.body.classList.add('hyvision-role-admin');
+    } else {
+      document.body.classList.add('hyvision-role-customer');
+      document.body.classList.remove('hyvision-role-admin');
+    }
+
+    var sideMenu = document.querySelector('ul.tb-side-menu, mat-sidenav .tb-side-menu, tb-side-menu ul');
+    if (!sideMenu) return;
+
+    var lis = sideMenu.querySelectorAll('li');
+    lis.forEach(function(li) {
+      if (li.classList.contains('hyvision-sidebar-reports-item')) return;
+
+      var txt = (li.innerText || '').toLowerCase();
+      var a = li.querySelector('a');
+      var href = a ? (a.getAttribute('href') || a.getAttribute('routerlink') || '') : '';
+
+      var isEntities = txt.indexOf('entidades') !== -1 || txt.indexOf('entities') !== -1 || href.indexOf('/entities') !== -1;
+      var isEdge = txt.indexOf('instancias de edge') !== -1 || txt.indexOf('edge instances') !== -1 || href.indexOf('/edge') !== -1;
+
+      if (isEntities || isEdge) {
+        if (!isAdmin) {
+          li.style.display = 'none';
+          li.setAttribute('data-hyvision-customer-hidden', 'true');
+        } else {
+          li.style.display = '';
+          li.removeAttribute('data-hyvision-customer-hidden');
+        }
+      }
+    });
+  }
+
+  // 8. Update Trigger Button Visibility (Role-Based Access Control)
   function updateTriggerVisibility() {
     var existingBtn = document.querySelector('.hyvision-wl-trigger');
 
@@ -904,12 +945,14 @@
     updateTriggerVisibility();
     updateSidebarTranslations();
     injectSidebarReportsLink();
+    filterCustomerSidebar();
 
     // Periodic check for SPA navigation updates (every 800ms)
     setInterval(function() {
       updateTriggerVisibility();
       updateSidebarTranslations();
       injectSidebarReportsLink();
+      filterCustomerSidebar();
     }, 800);
   });
 

@@ -289,6 +289,12 @@
   color: #a3e099 !important;
 }
 
+/* Customer View Restrictions (Hide Entidades & Instancias de edge) */
+body.hyvision-role-customer [data-hyvision-customer-hidden="true"],
+body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
+  display: none !important;
+}
+
 /* Modal Body */
 .hyvision-wl-body {
   padding: 24px;
