@@ -9,5 +9,9 @@
   "logoLoginUrl": "assets/logo_title_white.png",
   "logoToolbarUrl": "assets/logo_title_white.png",
   "faviconUrl": "thingsboard.ico",
-  "customCss": ""
+  "customCss": "",
+  "telegramEnabled": false,
+  "telegramBotToken": "",
+  "telegramChatId": "",
+  "telegramAlertSeverity": "CRITICAL"
 }

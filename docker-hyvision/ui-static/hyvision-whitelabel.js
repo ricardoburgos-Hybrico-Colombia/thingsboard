@@ -272,6 +272,40 @@
             </div>
           </div>
 
+          <!-- Notificaciones Telegram 24/7 -->
+          <div class="hyvision-wl-section">
+            <div class="hyvision-wl-section-title">
+              <span>📲</span> Notificaciones Críticas por Telegram (24/7 Gratis)
+            </div>
+            <div class="hyvision-wl-form-grid">
+              <div class="hyvision-wl-field hyvision-wl-form-full" style="flex-direction:row; align-items:center; gap:10px;">
+                <input type="checkbox" id="wl-telegramEnabled" style="width:18px; height:18px; accent-color:#64B856; cursor:pointer;">
+                <label for="wl-telegramEnabled" class="hyvision-wl-label" style="cursor:pointer; font-weight:600; color:#ffffff;">
+                  Activar Despacho Automático de Alertas a Telegram
+                </label>
+              </div>
+
+              <div class="hyvision-wl-field">
+                <label class="hyvision-wl-label">Bot Token de Telegram</label>
+                <input type="text" id="wl-telegramBotToken" class="hyvision-wl-input" placeholder="ej: 7123456789:AAFl...">
+                <span style="font-size:11px; color:#8ea38b; margin-top:2px;">Crea tu bot con <a href="https://t.me/BotFather" target="_blank" style="color:#64B856; text-decoration:underline;">@BotFather</a></span>
+              </div>
+
+              <div class="hyvision-wl-field">
+                <label class="hyvision-wl-label">Chat ID o ID de Grupo</label>
+                <input type="text" id="wl-telegramChatId" class="hyvision-wl-input" placeholder="ej: -100123456789 o 987654321">
+                <span style="font-size:11px; color:#8ea38b; margin-top:2px;">Obtén tu ID con <a href="https://t.me/userinfobot" target="_blank" style="color:#64B856; text-decoration:underline;">@userinfobot</a></span>
+              </div>
+
+              <div class="hyvision-wl-field hyvision-wl-form-full" style="margin-top:4px; display:flex; flex-direction:row; gap:12px; align-items:center;">
+                <button type="button" class="hyvision-wl-btn" id="wl-btn-telegram-test" style="background:rgba(100,184,86,0.2); border:1px solid #64B856; color:#a3e099; padding:8px 16px; font-size:12.5px;">
+                  🧪 Probar Conexión con Telegram
+                </button>
+                <span id="wl-telegram-test-result" style="font-size:12px; font-weight:500;"></span>
+              </div>
+            </div>
+          </div>
+
           <!-- CSS Personalizado -->
           <div class="hyvision-wl-section">
             <div class="hyvision-wl-section-title">
@@ -330,6 +364,53 @@
       }
     });
 
+    // Telegram Connection Test
+    document.getElementById('wl-btn-telegram-test').addEventListener('click', function() {
+      var btn = document.getElementById('wl-btn-telegram-test');
+      var resSpan = document.getElementById('wl-telegram-test-result');
+      var botToken = document.getElementById('wl-telegramBotToken').value.trim();
+      var chatId = document.getElementById('wl-telegramChatId').value.trim();
+
+      if (!botToken || !chatId) {
+        resSpan.style.color = '#ff8a80';
+        resSpan.innerText = '⚠️ Ingresa el Bot Token y Chat ID primero.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Enviando...';
+      resSpan.style.color = '#8ea38b';
+      resSpan.innerText = 'Conectando con Telegram...';
+
+      var token = localStorage.getItem('jwt_token') || '';
+      fetch('/api/hyvision/telegram/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ botToken: botToken, chatId: chatId })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerText = '🧪 Probar Conexión con Telegram';
+        if (data.status === 'ok') {
+          resSpan.style.color = '#64B856';
+          resSpan.innerText = '✅ ' + data.message;
+        } else {
+          resSpan.style.color = '#ff8a80';
+          resSpan.innerText = '❌ ' + (data.message || 'Error al conectar');
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.innerText = '🧪 Probar Conexión con Telegram';
+        resSpan.style.color = '#ff8a80';
+        resSpan.innerText = '❌ Error de red: ' + err.message;
+      });
+    });
+
     // Save Action
     document.getElementById('wl-btn-save').addEventListener('click', function() {
       var saveBtn = document.getElementById('wl-btn-save');
@@ -345,7 +426,10 @@
         backgroundColor: document.getElementById('wl-backgroundColor').value.trim() || currentConfig.backgroundColor,
         backgroundMode: document.getElementById('wl-backgroundMode').value,
         logoLoginUrl: document.getElementById('wl-logoLoginUrl').value.trim() || currentConfig.logoLoginUrl,
-        customCss: document.getElementById('wl-customCss').value
+        customCss: document.getElementById('wl-customCss').value,
+        telegramEnabled: document.getElementById('wl-telegramEnabled').checked,
+        telegramBotToken: document.getElementById('wl-telegramBotToken').value.trim(),
+        telegramChatId: document.getElementById('wl-telegramChatId').value.trim()
       };
 
       var token = localStorage.getItem('jwt_token') || '';
@@ -426,6 +510,11 @@
     document.getElementById('wl-backgroundMode').value = cfg.backgroundMode || 'dark_scada';
     document.getElementById('wl-logoLoginUrl').value = cfg.logoLoginUrl || '';
     document.getElementById('wl-customCss').value = cfg.customCss || '';
+    document.getElementById('wl-telegramEnabled').checked = !!cfg.telegramEnabled;
+    document.getElementById('wl-telegramBotToken').value = cfg.telegramBotToken || '';
+    document.getElementById('wl-telegramChatId').value = cfg.telegramChatId || '';
+    var resSpan = document.getElementById('wl-telegram-test-result');
+    if (resSpan) resSpan.innerText = '';
   }
 
   function openModal() {

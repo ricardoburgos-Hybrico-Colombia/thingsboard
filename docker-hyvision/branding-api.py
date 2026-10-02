@@ -2,6 +2,11 @@
 import json
 import os
 import sys
+import base64
+import time
+import urllib.request
+import urllib.error
+from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 CONFIG_PATH = os.environ.get("HYVISION_CONFIG_PATH", "/usr/share/nginx/html/hyvision-config.json")
@@ -19,14 +24,24 @@ DEFAULT_CONFIG = {
     "logoLoginUrl": "assets/logo_title_white.png",
     "logoToolbarUrl": "assets/logo_title_white.png",
     "faviconUrl": "thingsboard.ico",
-    "customCss": ""
+    "customCss": "",
+    "telegramEnabled": False,
+    "telegramBotToken": "",
+    "telegramChatId": "",
+    "telegramAlertSeverity": "CRITICAL"
 }
+
+# Cooldown memory store for anti-spam (5 minutes per device+alarm)
+alert_cooldown = {}
 
 def load_config():
     if os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
+                loaded = json.load(f)
+                merged = DEFAULT_CONFIG.copy()
+                merged.update(loaded)
+                return merged
         except Exception as e:
             print(f"Error reading config: {e}")
     return DEFAULT_CONFIG.copy()
@@ -93,8 +108,6 @@ def save_config(config):
         print(f"Error saving config: {e}")
         return False
 
-import base64
-
 def is_admin_token(auth_header):
     if not auth_header:
         return False
@@ -111,6 +124,34 @@ def is_admin_token(auth_header):
     except Exception as e:
         print(f"Auth check error: {e}")
         return False
+
+def send_telegram_message(bot_token, chat_id, text):
+    if not bot_token or not chat_id:
+        return False, "Bot token o Chat ID no configurados"
+    url = f"https://api.telegram.org/bot{bot_token.strip()}/sendMessage"
+    payload = json.dumps({
+        "chat_id": str(chat_id).strip(),
+        "text": text,
+        "parse_mode": "Markdown",
+        "disable_web_page_preview": False
+    }).encode("utf-8")
+    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if data.get("ok"):
+                return True, "Mensaje enviado exitosamente"
+            else:
+                return False, data.get("description", "Error desconocido de Telegram")
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8")
+        try:
+            err_json = json.loads(err_body)
+            return False, err_json.get("description", str(e))
+        except Exception:
+            return False, f"HTTP Error {e.code}: {e.reason}"
+    except Exception as e:
+        return False, str(e)
 
 class BrandingHandler(BaseHTTPRequestHandler):
     def _send_cors(self):
@@ -139,6 +180,90 @@ class BrandingHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def do_POST(self):
+        # 1. Telegram Alert Endpoint (receives alerts from Rule Engine or internal services)
+        if self.path.startswith("/api/hyvision/telegram/alert"):
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+            try:
+                alert_data = json.loads(body)
+            except Exception:
+                alert_data = {}
+
+            current = load_config()
+            if not current.get("telegramEnabled"):
+                res = {"status": "skipped", "message": "Notificaciones de Telegram desactivadas"}
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self._send_cors()
+                self.end_headers()
+                self.wfile.write(json.dumps(res).encode("utf-8"))
+                return
+
+            bot_token = current.get("telegramBotToken", "")
+            chat_id = current.get("telegramChatId", "")
+            if not bot_token or not chat_id:
+                res = {"status": "error", "message": "Bot token o Chat ID no configurados"}
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self._send_cors()
+                self.end_headers()
+                self.wfile.write(json.dumps(res).encode("utf-8"))
+                return
+
+            device_name = alert_data.get("deviceName", "Dispositivo BESS")
+            alarm_type = alert_data.get("alarmType", "Alerta Crítica")
+            severity = alert_data.get("severity", "CRITICAL")
+            details = alert_data.get("details", "")
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # Anti-spam: 300s cooldown per device + alarmType
+            cooldown_key = f"{device_name}:{alarm_type}"
+            now_ts = time.time()
+            if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 300:
+                res = {"status": "throttled", "message": "Alerta suprimida por enfriamiento anti-spam (5 min)"}
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self._send_cors()
+                self.end_headers()
+                self.wfile.write(json.dumps(res).encode("utf-8"))
+                return
+
+            alert_cooldown[cooldown_key] = now_ts
+
+            telemetry = alert_data.get("telemetry", {})
+            telemetry_lines = ""
+            if isinstance(telemetry, dict):
+                for k, v in telemetry.items():
+                    telemetry_lines += f"• *{k}:* `{v}`\n"
+
+            msg_text = (
+                "🚨 *ALERTA CRÍTICA — HYVISION SOLAR*\n"
+                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                f"📍 *Dispositivo:* `{device_name}`\n"
+                f"⚠️ *Alarma:* *{alarm_type}*\n"
+                f"🔴 *Severidad:* `{severity}`\n"
+                f"🕒 *Hora:* `{now_str}`\n"
+            )
+            if details:
+                msg_text += f"📝 *Detalle:* {details}\n"
+            if telemetry_lines:
+                msg_text += f"\n📊 *Telemetría:*\n{telemetry_lines}"
+            msg_text += (
+                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                "👉 [Abrir Monitoreo SCADA en Vivo](http://localhost:8082)\n"
+            )
+
+            success, send_msg = send_telegram_message(bot_token, chat_id, msg_text)
+            status_code = 200 if success else 400
+            res = {"status": "ok" if success else "error", "message": send_msg}
+            self.send_response(status_code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self._send_cors()
+            self.end_headers()
+            self.wfile.write(json.dumps(res).encode("utf-8"))
+            return
+
+        # 2. Endpoints requiring Admin Authorization
         auth_header = self.headers.get("X-Authorization") or self.headers.get("Authorization")
         if not is_admin_token(auth_header):
             self.send_response(403)
@@ -151,6 +276,46 @@ class BrandingHandler(BaseHTTPRequestHandler):
             }).encode("utf-8"))
             return
 
+        # 3. Telegram Test Endpoint
+        if self.path.startswith("/api/hyvision/telegram/test"):
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+            try:
+                data = json.loads(body)
+            except Exception:
+                data = {}
+
+            current = load_config()
+            bot_token = data.get("botToken") or current.get("telegramBotToken", "")
+            chat_id = data.get("chatId") or current.get("telegramChatId", "")
+            
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            test_msg = (
+                "☀️ *HYVISION IOT — NOTIFICACIÓN DE PRUEBA*\n"
+                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                "✅ *Conexión con Telegram Exitosa*\n"
+                "🤖 *Bot:* Vinculado y operativo 24/7\n"
+                "🏢 *Instalación:* Hybrico Solar / Parque BESS\n"
+                f"🕒 *Fecha y Hora:* `{now_str}`\n"
+                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                "🔔 *A partir de ahora, las alertas críticas de telemetría y fallas de planta se notificarán de forma inmediata en este chat.*"
+            )
+            success, msg = send_telegram_message(bot_token, chat_id, test_msg)
+            if success:
+                res = {"status": "ok", "message": "¡Mensaje de prueba enviado con éxito a Telegram!"}
+                self.send_response(200)
+            else:
+                res = {"status": "error", "message": f"Error de Telegram: {msg}"}
+                self.send_response(400)
+                
+            data = json.dumps(res).encode("utf-8")
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self._send_cors()
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
+        # 4. Reset Branding
         if self.path.startswith("/api/hyvision/branding/reset"):
             save_config(DEFAULT_CONFIG)
             data = json.dumps({"status": "ok", "message": "Restablecido a valores de fábrica", "config": DEFAULT_CONFIG}).encode("utf-8")
@@ -161,6 +326,7 @@ class BrandingHandler(BaseHTTPRequestHandler):
             self.wfile.write(data)
             return
 
+        # 5. Save Branding & Config
         if self.path.startswith("/api/hyvision/branding"):
             length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(length).decode("utf-8")
@@ -189,11 +355,10 @@ class BrandingHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
 def run():
-    # Generate initial dynamic CSS if needed
     save_config(load_config())
     server_address = ("0.0.0.0", PORT)
     httpd = HTTPServer(server_address, BrandingHandler)
-    print(f"HyVision White-Labeling API running on port {PORT}...")
+    print(f"HyVision White-Labeling & Telegram API running on port {PORT}...")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
