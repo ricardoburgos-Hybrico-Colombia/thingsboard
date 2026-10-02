@@ -13,5 +13,11 @@
   "telegramEnabled": false,
   "telegramBotToken": "",
   "telegramChatId": "",
-  "telegramAlertSeverity": "CRITICAL"
+  "telegramAlertSeverity": "CRITICAL",
+  "reportSchedule": {
+    "enabled": true,
+    "frequency": "weekly",
+    "hour": "07:30",
+    "target": "telegram"
+  }
 }
