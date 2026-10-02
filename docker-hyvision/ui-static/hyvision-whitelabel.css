@@ -1114,12 +1114,27 @@ body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
   background: rgba(67, 106, 60, 0.2);
 }
 
-.hyv-table-bess-bar {
-  display: flex;
+.hyv-btn-delete {
+  background: rgba(220, 53, 69, 0.15);
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  color: #ff6b77;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-width: 120px;
+  justify-content: center;
 }
+
+.hyv-btn-delete:hover {
+  background: rgba(220, 53, 69, 0.35);
+  border-color: #ff4757;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
 
 .hyv-progress-bg {
   flex: 1;

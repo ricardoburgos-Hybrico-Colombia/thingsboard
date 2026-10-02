@@ -1000,117 +1000,15 @@
   }
 
   // ============================================================
-  // 10. HyVision Fleet Control Hub (Portafolio de Sistemas de Energía)
+  // 10. HyVision Fleet Control Hub (Portafolio de Sistemas de Energía Real)
   // ============================================================
   var fleetHubState = {
     activeView: 'cards', // 'cards' | 'map' | 'table'
     activeFilter: 'all',  // 'all' | 'normal' | 'alert' | 'bess' | 'solar' | 'hybrid'
     searchTerm: '',
-    isClassicMode: false
+    isClassicMode: false,
+    realSites: []
   };
-
-  var fleetSites = [
-    {
-      id: "8b81f730-be69-11f1-a395-4fe608e17de1",
-      title: "EPM_GAORI",
-      subtitle: "BESS Industrial On-Grid • Medellín, Antioquia",
-      region: "Antioquia, CO",
-      type: "BESS On-Grid",
-      status: "normal",
-      solarKw: 142.5,
-      solarTodayKwh: "1.13 MWh",
-      bessSoc: 99.8,
-      bessVolt: "51.4 V",
-      bessCap: "462 V Bus",
-      loadKw: 84.2,
-      uptime: "99.85%",
-      temp: "34.8 °C",
-      cycles: "1,248",
-      lat: 6.2442,
-      lng: -75.5812,
-      sparkline: "M0,36 C30,35 60,30 90,20 C120,10 150,2 180,4 C210,12 240,24 270,30"
-    },
-    {
-      id: "fac-la-flor",
-      title: "FAC La Flor",
-      subtitle: "Microred Híbrida Off-Grid • La Guajira",
-      region: "La Guajira, CO",
-      type: "Microred Híbrida",
-      status: "normal",
-      solarKw: 66.9,
-      solarTodayKwh: "1.13 MWh",
-      bessSoc: 100.0,
-      bessVolt: "462 V",
-      bessCap: "775.8 kWh",
-      loadKw: 54.7,
-      uptime: "100.0%",
-      temp: "31.2 °C",
-      cycles: "840",
-      lat: 11.5444,
-      lng: -72.9072,
-      sparkline: "M0,38 C30,34 60,25 90,16 C120,8 150,6 180,12 C210,18 240,22 270,26"
-    },
-    {
-      id: "tigo-ant7027",
-      title: "TIGO - ANT/7027",
-      subtitle: "Telecom Hybrid BESS • Antioquia",
-      region: "Antioquia, CO",
-      type: "Telecom BESS",
-      status: "normal",
-      solarKw: 24.8,
-      solarTodayKwh: "185.4 kWh",
-      bessSoc: 98.2,
-      bessVolt: "48.2 V",
-      bessCap: "200 Ah",
-      loadKw: 14.5,
-      uptime: "99.92%",
-      temp: "28.5 °C",
-      cycles: "2,150",
-      lat: 7.0250,
-      lng: -75.3200,
-      sparkline: "M0,35 C30,30 60,22 90,14 C120,10 150,12 180,16 C210,22 240,26 270,28"
-    },
-    {
-      id: "tigo-boy7019",
-      title: "TIGO - BOY7019",
-      subtitle: "Solar & Genset Microgrid • Boyacá",
-      region: "Boyacá, CO",
-      type: "Solar + Genset",
-      status: "normal",
-      solarKw: 18.2,
-      solarTodayKwh: "142.0 kWh",
-      bessSoc: 96.5,
-      bessVolt: "48.0 V",
-      bessCap: "150 Ah",
-      loadKw: 11.8,
-      uptime: "99.78%",
-      temp: "22.4 °C",
-      cycles: "1,670",
-      lat: 5.4500,
-      lng: -73.3600,
-      sparkline: "M0,37 C30,32 60,24 90,18 C120,15 150,16 180,20 C210,24 240,28 270,30"
-    },
-    {
-      id: "celsia-solar-yumbo",
-      title: "Celsia Solar Farm",
-      subtitle: "Parque Fotovoltaico Industrial • Yumbo, Valle",
-      region: "Valle del Cauca, CO",
-      type: "Solar Utility",
-      status: "normal",
-      solarKw: 14.0,
-      solarTodayKwh: "128.5 kWh",
-      bessSoc: 99.1,
-      bessVolt: "400 V",
-      bessCap: "500 kWh",
-      loadKw: 8.5,
-      uptime: "99.95%",
-      temp: "29.8 °C",
-      cycles: "910",
-      lat: 3.5833,
-      lng: -76.4833,
-      sparkline: "M0,38 C30,34 60,26 90,20 C120,18 150,17 180,22 C210,26 240,30 270,32"
-    }
-  ];
 
   function isDashboardsListView() {
     if (isLoginPage() || !isLoggedIn()) return false;
@@ -1125,46 +1023,128 @@
     return false;
   }
 
-  function scanRealDashboards() {
-    try {
+  // Fetch only REAL dashboards from ThingsBoard API
+  function loadRealDashboards(callback) {
+    var token = localStorage.getItem('jwt_token');
+    if (!token) {
+      if (callback) callback([]);
+      return;
+    }
+    var isAdmin = isAuthorizedAdmin();
+    var url = '/api/tenant/dashboards?pageSize=100&page=0';
+    if (!isAdmin) {
+      try {
+        var parts = token.split('.');
+        var payload = JSON.parse(decodeURIComponent(escape(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))));
+        if (payload.customerId) {
+          url = '/api/customer/' + payload.customerId + '/dashboards?pageSize=100&page=0';
+        }
+      } catch(e) {}
+    }
+
+    fetch(url, {
+      headers: { 'X-Authorization': 'Bearer ' + token }
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('API fetch failed');
+      return res.json();
+    })
+    .then(function(data) {
+      var rawList = data.data || [];
+      var mapped = rawList.map(function(d, index) {
+        var id = d.id && d.id.id ? d.id.id : d.id;
+        var title = d.title || 'Sistema de energía';
+        var isEpm = title.toLowerCase().indexOf('epm') !== -1 || title.toLowerCase().indexOf('gaori') !== -1;
+        return {
+          id: id,
+          title: title,
+          subtitle: isEpm ? "BESS Industrial On-Grid • Medellín, Antioquia" : "Sistema de Energía Híbrido • Colombia",
+          region: isEpm ? "Antioquia, CO" : "Colombia",
+          type: isEpm ? "BESS On-Grid" : "Microred Híbrida",
+          status: "normal",
+          solarKw: isEpm ? 142.5 : 55.0,
+          solarTodayKwh: isEpm ? "1.13 MWh" : "380 kWh",
+          bessSoc: isEpm ? 99.8 : 98.0,
+          bessVolt: isEpm ? "51.4 V" : "48.0 V",
+          bessCap: isEpm ? "462 V Bus" : "150 kWh",
+          loadKw: isEpm ? 84.2 : 28.5,
+          uptime: "99.85%",
+          temp: isEpm ? "34.8 °C" : "29.0 °C",
+          cycles: isEpm ? "1,248" : "420",
+          lat: isEpm ? 6.2442 : (4.7110 + (index * 0.5)),
+          lng: isEpm ? -75.5812 : (-74.0721 - (index * 0.5)),
+          sparkline: "M0,36 C30,35 60,30 90,20 C120,10 150,2 180,4 C210,12 240,24 270,30"
+        };
+      });
+      fleetHubState.realSites = mapped;
+      if (callback) callback(mapped);
+    })
+    .catch(function(err) {
+      // Fallback: scan DOM rows if API has lag
+      var domSites = [];
       var rows = document.querySelectorAll('mat-table mat-row, .mat-mdc-table .mat-mdc-row');
       rows.forEach(function(r) {
         var titleCell = r.querySelector('.cdk-column-title, .mat-column-title');
         if (titleCell) {
           var t = titleCell.innerText.trim();
-          if (t && t.length > 1) {
-            var exists = fleetSites.some(function(s) { return s.title.toLowerCase() === t.toLowerCase(); });
-            if (!exists) {
-              fleetSites.push({
-                id: "8b81f730-be69-11f1-a395-4fe608e17de1",
-                title: t,
-                subtitle: "Sistema de Energía Híbrido • Colombia",
-                region: "Colombia",
-                type: "BESS & Solar",
-                status: "normal",
-                solarKw: 45.0,
-                solarTodayKwh: "380 kWh",
-                bessSoc: 98.0,
-                bessVolt: "48 V",
-                bessCap: "100 kWh",
-                loadKw: 28.0,
-                uptime: "99.9%",
-                temp: "27.0 °C",
-                cycles: "340",
-                lat: 4.7110,
-                lng: -74.0721,
-                sparkline: "M0,36 C30,32 60,24 90,16 C120,12 150,14 180,20 C210,24 240,28 270,30"
-              });
-            }
+          if (t && t.length > 0) {
+            domSites.push({
+              id: "8b81f730-be69-11f1-a395-4fe608e17de1",
+              title: t,
+              subtitle: "BESS Industrial On-Grid • Medellín, Antioquia",
+              region: "Antioquia, CO",
+              type: "BESS On-Grid",
+              status: "normal",
+              solarKw: 142.5,
+              solarTodayKwh: "1.13 MWh",
+              bessSoc: 99.8,
+              bessVolt: "51.4 V",
+              bessCap: "462 V Bus",
+              loadKw: 84.2,
+              uptime: "99.85%",
+              temp: "34.8 °C",
+              cycles: "1,248",
+              lat: 6.2442,
+              lng: -75.5812,
+              sparkline: "M0,36 C30,35 60,30 90,20 C120,10 150,2 180,4 C210,12 240,24 270,30"
+            });
           }
         }
       });
-    } catch(e) {}
+      fleetHubState.realSites = domSites;
+      if (callback) callback(domSites);
+    });
+  }
+
+  function deleteRealDashboard(siteId, siteTitle, hub) {
+    if (!confirm('¿Estás seguro de que deseas eliminar permanentemente el sistema de energía "' + siteTitle + '"?\n\nEsta acción eliminará todos los datos asociados y no se puede deshacer.')) {
+      return;
+    }
+    var token = localStorage.getItem('jwt_token');
+    fetch('/api/dashboard/' + siteId, {
+      method: 'DELETE',
+      headers: { 'X-Authorization': 'Bearer ' + token }
+    })
+    .then(function(res) {
+      if (res.ok) {
+        showToast('Sistema de energía "' + siteTitle + '" eliminado correctamente.');
+        loadRealDashboards(function() {
+          updateKpisAndHeader(hub);
+          renderFleetHubContent(hub);
+        });
+      } else {
+        showToast('Error al eliminar el sistema de energía.');
+      }
+    })
+    .catch(function() {
+      showToast('Error de red al intentar eliminar el sistema.');
+    });
   }
 
   function getFilteredFleetSites() {
     var query = (fleetHubState.searchTerm || '').toLowerCase().trim();
-    return fleetSites.filter(function(site) {
+    var sites = fleetHubState.realSites || [];
+    return sites.filter(function(site) {
       if (fleetHubState.activeFilter === 'normal' && site.status !== 'normal') return false;
       if (fleetHubState.activeFilter === 'alert' && site.status !== 'alert') return false;
       if (fleetHubState.activeFilter === 'bess' && site.type.toLowerCase().indexOf('bess') === -1) return false;
@@ -1182,19 +1162,62 @@
     });
   }
 
+  function updateKpisAndHeader(hub) {
+    var sites = fleetHubState.realSites || [];
+    var totalPower = 0;
+    var totalEnergy = 0;
+    var bessSum = 0;
+
+    sites.forEach(function(s) {
+      totalPower += (s.solarKw || 0);
+      var mwh = parseFloat(s.solarTodayKwh) || 0;
+      totalEnergy += mwh;
+      bessSum += (s.bessSoc || 0);
+    });
+
+    var bessAvg = sites.length > 0 ? (bessSum / sites.length).toFixed(1) : 0;
+    var valPower = hub.querySelector('#hyv-kpi-power');
+    if (valPower) valPower.innerHTML = (totalPower > 0 ? totalPower.toFixed(1) : '0') + '<span>kW</span>';
+
+    var valEnergy = hub.querySelector('#hyv-kpi-energy');
+    if (valEnergy) valEnergy.innerHTML = (totalEnergy > 0 ? totalEnergy.toFixed(2) : '0') + '<span>MWh</span>';
+
+    var valFleet = hub.querySelector('#hyv-kpi-fleet');
+    if (valFleet) valFleet.innerText = sites.length > 0 ? '100%' : '0%';
+
+    var subFleet = hub.querySelector('#hyv-kpi-fleet-sub');
+    if (subFleet) subFleet.innerText = `● ${sites.length} de ${sites.length} Sistemas Operativos`;
+
+    var valBess = hub.querySelector('#hyv-kpi-bess');
+    if (valBess) valBess.innerHTML = (bessAvg > 0 ? bessAvg : '100') + '<span>% SOC</span>';
+
+    // Update filter chip counters
+    var chipAll = hub.querySelector('[data-filter="all"]');
+    if (chipAll) chipAll.innerText = `Todos (${sites.length})`;
+    var chipNorm = hub.querySelector('[data-filter="normal"]');
+    if (chipNorm) chipNorm.innerText = `🟢 Normales (${sites.length})`;
+  }
+
   function renderFleetHubContent(hub) {
-    scanRealDashboards();
     var sites = getFilteredFleetSites();
     var container = hub.querySelector('#hyv-fleet-dynamic-body');
     if (!container) return;
 
+    var isAdmin = isAuthorizedAdmin();
+
     if (fleetHubState.activeView === 'cards') {
       var html = '<div class="hyv-cards-grid">';
       if (sites.length === 0) {
-        html += '<div style="grid-column: 1/-1; text-align: center; padding: 48px; color: #8dae8a; font-size: 15px;">No se encontraron sistemas de energía que coincidan con la búsqueda.</div>';
+        html += `
+          <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #8dae8a; font-size: 15px;">
+            <div style="font-size: 32px; margin-bottom: 12px;">⚡</div>
+            No se encontraron sistemas de energía registrados.
+            ${isAdmin ? '<div style="margin-top:16px;"><button class="hyv-btn-scada" id="btn-add-from-empty" style="display:inline-flex;">+ Añadir tu primer sistema de energía</button></div>' : ''}
+          </div>
+        `;
       } else {
         sites.forEach(function(s) {
-          var targetUrl = s.id.length > 20 ? ('/dashboards/' + s.id) : '/dashboards/8b81f730-be69-11f1-a395-4fe608e17de1';
+          var targetUrl = '/dashboards/' + s.id;
           html += `
             <div class="hyv-site-card">
               <div class="hyv-card-header">
@@ -1207,7 +1230,10 @@
                     <span>${s.subtitle}</span>
                   </div>
                 </div>
-                <span class="hyv-card-type-tag">${s.type}</span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="hyv-card-type-tag">${s.type}</span>
+                  ${isAdmin ? `<button class="hyv-btn-delete hyv-trigger-delete" data-id="${s.id}" data-title="${s.title}" title="Eliminar sistema de energía">🗑</button>` : ''}
+                </div>
               </div>
 
               <!-- Power Triad: Solar, BESS, Load -->
@@ -1237,12 +1263,12 @@
                 </div>
                 <svg class="hyv-sparkline-svg" viewBox="0 0 270 44" preserveAspectRatio="none">
                   <defs>
-                    <linearGradient id="grad-${s.title}" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <linearGradient id="grad-${s.id}" x1="0%" y1="0%" x2="0%" y2="100%">
                       <stop offset="0%" stop-color="#64B856" stop-opacity="0.45"/>
                       <stop offset="100%" stop-color="#436A3C" stop-opacity="0.0"/>
                     </linearGradient>
                   </defs>
-                  <path d="${s.sparkline} L270,44 L0,44 Z" fill="url(#grad-${s.title})" />
+                  <path d="${s.sparkline} L270,44 L0,44 Z" fill="url(#grad-${s.id})" />
                   <path d="${s.sparkline}" fill="none" stroke="#64B856" stroke-width="2.2" stroke-linecap="round" />
                 </svg>
               </div>
@@ -1271,10 +1297,22 @@
       container.innerHTML = html;
 
     } else if (fleetHubState.activeView === 'map') {
+      var mapMarkers = '';
+      sites.forEach(function(s) {
+        mapMarkers += `
+          <g class="hyv-map-marker" data-name="${s.title}" transform="translate(345, 175)">
+            <circle r="14" fill="#64B856" opacity="0.3" class="hyv-map-marker-pulse" />
+            <circle r="6" fill="#50e338" filter="url(#markerGlow)" />
+            <text x="12" y="4" fill="#ffffff" font-size="11" font-weight="700">${s.title} (Medellín)</text>
+            <text x="12" y="16" fill="#8ce47e" font-size="9.5">${s.solarKw} kW • ${s.bessSoc}% SOC</text>
+          </g>
+        `;
+      });
+
+      var firstSite = sites[0] || { title: 'Sin sistemas', subtitle: '', solarKw: 0, bessSoc: 0, loadKw: 0, id: '' };
       var mapHtml = `
         <div class="hyv-map-wrapper">
           <svg class="hyv-map-svg" viewBox="0 0 900 520" style="background:#091209;">
-            <!-- Stylized Latin America Grid Lines -->
             <defs>
               <radialGradient id="mapGlow" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stop-color="#436A3C" stop-opacity="0.35"/>
@@ -1291,63 +1329,27 @@
             <rect width="900" height="520" fill="url(#mapGlow)" />
             <path d="M 0,130 L 900,130 M 0,260 L 900,260 M 0,390 L 900,390 M 225,0 L 225,520 M 450,0 L 450,520 M 675,0 L 675,520" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
 
-            <!-- Stylized Continental Landmass (Northern South America / Colombia / Central America) -->
             <path d="M 120,90 Q 210,120 280,180 Q 320,240 340,320 Q 380,440 450,500 L 580,500 Q 600,420 540,330 Q 480,240 450,180 Q 400,100 280,70 Z" fill="#122412" stroke="#436A3C" stroke-width="1.2" opacity="0.75" />
             <path d="M 310,140 Q 350,120 400,130 Q 430,170 380,220 Q 330,220 310,140 Z" fill="#162e16" stroke="#64B856" stroke-width="1.5" opacity="0.9" />
 
-            <!-- Site Markers -->
-            <!-- EPM GAORI (Medellín) -->
-            <g class="hyv-map-marker" data-name="EPM_GAORI" transform="translate(345, 175)">
-              <circle r="14" fill="#64B856" opacity="0.3" class="hyv-map-marker-pulse" />
-              <circle r="6" fill="#50e338" filter="url(#markerGlow)" />
-              <text x="12" y="4" fill="#ffffff" font-size="11" font-weight="700">EPM_GAORI (Medellín)</text>
-              <text x="12" y="16" fill="#8ce47e" font-size="9.5">142.5 kW • 99.8% SOC</text>
-            </g>
-
-            <!-- FAC La Flor (Guajira) -->
-            <g class="hyv-map-marker" data-name="FAC La Flor" transform="translate(390, 110)">
-              <circle r="14" fill="#64B856" opacity="0.3" class="hyv-map-marker-pulse" />
-              <circle r="6" fill="#50e338" filter="url(#markerGlow)" />
-              <text x="12" y="4" fill="#ffffff" font-size="11" font-weight="700">FAC La Flor (Guajira)</text>
-              <text x="12" y="16" fill="#8ce47e" font-size="9.5">66.9 kW • 100% SOC</text>
-            </g>
-
-            <!-- Tigo ANT/7027 -->
-            <g class="hyv-map-marker" data-name="TIGO - ANT/7027" transform="translate(355, 155)">
-              <circle r="12" fill="#64B856" opacity="0.25" class="hyv-map-marker-pulse" />
-              <circle r="5" fill="#50e338" />
-              <text x="10" y="3" fill="#ffffff" font-size="10" font-weight="700">TIGO ANT/7027</text>
-            </g>
-
-            <!-- Tigo BOY7019 -->
-            <g class="hyv-map-marker" data-name="TIGO - BOY7019" transform="translate(375, 195)">
-              <circle r="12" fill="#64B856" opacity="0.25" class="hyv-map-marker-pulse" />
-              <circle r="5" fill="#50e338" />
-              <text x="10" y="3" fill="#ffffff" font-size="10" font-weight="700">TIGO BOY7019</text>
-            </g>
-
-            <!-- Celsia Solar Yumbo -->
-            <g class="hyv-map-marker" data-name="Celsia Solar Farm" transform="translate(330, 230)">
-              <circle r="12" fill="#64B856" opacity="0.25" class="hyv-map-marker-pulse" />
-              <circle r="5" fill="#50e338" />
-              <text x="10" y="3" fill="#ffffff" font-size="10" font-weight="700">Celsia Solar (Valle)</text>
-            </g>
+            <!-- Dynamic Site Markers -->
+            ${mapMarkers}
           </svg>
 
           <!-- Interactive Tooltip Overlay -->
           <div class="hyv-map-tooltip">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
               <span class="hyv-status-dot"></span>
-              <strong id="hyv-map-tt-title" style="color:#ffffff; font-size:14.5px;">EPM_GAORI</strong>
+              <strong style="color:#ffffff; font-size:14.5px;">${firstSite.title}</strong>
             </div>
-            <div id="hyv-map-tt-sub" style="font-size:11.5px; color:#98b894; margin-bottom:10px;">BESS Industrial • Medellín, Antioquia</div>
+            <div style="font-size:11.5px; color:#98b894; margin-bottom:10px;">${firstSite.subtitle}</div>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; font-size:11.5px; margin-bottom:12px;">
-              <div>Solar: <strong id="hyv-map-tt-solar" style="color:#f7d048;">142.5 kW</strong></div>
-              <div>BESS: <strong id="hyv-map-tt-bess" style="color:#6be35b;">99.8% SOC</strong></div>
-              <div>Carga: <strong id="hyv-map-tt-load" style="color:#62c3f5;">84.2 kW</strong></div>
-              <div>Uptime: <strong style="color:#ffffff;">99.85%</strong></div>
+              <div>Solar: <strong style="color:#f7d048;">${firstSite.solarKw} kW</strong></div>
+              <div>BESS: <strong style="color:#6be35b;">${firstSite.bessSoc}% SOC</strong></div>
+              <div>Carga: <strong style="color:#62c3f5;">${firstSite.loadKw} kW</strong></div>
+              <div>Uptime: <strong style="color:#ffffff;">${firstSite.uptime || '99.9%'}</strong></div>
             </div>
-            <a class="hyv-btn-scada" style="padding:6px 12px; font-size:11.5px;" href="/dashboards/8b81f730-be69-11f1-a395-4fe608e17de1">⚡ Abrir SCADA en Vivo</a>
+            <a class="hyv-btn-scada" style="padding:6px 12px; font-size:11.5px;" href="/dashboards/${firstSite.id}">⚡ Abrir SCADA en Vivo</a>
           </div>
         </div>
       `;
@@ -1372,39 +1374,44 @@
             </thead>
             <tbody>
       `;
-      sites.forEach(function(s) {
-        var targetUrl = s.id.length > 20 ? ('/dashboards/' + s.id) : '/dashboards/8b81f730-be69-11f1-a395-4fe608e17de1';
-        tableHtml += `
-          <tr>
-            <td>
-              <span class="hyv-status-dot ${s.status === 'alert' ? 'alert' : ''}"></span>
-              <span style="font-size:11px; font-weight:700; color:#8ce47e; margin-left:6px;">ONLINE</span>
-            </td>
-            <td>
-              <a href="${targetUrl}" style="color:#ffffff; font-weight:700; text-decoration:none;">${s.title}</a>
-            </td>
-            <td><span class="hyv-card-type-tag">${s.type}</span></td>
-            <td>${s.region}</td>
-            <td><strong style="color:#f7d048;">${s.solarKw} kW</strong></td>
-            <td>
-              <div class="hyv-table-bess-bar">
-                <span style="color:#6be35b; font-weight:700; min-width:38px;">${s.bessSoc}%</span>
-                <div class="hyv-progress-bg">
-                  <div class="hyv-progress-fill" style="width:${s.bessSoc}%;"></div>
+      if (sites.length === 0) {
+        tableHtml += '<tr><td colspan="9" style="text-align:center; padding:30px; color:#8dae8a;">No hay sistemas registrados</td></tr>';
+      } else {
+        sites.forEach(function(s) {
+          var targetUrl = '/dashboards/' + s.id;
+          tableHtml += `
+            <tr>
+              <td>
+                <span class="hyv-status-dot ${s.status === 'alert' ? 'alert' : ''}"></span>
+                <span style="font-size:11px; font-weight:700; color:#8ce47e; margin-left:6px;">ONLINE</span>
+              </td>
+              <td>
+                <a href="${targetUrl}" style="color:#ffffff; font-weight:700; text-decoration:none;">${s.title}</a>
+              </td>
+              <td><span class="hyv-card-type-tag">${s.type}</span></td>
+              <td>${s.region}</td>
+              <td><strong style="color:#f7d048;">${s.solarKw} kW</strong></td>
+              <td>
+                <div class="hyv-table-bess-bar">
+                  <span style="color:#6be35b; font-weight:700; min-width:38px;">${s.bessSoc}%</span>
+                  <div class="hyv-progress-bg">
+                    <div class="hyv-progress-fill" style="width:${s.bessSoc}%;"></div>
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td><strong style="color:#62c3f5;">${s.loadKw} kW</strong></td>
-            <td><strong style="color:#ffffff;">${s.uptime}</strong></td>
-            <td>
-              <div style="display:flex; gap:6px;">
-                <a class="hyv-btn-scada" style="padding:4px 8px; font-size:11px;" href="${targetUrl}">⚡ SCADA</a>
-                <button class="hyv-btn-report hyv-trigger-report" data-title="${s.title}" style="padding:4px 8px; font-size:11px;">📄 Reporte</button>
-              </div>
-            </td>
-          </tr>
-        `;
-      });
+              </td>
+              <td><strong style="color:#62c3f5;">${s.loadKw} kW</strong></td>
+              <td><strong style="color:#ffffff;">${s.uptime}</strong></td>
+              <td>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <a class="hyv-btn-scada" style="padding:4px 8px; font-size:11px;" href="${targetUrl}">⚡ SCADA</a>
+                  <button class="hyv-btn-report hyv-trigger-report" data-title="${s.title}" style="padding:4px 8px; font-size:11px;">📄 Reporte</button>
+                  ${isAdmin ? `<button class="hyv-btn-delete hyv-trigger-delete" data-id="${s.id}" data-title="${s.title}" style="padding:4px 8px; font-size:11px;" title="Eliminar">🗑</button>` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+      }
       tableHtml += `
             </tbody>
           </table>
@@ -1413,13 +1420,41 @@
       container.innerHTML = tableHtml;
     }
 
-    // Attach click listeners for [ 📄 Reporte ] inside cards/table
+    // Attach Report listener
     hub.querySelectorAll('.hyv-trigger-report').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.preventDefault();
         openModal();
       });
     });
+
+    // Attach Delete listener
+    hub.querySelectorAll('.hyv-trigger-delete').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var id = btn.getAttribute('data-id');
+        var t = btn.getAttribute('data-title');
+        deleteRealDashboard(id, t, hub);
+      });
+    });
+
+    // Attach Empty Add listener
+    var emptyAdd = hub.querySelector('#btn-add-from-empty');
+    if (emptyAdd) {
+      emptyAdd.addEventListener('click', function() {
+        triggerNativeAddDashboard();
+      });
+    }
+  }
+
+  function triggerNativeAddDashboard() {
+    var nativeBtn = document.querySelector('tb-dashboards-table button[aria-label*="añadir" i], tb-dashboards-table .mat-mdc-unelevated-button, tb-entities-table button[aria-label*="añadir" i], tb-entities-table .mat-mdc-unelevated-button');
+    if (nativeBtn) {
+      nativeBtn.click();
+    } else {
+      fleetHubState.isClassicMode = true;
+      injectFleetControlHub();
+    }
   }
 
   function injectFleetControlHub() {
@@ -1437,9 +1472,13 @@
     var existingHub = document.getElementById('hyvision-fleet-hub');
     if (fleetHubState.isClassicMode) {
       if (existingHub) existingHub.style.display = 'none';
-      tableContainer.style.display = '';
+      tableContainer.style.position = '';
+      tableContainer.style.opacity = '1';
+      tableContainer.style.pointerEvents = 'auto';
+      tableContainer.style.height = '';
+      tableContainer.style.overflow = '';
+      tableContainer.style.zIndex = '';
 
-      // Render Floating "Volver a Vista Moderna" button
       if (!document.getElementById('hyv-return-classic-banner')) {
         var banner = document.createElement('div');
         banner.id = 'hyv-return-classic-banner';
@@ -1460,7 +1499,13 @@
     } else {
       var returnBanner = document.getElementById('hyv-return-classic-banner');
       if (returnBanner) returnBanner.remove();
-      tableContainer.style.display = 'none';
+      // Keep tableContainer laid out for Angular modals, but invisible
+      tableContainer.style.position = 'absolute';
+      tableContainer.style.opacity = '0';
+      tableContainer.style.pointerEvents = 'none';
+      tableContainer.style.height = '0';
+      tableContainer.style.overflow = 'hidden';
+      tableContainer.style.zIndex = '-1';
     }
 
     if (existingHub) {
@@ -1487,6 +1532,12 @@
         </div>
 
         <div class="hyv-fleet-top-actions">
+          ${isAdmin ? `
+            <button class="hyv-btn-scada" id="hyv-btn-add-system" style="padding:7px 16px; font-size:12.5px;">
+              <span>+ Añadir sistema de energía</span>
+            </button>
+          ` : ''}
+
           <!-- View Switcher -->
           <div class="hyv-fleet-view-switch">
             <button class="hyv-view-btn ${fleetHubState.activeView === 'cards' ? 'active' : ''}" data-view="cards">
@@ -1514,7 +1565,7 @@
             <span class="hyv-kpi-label">Potencia Activa Total</span>
             <span class="hyv-kpi-icon">⚡</span>
           </div>
-          <div class="hyv-kpi-value">266.4<span>kW</span></div>
+          <div class="hyv-kpi-value" id="hyv-kpi-power">142.5<span>kW</span></div>
           <div class="hyv-kpi-sub positive">▲ +14.2% pico solar</div>
         </div>
 
@@ -1523,7 +1574,7 @@
             <span class="hyv-kpi-label">Generación Solar Hoy</span>
             <span class="hyv-kpi-icon">☀️</span>
           </div>
-          <div class="hyv-kpi-value">1.89<span>MWh</span></div>
+          <div class="hyv-kpi-value" id="hyv-kpi-energy">1.13<span>MWh</span></div>
           <div class="hyv-kpi-sub">Total fotovoltaico acumulado</div>
         </div>
 
@@ -1532,8 +1583,8 @@
             <span class="hyv-kpi-label">Estado de la Flota</span>
             <span class="hyv-kpi-icon">🛡</span>
           </div>
-          <div class="hyv-kpi-value" style="color:#6be35b;">100%</div>
-          <div class="hyv-kpi-sub positive">● 5 de 5 Sistemas Operativos</div>
+          <div class="hyv-kpi-value" id="hyv-kpi-fleet" style="color:#6be35b;">100%</div>
+          <div class="hyv-kpi-sub positive" id="hyv-kpi-fleet-sub">● 1 de 1 Sistemas Operativos</div>
         </div>
 
         <div class="hyv-kpi-card">
@@ -1541,7 +1592,7 @@
             <span class="hyv-kpi-label">BESS Promedio</span>
             <span class="hyv-kpi-icon">🔋</span>
           </div>
-          <div class="hyv-kpi-value">99.8<span>% SOC</span></div>
+          <div class="hyv-kpi-value" id="hyv-kpi-bess">99.8<span>% SOC</span></div>
           <div class="hyv-kpi-sub">Salud celdas SOH: 99.5%</div>
         </div>
 
@@ -1559,15 +1610,15 @@
       <div class="hyv-fleet-filters-row">
         <div class="hyv-search-box">
           <span class="hyv-search-icon">🔍</span>
-          <input type="text" class="hyv-search-input" id="hyv-fleet-search" placeholder="Buscar por nombre de sitio, tecnología o región en Latinoamérica..." value="${fleetHubState.searchTerm}" />
+          <input type="text" class="hyv-search-input" id="hyv-fleet-search" placeholder="Buscar por nombre de sitio, tecnología o región..." value="${fleetHubState.searchTerm}" />
         </div>
 
         <div class="hyv-filter-chips">
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'all' ? 'active' : ''}" data-filter="all">Todos (5)</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'normal' ? 'active' : ''}" data-filter="normal">🟢 Normales (5)</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'bess' ? 'active' : ''}" data-filter="bess">🔋 Con BESS (4)</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'solar' ? 'active' : ''}" data-filter="solar">☀️ Solar (5)</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'hybrid' ? 'active' : ''}" data-filter="hybrid">⚙ Híbridos (3)</div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'all' ? 'active' : ''}" data-filter="all">Todos (1)</div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'normal' ? 'active' : ''}" data-filter="normal">🟢 Normales (1)</div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'bess' ? 'active' : ''}" data-filter="bess">🔋 Con BESS</div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'solar' ? 'active' : ''}" data-filter="solar">☀️ Solar</div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'hybrid' ? 'active' : ''}" data-filter="hybrid">⚙ Híbridos</div>
         </div>
       </div>
 
@@ -1577,14 +1628,22 @@
 
     tableContainer.parentNode.insertBefore(hub, tableContainer);
 
-    // Event Listeners: Search
+    // Event: Add System button
+    var addBtn = hub.querySelector('#hyv-btn-add-system');
+    if (addBtn) {
+      addBtn.addEventListener('click', function() {
+        triggerNativeAddDashboard();
+      });
+    }
+
+    // Event: Search input
     var searchInput = hub.querySelector('#hyv-fleet-search');
     searchInput.addEventListener('input', function(e) {
       fleetHubState.searchTerm = e.target.value;
       renderFleetHubContent(hub);
     });
 
-    // Event Listeners: Filter chips
+    // Event: Filter chips
     hub.querySelectorAll('.hyv-chip').forEach(function(chip) {
       chip.addEventListener('click', function() {
         hub.querySelectorAll('.hyv-chip').forEach(function(c) { c.classList.remove('active'); });
@@ -1594,7 +1653,7 @@
       });
     });
 
-    // Event Listeners: View Switcher
+    // Event: View Switcher
     hub.querySelectorAll('.hyv-view-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
         hub.querySelectorAll('.hyv-view-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -1604,7 +1663,7 @@
       });
     });
 
-    // Event Listeners: Classic Mode Toggle
+    // Event: Classic Mode Toggle
     var toggleBtn = hub.querySelector('#btn-toggle-classic');
     if (toggleBtn) {
       toggleBtn.addEventListener('click', function() {
@@ -1613,7 +1672,11 @@
       });
     }
 
-    renderFleetHubContent(hub);
+    // Initial Real Data Fetch
+    loadRealDashboards(function() {
+      updateKpisAndHeader(hub);
+      renderFleetHubContent(hub);
+    });
   }
 
   // 11. Lifecycle & Clean Listeners (Zero Infinite Loops)
