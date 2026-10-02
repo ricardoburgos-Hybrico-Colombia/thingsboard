@@ -25,19 +25,201 @@ tb-github-badge {
   display: none !important;
 }
 
-/* HyVision Login Card & Actions */
-.tb-login-content .tb-login-form .tb-action-button {
-  background-color: #436A3C !important;
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  border-radius: 6px !important;
-  box-shadow: 0 4px 12px rgba(67, 106, 60, 0.35) !important;
-  transition: all 0.25s ease-in-out !important;
+/* ========================================================
+   HyVision Dark SCADA Login Theme
+   ======================================================== */
+
+/* 1. Page Background */
+body, html,
+tb-login,
+.tb-login-content,
+.tb-login-content.mat-app-background {
+  background: radial-gradient(circle at 50% 36%, #173117 0%, #0c1c0c 48%, #070e07 100%) !important;
+  min-height: 100vh !important;
 }
 
-.tb-login-content .tb-login-form .tb-action-button:hover {
-  background-color: #35562f !important;
-  box-shadow: 0 6px 16px rgba(67, 106, 60, 0.5) !important;
+/* 2. Login Flex Container */
+.tb-login-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 24px 16px 40px !important;
+}
+
+/* 3. HYVISION Header (Title + Subtitle) */
+.hyvision-login-header {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 8px !important;
+  margin-bottom: 38px !important;
+  text-align: center !important;
+  user-select: none !important;
+  animation: hyvisionFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hyvision-login-header .hyvision-main-title {
+  font-family: 'Titillium Web', 'Montserrat', 'Roboto', sans-serif !important;
+  font-size: 58px !important;
+  font-weight: 800 !important;
+  letter-spacing: 12px !important;
+  color: #ffffff !important;
+  text-transform: uppercase !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.1 !important;
+  text-shadow: 0 0 45px rgba(67, 106, 60, 0.85), 0 4px 20px rgba(0, 0, 0, 0.9) !important;
+}
+
+.hyvision-login-header .hyvision-sub-title {
+  font-family: 'Montserrat', 'Roboto', sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 5.5px !important;
+  color: #9EBA99 !important;
+  text-transform: uppercase !important;
+  margin-top: 12px !important;
+  opacity: 0.95 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6) !important;
+}
+
+@keyframes hyvisionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 4. Login Card (Corporate Green) */
+.tb-login-content mat-card,
+.tb-login-content .mat-mdc-card {
+  background: linear-gradient(165deg, #2b4c23 0%, #1c3618 60%, #142711 100%) !important;
+  border: 1px solid rgba(135, 195, 125, 0.28) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px rgba(67, 106, 60, 0.25) !important;
+  overflow: hidden !important;
+}
+
+.tb-login-content .mat-mdc-card-content {
+  background: transparent !important;
+}
+
+/* Card inner title "Iniciar sesión en tu cuenta" */
+.tb-login-content .oauth-container .title {
+  color: #e5f0e3 !important;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  letter-spacing: 0.4px !important;
+}
+
+/* 5. Inputs (Corporate Green Harmony - Zero Blue) */
+.tb-login-content .mat-mdc-form-field {
+  margin-bottom: 6px !important;
+}
+
+.tb-login-content .mat-mdc-text-field-wrapper {
+  background-color: rgba(13, 27, 12, 0.75) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Fix browser autofill blue overlay and ThingsBoard .tb-autofilled blue overlay */
+.tb-login-content .tb-autofilled:has(input:-webkit-autofill) .mat-mdc-form-field-flex:before,
+.tb-autofilled:has(input:-webkit-autofill) .mat-mdc-form-field-flex:before {
+  background: rgba(30, 60, 26, 0.7) !important;
+}
+
+.tb-login-content input:-webkit-autofill,
+.tb-login-content input:-webkit-autofill:hover,
+.tb-login-content input:-webkit-autofill:focus,
+.tb-login-content input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #132511 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #64B856 !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+.tb-login-content .mat-mdc-form-field-focus-overlay {
+  background-color: rgba(67, 106, 60, 0.15) !important;
+}
+
+/* Outline borders */
+.tb-login-content .mdc-notched-outline__leading,
+.tb-login-content .mdc-notched-outline__notch,
+.tb-login-content .mdc-notched-outline__trailing {
+  border-color: rgba(140, 195, 130, 0.35) !important;
+}
+
+.tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #64B856 !important;
+  border-width: 2px !important;
+}
+
+/* Input text and labels */
+.tb-login-content input.mat-mdc-input-element {
+  color: #ffffff !important;
+  caret-color: #64B856 !important;
+}
+
+.tb-login-content .mat-mdc-floating-label,
+.tb-login-content .mat-mdc-select-placeholder {
+  color: rgba(225, 240, 222, 0.78) !important;
+}
+
+.tb-login-content .mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: #79CF6A !important;
+}
+
+.tb-login-content .mat-mdc-form-field .mat-icon {
+  color: #8EBA88 !important;
+}
+
+.tb-login-content tb-toggle-password button {
+  color: #8EBA88 !important;
+}
+
+/* 6. Action Button */
+.tb-login-content .tb-login-form .tb-action-button {
+  background: linear-gradient(135deg, #436A3C 0%, #34572e 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  font-size: 14.5px !important;
+  border-radius: 8px !important;
+  padding: 12px !important;
+  height: 46px !important;
+  box-shadow: 0 6px 20px rgba(45, 75, 40, 0.5) !important;
+  border: 1px solid rgba(130, 190, 120, 0.25) !important;
+  transition: all 0.25s ease !important;
+}
+
+.tb-login-content .tb-login-form .tb-action-button:hover:not([disabled]) {
+  background: linear-gradient(135deg, #4e7c46 0%, #3d6636 100%) !important;
+  box-shadow: 0 8px 24px rgba(67, 106, 60, 0.65) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* 7. Forgot password button */
+.tb-login-content .tb-reset-password {
+  color: #A3C99B !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  transition: color 0.2s ease !important;
+}
+
+.tb-login-content .tb-reset-password:hover {
+  color: #d6edd1 !important;
+  text-decoration: underline !important;
 }
 
 /* Login card header & logo styling */
@@ -52,13 +234,6 @@ tb-github-badge {
   width: auto !important;
 }
 
-/* Focus color for inputs in login */
-.tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
-.tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
-.tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
-  border-color: #436A3C !important;
-}
-
 /* Global Primary Buttons */
 .mat-mdc-unelevated-button.mat-primary,
 .mat-mdc-raised-button.mat-primary,
@@ -66,3 +241,4 @@ tb-github-badge {
   background-color: #436A3C !important;
   color: #ffffff !important;
 }
+

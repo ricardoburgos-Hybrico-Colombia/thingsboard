@@ -16,13 +16,32 @@
           document.title = document.title.replace(/ThingsBoard/g, 'HyVision');
         }
       }
+      function injectHyvisionHeader() {
+        var loginContent = document.querySelector('.tb-login-content');
+        if (loginContent) {
+          if (!loginContent.querySelector('.hyvision-login-header')) {
+            var card = loginContent.querySelector('mat-card, .mat-mdc-card');
+            if (card) {
+              var title = (window.hyvisionConfig && window.hyvisionConfig.appTitle) || 'HYVISION';
+              var subtitle = (window.hyvisionConfig && window.hyvisionConfig.appSubtitle) || 'POWERED BY HYBRICO ENERGY';
+              var header = document.createElement('div');
+              header.className = 'hyvision-login-header';
+              header.innerHTML = '<h1 class="hyvision-main-title">' + title + '</h1><span class="hyvision-sub-title">' + subtitle + '</span>';
+              loginContent.insertBefore(header, card);
+            }
+          }
+        }
+      }
       fixTitle();
       window.addEventListener('DOMContentLoaded', function() {
         fixTitle();
+        injectHyvisionHeader();
         var titleElem = document.querySelector('title');
         if (titleElem) {
           new MutationObserver(fixTitle).observe(titleElem, { subtree: true, characterData: true, childList: true });
         }
+        // Check periodically for login route changes without locking the main thread
+        setInterval(injectHyvisionHeader, 600);
       });
       var origTitleDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'title') ||
                                 Object.getOwnPropertyDescriptor(HTMLDocument.prototype, 'title');
@@ -42,6 +61,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="thingsboard.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Titillium+Web:wght@700;900&display=swap" rel="stylesheet">
   <link rel="preload" href="assets/fonts/MaterialIcons-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous"/>
   <link rel="preload" href="assets/fonts/MaterialIconsRound-Regular.otf" as="font" type="font/otf" crossorigin="anonymous"/>
   <link rel="stylesheet" href="assets/fonts/material-icons.css"/>
@@ -50,7 +72,7 @@
     body, html {
       height: 100%;
       overflow: hidden;
-      background-color: #eee;
+      background-color: #080f08;
     }
 
     .tb-loading-spinner {
@@ -114,7 +136,10 @@
     }
 
   </style>
-<link rel="stylesheet" href="styles-WUQVJSVC.css"></head>
+<link rel="stylesheet" href="styles-WUQVJSVC.css">
+<link rel="stylesheet" href="dynamic-branding.css" id="hyvision-dynamic-styles">
+<link rel="stylesheet" href="hyvision-whitelabel.css">
+</head>
 <body class="tb-default">
   <tb-root></tb-root>
   <div id="tb-loading-spinner" class="tb-loading-spinner">
@@ -122,5 +147,5 @@
     <div class="tb-bounce2"></div>
     <div class="tb-bounce3"></div>
   </div>
-<link rel="modulepreload" href="chunk-L6CK774F.js"><link rel="modulepreload" href="chunk-AWADN7CA.js"><link rel="modulepreload" href="chunk-3WMNFA25.js"><link rel="modulepreload" href="chunk-OGF7STF4.js"><link rel="modulepreload" href="chunk-VUDACDWI.js"><link rel="modulepreload" href="chunk-PUMLWYBY.js"><link rel="modulepreload" href="chunk-FPCU2LKZ.js"><link rel="modulepreload" href="chunk-EFA6VVCO.js"><link rel="modulepreload" href="chunk-5KVR56NM.js"><script src="polyfills-6FA3EHOI.js" type="module"></script><script src="scripts-HV4CFAKB.js" defer></script><script src="main-RUDBBS27.js" type="module"></script></body>
+<link rel="modulepreload" href="chunk-L6CK774F.js"><link rel="modulepreload" href="chunk-AWADN7CA.js"><link rel="modulepreload" href="chunk-3WMNFA25.js"><link rel="modulepreload" href="chunk-OGF7STF4.js"><link rel="modulepreload" href="chunk-VUDACDWI.js"><link rel="modulepreload" href="chunk-PUMLWYBY.js"><link rel="modulepreload" href="chunk-FPCU2LKZ.js"><link rel="modulepreload" href="chunk-EFA6VVCO.js"><link rel="modulepreload" href="chunk-5KVR56NM.js"><script src="polyfills-6FA3EHOI.js" type="module"></script><script src="scripts-HV4CFAKB.js" defer></script><script src="main-RUDBBS27.js" type="module"></script><script src="hyvision-whitelabel.js" defer></script></body>
 </html>

@@ -1,0 +1,378 @@
+/* ============================================================
+   HyVision White-Labeling Module Styles
+   ============================================================ */
+
+/* Floating Launcher Button */
+.hyvision-wl-trigger {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #436A3C 0%, #2b4926 100%);
+  color: #ffffff;
+  border: 1px solid rgba(130, 195, 120, 0.4);
+  border-radius: 30px;
+  padding: 10px 18px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 20px rgba(67, 106, 60, 0.4);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.hyvision-wl-trigger:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55), 0 0 28px rgba(67, 106, 60, 0.6);
+  background: linear-gradient(135deg, #4e7c46 0%, #355c2f 100%);
+}
+
+.hyvision-wl-trigger svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* Modal Backdrop */
+.hyvision-wl-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 10, 5, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease-out;
+}
+
+.hyvision-wl-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Modal Dialog */
+.hyvision-wl-modal {
+  width: 90%;
+  max-width: 680px;
+  max-height: 88vh;
+  background: #142014;
+  background: linear-gradient(165deg, #182818 0%, #0f190f 100%);
+  border: 1px solid rgba(130, 195, 120, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 50px rgba(67, 106, 60, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.92) translateY(20px);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Roboto', sans-serif;
+  color: #e5ede4;
+}
+
+.hyvision-wl-overlay.active .hyvision-wl-modal {
+  transform: scale(1) translateY(0);
+}
+
+/* Modal Header */
+.hyvision-wl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.hyvision-wl-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hyvision-wl-header-title h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+.hyvision-wl-badge {
+  background: rgba(67, 106, 60, 0.35);
+  border: 1px solid rgba(130, 195, 120, 0.4);
+  color: #a3d99b;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hyvision-wl-close {
+  background: transparent;
+  border: none;
+  color: #8b9c8a;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.hyvision-wl-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Modal Body */
+.hyvision-wl-body {
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Section Box */
+.hyvision-wl-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.hyvision-wl-section-title {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #9EBA99;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hyvision-wl-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.hyvision-wl-form-full {
+  grid-column: span 2;
+}
+
+.hyvision-wl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hyvision-wl-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #c7d9c5;
+}
+
+.hyvision-wl-input,
+.hyvision-wl-select {
+  background: rgba(10, 20, 10, 0.7);
+  border: 1px solid rgba(130, 195, 120, 0.25);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 13.5px;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.hyvision-wl-input:focus,
+.hyvision-wl-select:focus {
+  border-color: #64B856;
+  box-shadow: 0 0 10px rgba(100, 184, 86, 0.35);
+}
+
+.hyvision-wl-color-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hyvision-wl-color-input {
+  width: 44px;
+  height: 40px;
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Color Presets */
+.hyvision-wl-presets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.hyvision-wl-preset-chip {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hyvision-wl-preset-chip:hover {
+  transform: scale(1.15);
+  border-color: #ffffff;
+}
+
+/* File Upload Button */
+.hyvision-wl-file-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(67, 106, 60, 0.25);
+  border: 1px dashed rgba(130, 195, 120, 0.5);
+  color: #a3d99b;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hyvision-wl-file-btn:hover {
+  background: rgba(67, 106, 60, 0.45);
+  border-color: #64B856;
+  color: #ffffff;
+}
+
+/* CSS Editor */
+.hyvision-wl-textarea {
+  width: 100%;
+  min-height: 90px;
+  font-family: 'Consolas', 'Roboto Mono', monospace;
+  font-size: 12.5px;
+  background: rgba(6, 14, 7, 0.85);
+  border: 1px solid rgba(130, 195, 120, 0.25);
+  border-radius: 8px;
+  padding: 12px;
+  color: #b8f0b0;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.hyvision-wl-textarea:focus {
+  border-color: #64B856;
+}
+
+/* Modal Footer */
+.hyvision-wl-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.hyvision-wl-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hyvision-wl-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hyvision-wl-btn-reset {
+  background: transparent;
+  color: #c97575;
+  border: 1px solid rgba(201, 117, 117, 0.3);
+}
+
+.hyvision-wl-btn-reset:hover {
+  background: rgba(201, 117, 117, 0.15);
+  color: #ff9999;
+}
+
+.hyvision-wl-btn-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d1ded0;
+}
+
+.hyvision-wl-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.hyvision-wl-btn-save {
+  background: linear-gradient(135deg, #436A3C 0%, #305429 100%);
+  color: #ffffff;
+  border: 1px solid rgba(130, 195, 120, 0.4);
+  box-shadow: 0 4px 14px rgba(67, 106, 60, 0.4);
+}
+
+.hyvision-wl-btn-save:hover {
+  background: linear-gradient(135deg, #4f7d46 0%, #396331 100%);
+  box-shadow: 0 6px 20px rgba(67, 106, 60, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Toast Notification */
+.hyvision-wl-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(50px);
+  background: #1b3819;
+  border: 1px solid #64B856;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(100, 184, 86, 0.4);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100001;
+  pointer-events: none;
+}
+
+.hyvision-wl-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}

@@ -1,0 +1,13 @@
+{
+  "appTitle": "HYVISION",
+  "appSubtitle": "POWERED BY HYBRICO ENERGY",
+  "browserTitle": "HyVision",
+  "primaryColor": "#436A3C",
+  "loginCardColor": "#2b4c23",
+  "backgroundColor": "#173117",
+  "backgroundMode": "dark_scada",
+  "logoLoginUrl": "assets/logo_title_white.png",
+  "logoToolbarUrl": "assets/logo_title_white.png",
+  "faviconUrl": "thingsboard.ico",
+  "customCss": ""
+}
