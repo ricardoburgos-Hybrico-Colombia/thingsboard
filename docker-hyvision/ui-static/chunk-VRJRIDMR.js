@@ -1,0 +1,1 @@
+import{a as e,i as a}from"./chunk-5KVR56NM.js";a();function i(o){let t=o&&o.family?o.family:"Roboto";return t==="RobotoDraft"&&(t="Roboto"),t}function f(o,t){let r=e(e({},t),o||{});return r.family=i(r),r}export{i as a,f as b};

@@ -1,0 +1,1 @@
+import{e as f,i as t}from"./chunk-5KVR56NM.js";var i=f((o,e)=>{t();(function(){ace.require(["ace/snippets/svg"],function(c){typeof e=="object"&&typeof o=="object"&&e&&(e.exports=c)})})()});export default i();
