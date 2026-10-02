@@ -1626,6 +1626,16 @@
       <div id="hyv-fleet-dynamic-body"></div>
     `;
 
+    if (tableContainer.parentElement) {
+      tableContainer.parentElement.style.padding = '0';
+      tableContainer.parentElement.style.margin = '0';
+      tableContainer.parentElement.style.background = 'radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%)';
+    }
+    var sidenav = document.querySelector('mat-sidenav-content, .mat-drawer-content');
+    if (sidenav) {
+      sidenav.style.background = 'radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%)';
+    }
+
     tableContainer.parentNode.insertBefore(hub, tableContainer);
 
     // Event: Add System button
