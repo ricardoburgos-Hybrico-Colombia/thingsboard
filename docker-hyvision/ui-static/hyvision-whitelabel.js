@@ -1,6 +1,8 @@
 /**
  * HyVision Enterprise Suite (Client-Side Module)
  * - Módulo de Reportes Ejecutivos (PDF & Excel)
+ * - Renombramiento de "Tableros" por "Sistemas de energía"
+ * - Inserción del ítem nativo "Reportes" en el menú lateral bajo "Sistemas de energía"
  * - Módulo de Marca Blanca Dinámica (White-Labeling)
  * - Módulo de Notificaciones Críticas Telegram 24/7
  * - Control de Acceso Estricto Basado en Roles (RBAC: Tenant Admin vs Customer User)
@@ -136,7 +138,106 @@
     return !!localStorage.getItem('jwt_token') && !isLoginPage();
   }
 
-  // 5. Update Trigger Button Visibility (Role-Based Access Control)
+  // 5. Update Sidebar: Rename "Tableros" to "Sistemas de energía"
+  function updateSidebarTranslations() {
+    if (isLoginPage() || !isLoggedIn()) return;
+
+    // Sidebar navigation menu links
+    var sideLinks = document.querySelectorAll('tb-menu-link a, .tb-side-menu a, mat-sidenav a, .mat-mdc-list-item');
+    sideLinks.forEach(function(a) {
+      var href = a.getAttribute('href') || a.getAttribute('routerlink') || '';
+      var span = a.querySelector('.tb-link-title, span:not(.mat-icon)');
+      if (span) {
+        var t = span.innerText.trim();
+        if (t === 'Tableros' || t === 'Dashboards') {
+          span.innerText = 'Sistemas de energía';
+        }
+      }
+      if (href.indexOf('/dashboards') !== -1 && span) {
+        var curr = span.innerText.trim();
+        if (curr === 'Tableros' || curr === 'Dashboards' || curr === 'tableros') {
+          span.innerText = 'Sistemas de energía';
+        }
+      }
+    });
+
+    // Breadcrumbs & top navigation headers
+    var breadcrumbs = document.querySelectorAll('.tb-breadcrumb-item, .mat-mdc-button span, .mat-mdc-card-title, .tb-dashboard-title, .tb-navigation-title');
+    breadcrumbs.forEach(function(el) {
+      if (el.children.length === 0) {
+        var t = el.innerText.trim();
+        if (t === 'Tableros' || t === 'Dashboards') {
+          el.innerText = 'Sistemas de energía';
+        } else if (t === 'Tablero' || t === 'Dashboard') {
+          el.innerText = 'Sistema de energía';
+        }
+      }
+    });
+  }
+
+  // 6. Inject Native "Reportes" Menu Item in Sidebar under "Sistemas de energía"
+  function injectSidebarReportsLink() {
+    if (isLoginPage() || !isLoggedIn()) return;
+
+    // Already injected?
+    if (document.querySelector('.hyvision-sidebar-reports-item')) return;
+
+    // Find side menu container
+    var sideMenu = document.querySelector('ul.tb-side-menu, mat-sidenav .tb-side-menu, tb-side-menu ul');
+    if (!sideMenu) return;
+
+    // Find the link for dashboards ("Sistemas de energía" / /dashboards)
+    var dashboardLink = null;
+    var allLinks = sideMenu.querySelectorAll('a');
+    for (var i = 0; i < allLinks.length; i++) {
+      var a = allLinks[i];
+      var href = a.getAttribute('href') || a.getAttribute('routerlink') || '';
+      var txt = (a.innerText || '').toLowerCase();
+      if (href.indexOf('/dashboards') !== -1 || txt.indexOf('sistemas de energía') !== -1 || txt.indexOf('tableros') !== -1 || txt.indexOf('dashboards') !== -1) {
+        dashboardLink = a;
+        break;
+      }
+    }
+
+    if (!dashboardLink) return;
+
+    var parentLi = dashboardLink.closest('li') || dashboardLink;
+    if (!parentLi || !parentLi.parentNode) return;
+
+    // Create the native-looking <li> menu item
+    var reportsLi = document.createElement('li');
+    reportsLi.className = 'hyvision-sidebar-reports-item';
+    reportsLi.innerHTML = `
+      <tb-menu-link>
+        <a class="mat-mdc-button mat-unthemed mat-mdc-button-base hyvision-reports-nav-btn" 
+           style="width: 100%; display: flex; align-items: center; cursor: pointer; text-decoration: none; padding: 0 16px; height: 48px; border-radius: 0;"
+           title="Generar y Descargar Reportes Ejecutivos (PDF & Excel)">
+          <tb-icon class="mat-icon material-icons notranslate mat-icon-no-color" 
+                   style="margin-right: 16px; font-size: 24px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; color: inherit;">
+            assessment
+          </tb-icon>
+          <span class="tb-link-title" style="flex: 1; text-align: left; font-size: 14px; font-weight: 500; letter-spacing: 0.25px;">
+            Reportes
+          </span>
+        </a>
+      </tb-menu-link>
+    `;
+
+    var navBtn = reportsLi.querySelector('.hyvision-reports-nav-btn');
+    navBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openModal();
+    });
+
+    // Insert right after the "Sistemas de energía" item
+    if (parentLi.nextSibling) {
+      parentLi.parentNode.insertBefore(reportsLi, parentLi.nextSibling);
+    } else {
+      parentLi.parentNode.appendChild(reportsLi);
+    }
+  }
+
+  // 7. Update Trigger Button Visibility (Role-Based Access Control)
   function updateTriggerVisibility() {
     var existingBtn = document.querySelector('.hyvision-wl-trigger');
 
@@ -145,49 +246,43 @@
       return;
     }
 
+    // STRICT RBAC: Customer Users NEVER see the floating launcher button!
+    // Customer users access reports strictly through the native sidebar item "Reportes".
+    if (!isAuthorizedAdmin()) {
+      if (existingBtn) existingBtn.remove();
+      return;
+    }
+
+    // Tenant Admin & Sysadmin get the HyVision Suite launcher button
     if (!existingBtn) {
       createTriggerButton();
     }
   }
 
-  // 6. Create Trigger Button
+  // 8. Create Trigger Button (Admin Only)
   function createTriggerButton() {
     if (document.querySelector('.hyvision-wl-trigger')) return;
-    if (isLoginPage() || !isLoggedIn()) return;
+    if (isLoginPage() || !isLoggedIn() || !isAuthorizedAdmin()) return;
 
-    var isAdmin = isAuthorizedAdmin();
     var btn = document.createElement('button');
     btn.className = 'hyvision-wl-trigger';
-
-    if (isAdmin) {
-      btn.innerHTML = `
-        <svg viewBox="0 0 24 24">
-          <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.59 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
-        </svg>
-        <span>HyVision Suite</span>
-      `;
-      btn.title = "HyVision Enterprise Suite: Reportes, Marca Blanca y Alertas";
-    } else {
-      btn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-          <polyline points="14 2 14 8 20 8"></polyline>
-          <line x1="16" y1="13" x2="8" y2="13"></line>
-          <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
-        </svg>
-        <span>Reportes Ejecutivos</span>
-      `;
-      btn.title = "Generar y Descargar Reportes Ejecutivos (PDF & Excel)";
-    }
-
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.59 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/>
+      </svg>
+      <span>HyVision Suite</span>
+    `;
+    btn.title = "HyVision Enterprise Suite: Reportes, Marca Blanca y Alertas";
     btn.addEventListener('click', openModal);
     document.body.appendChild(btn);
   }
 
-  // 7. Create White-Labeling & Reporting Modal Dialog
+  // 9. Create White-Labeling & Reporting Modal Dialog
   function createWhiteLabelModal() {
-    if (document.querySelector('.hyvision-wl-overlay')) return;
+    var existingModal = document.querySelector('.hyvision-wl-overlay');
+    if (existingModal) {
+      existingModal.remove(); // Re-create to match current user role strictly
+    }
 
     var isAdmin = isAuthorizedAdmin();
     var overlay = document.createElement('div');
@@ -198,30 +293,34 @@
         <div class="hyvision-wl-header">
           <div class="hyvision-wl-header-title">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64B856" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
-            <h2>HyVision Enterprise Suite</h2>
-            <span class="hyvision-wl-badge">v4.3 Pro</span>
+            <h2>${isAdmin ? 'HyVision Enterprise Suite' : 'Reportes Ejecutivos'}</h2>
+            <span class="hyvision-wl-badge">${isAdmin ? 'v4.3 Pro' : 'HyVision'}</span>
           </div>
           <button class="hyvision-wl-close" id="hyvision-wl-close-btn" title="Cerrar">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
 
-        <!-- Tab Bar Navigation -->
-        <div class="hyvision-wl-tabs">
-          <button class="hyvision-wl-tab-btn active" data-tab="tab-reports">
-            <span>📑</span> Reportes Ejecutivos (PDF & Excel)
-          </button>
-          ${isAdmin ? `
+        <!-- Tab Bar Navigation (STRICTLY HIDDEN / OMITTED FOR CUSTOMER USERS) -->
+        ${isAdmin ? `
+          <div class="hyvision-wl-tabs">
+            <button class="hyvision-wl-tab-btn active" data-tab="tab-reports">
+              <span>📑</span> Reportes Ejecutivos
+            </button>
             <button class="hyvision-wl-tab-btn" data-tab="tab-branding" id="tab-btn-branding">
               <span>🎨</span> Marca Blanca
             </button>
             <button class="hyvision-wl-tab-btn" data-tab="tab-telegram" id="tab-btn-telegram">
               <span>📲</span> Alertas Telegram
             </button>
-          ` : ''}
-        </div>
+          </div>
+        ` : ''}
 
         <div class="hyvision-wl-body">
 
@@ -245,7 +344,7 @@
               </div>
 
               <!-- Action Buttons -->
-              <div class="hyv-report-actions-grid">
+              <div class="hyv-report-actions-grid" style="${isAdmin ? '' : 'grid-template-columns: repeat(2, 1fr);'}">
                 <div class="hyv-rep-action-card" id="btn-rep-pdf">
                   <div class="hyv-rep-action-icon">📄</div>
                   <div class="hyv-rep-action-title">PDF Ejecutivo</div>
@@ -258,16 +357,18 @@
                   <div class="hyv-rep-action-desc">Libro multicapa con resumen, telemetría diaria y bitácora de eventos</div>
                 </div>
 
-                <div class="hyv-rep-action-card" id="btn-rep-tg">
-                  <div class="hyv-rep-action-icon">📲</div>
-                  <div class="hyv-rep-action-title">Despacho Telegram</div>
-                  <div class="hyv-rep-action-desc">Enviar resumen ejecutivo y enlaces de descarga directa al chat del equipo</div>
-                </div>
+                ${isAdmin ? `
+                  <div class="hyv-rep-action-card" id="btn-rep-tg">
+                    <div class="hyv-rep-action-icon">📲</div>
+                    <div class="hyv-rep-action-title">Despacho Telegram</div>
+                    <div class="hyv-rep-action-desc">Enviar resumen ejecutivo y enlaces de descarga directa al chat del equipo</div>
+                  </div>
+                ` : ''}
               </div>
               <div id="hyv-report-status" style="font-size:12px; margin-top:10px; font-weight:600; text-align:center;"></div>
             </div>
 
-            <!-- Scheduled Reports Configuration (Only for Admins) -->
+            <!-- Scheduled Reports Configuration (Strictly for Admins) -->
             ${isAdmin ? `
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
@@ -306,7 +407,7 @@
             ` : ''}
           </div>
 
-          <!-- ================= TAB 2: MARCA BLANCA ================= -->
+          <!-- ================= TAB 2: MARCA BLANCA (ADMIN ONLY) ================= -->
           ${isAdmin ? `
           <div class="hyvision-wl-tab-pane" id="tab-branding">
             <!-- Identidad de Marca -->
@@ -410,7 +511,7 @@
             </div>
           </div>
 
-          <!-- ================= TAB 3: TELEGRAM ================= -->
+          <!-- ================= TAB 3: TELEGRAM (ADMIN ONLY) ================= -->
           <div class="hyvision-wl-tab-pane" id="tab-telegram">
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
@@ -460,7 +561,7 @@
           ` : `
             <div></div>
             <div class="hyvision-wl-actions">
-              <button class="hyvision-wl-btn hyvision-wl-btn-cancel" id="wl-btn-cancel">Cerrar</button>
+              <button class="hyvision-wl-btn hyvision-wl-btn-save" id="wl-btn-cancel" style="background:#436A3C; color:#ffffff;">Cerrar</button>
             </div>
           `}
         </div>
@@ -469,19 +570,21 @@
 
     document.body.appendChild(overlay);
 
-    // Tab Navigation Logic
-    overlay.querySelectorAll('.hyvision-wl-tab-btn').forEach(function(tabBtn) {
-      tabBtn.addEventListener('click', function() {
-        var targetTabId = tabBtn.getAttribute('data-tab');
+    // Tab Navigation Logic (Only for Admin)
+    if (isAdmin) {
+      overlay.querySelectorAll('.hyvision-wl-tab-btn').forEach(function(tabBtn) {
+        tabBtn.addEventListener('click', function() {
+          var targetTabId = tabBtn.getAttribute('data-tab');
 
-        overlay.querySelectorAll('.hyvision-wl-tab-btn').forEach(function(b) { b.classList.remove('active'); });
-        overlay.querySelectorAll('.hyvision-wl-tab-pane').forEach(function(p) { p.classList.remove('active'); });
+          overlay.querySelectorAll('.hyvision-wl-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+          overlay.querySelectorAll('.hyvision-wl-tab-pane').forEach(function(p) { p.classList.remove('active'); });
 
-        tabBtn.classList.add('active');
-        var pane = document.getElementById(targetTabId);
-        if (pane) pane.classList.add('active');
+          tabBtn.classList.add('active');
+          var pane = document.getElementById(targetTabId);
+          if (pane) pane.classList.add('active');
+        });
       });
-    });
+    }
 
     // Period selector logic
     overlay.querySelectorAll('.hyv-period-chip').forEach(function(chip) {
@@ -506,33 +609,36 @@
       showToast('Descargando archivo Excel (.xlsx)...');
     });
 
-    // Report Actions: Telegram Dispatch
-    document.getElementById('btn-rep-tg').addEventListener('click', function() {
-      var statusEl = document.getElementById('hyv-report-status');
-      statusEl.style.color = '#8ea38b';
-      statusEl.innerText = 'Despachando reporte a Telegram...';
+    // Report Actions: Telegram Dispatch (Admin only)
+    var tgBtn = document.getElementById('btn-rep-tg');
+    if (tgBtn) {
+      tgBtn.addEventListener('click', function() {
+        var statusEl = document.getElementById('hyv-report-status');
+        statusEl.style.color = '#8ea38b';
+        statusEl.innerText = 'Despachando reporte a Telegram...';
 
-      fetch('/api/hyvision/report/send-telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ days: selectedReportDays })
-      })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.status === 'ok') {
-          statusEl.style.color = '#64B856';
-          statusEl.innerText = '✅ ¡Reporte despachado exitosamente a Telegram!';
-          showToast('¡Reporte enviado a Telegram!');
-        } else {
+        fetch('/api/hyvision/report/send-telegram', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ days: selectedReportDays })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status === 'ok') {
+            statusEl.style.color = '#64B856';
+            statusEl.innerText = '✅ ¡Reporte despachado exitosamente a Telegram!';
+            showToast('¡Reporte enviado a Telegram!');
+          } else {
+            statusEl.style.color = '#ff8a80';
+            statusEl.innerText = '❌ ' + (data.message || 'Error al despachar reporte');
+          }
+        })
+        .catch(function(err) {
           statusEl.style.color = '#ff8a80';
-          statusEl.innerText = '❌ ' + (data.message || 'Error al despachar reporte');
-        }
-      })
-      .catch(function(err) {
-        statusEl.style.color = '#ff8a80';
-        statusEl.innerText = '❌ Error de conexión: ' + err.message;
+          statusEl.innerText = '❌ Error de conexión: ' + err.message;
+        });
       });
-    });
+    }
 
     // Event listeners inside modal
     document.getElementById('hyvision-wl-close-btn').addEventListener('click', closeModal);
@@ -792,13 +898,19 @@
     if (overlay) overlay.classList.remove('active');
   }
 
-  // 8. Lifecycle & Clean Listeners (Zero Infinite Loops)
+  // 10. Lifecycle & Clean Listeners (Zero Infinite Loops)
   window.addEventListener('DOMContentLoaded', function() {
     loadInitialConfig();
     updateTriggerVisibility();
+    updateSidebarTranslations();
+    injectSidebarReportsLink();
 
-    // Check visibility on route change or periodically (every 1s)
-    setInterval(updateTriggerVisibility, 1000);
+    // Periodic check for SPA navigation updates (every 800ms)
+    setInterval(function() {
+      updateTriggerVisibility();
+      updateSidebarTranslations();
+      injectSidebarReportsLink();
+    }, 800);
   });
 
   // Global API

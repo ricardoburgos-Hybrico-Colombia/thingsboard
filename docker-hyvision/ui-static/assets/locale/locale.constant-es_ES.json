@@ -1807,10 +1807,10 @@
     "to": "Hasta"
   },
   "dashboard": {
-    "dashboard": "Tablero",
-    "dashboards": "Tableros",
-    "management": "Gestión de tableros",
-    "view-dashboards": "Ver tableros",
+    "dashboard": "Sistema de energía",
+    "dashboards": "Sistemas de energía",
+    "management": "Gestión de sistemas de energía",
+    "view-dashboards": "Ver sistemas de energía",
     "add": "Añadir tablero",
     "assign-dashboard-to-customer": "Asignar tablero(s) al customer",
     "assign-dashboard-to-customer-text": "Por favor, seleccione los tableros para asignar al customer",
@@ -9982,12 +9982,12 @@
       "columns": "Columnas"
     },
     "recent-dashboards": {
-      "title": "Tableros",
+      "title": "Sistemas de energía",
       "last": "Vistos recientemente",
       "starred": "Favoritos",
       "name": "Nombre",
       "last-viewed": "Última visualización",
-      "no-last-viewed-dashboards": "Aún no se han visualizado tableros recientemente"
+      "no-last-viewed-dashboards": "Aún no se han visualizado sistemas de energía recientemente"
     },
     "configured-features": {
       "title": "Características configuradas",
@@ -10020,7 +10020,7 @@
       "pe-feature-tooltip": "Disponible solo en ThingsBoard\nProfessional Edition",
       "switch-to-pe": "Cambiar a PE",
       "alarms": "Alarmas",
-      "dashboards": "Tableros",
+      "dashboards": "Sistemas de energía",
       "entities-and-relations": "Entidades y Relaciones",
       "profiles": "Perfiles",
       "advanced-features": "Funciones avanzadas",

@@ -1936,8 +1936,8 @@
         "to": "To"
     },
     "dashboard": {
-        "dashboard": "Dashboard",
-        "dashboards": "Dashboards",
+        "dashboard": "Sistema de energía",
+        "dashboards": "Sistemas de energía",
         "management": "Dashboard management",
         "view-dashboards": "View Dashboards",
         "add": "Add dashboard",
@@ -10440,7 +10440,7 @@
             "pe-feature-tooltip": "Only on ThingsBoard\nProfessional Edition",
             "switch-to-pe": "Switch to PE",
             "alarms": "Alarms",
-            "dashboards": "Dashboards",
+            "dashboards": "Sistemas de energía",
             "entities-and-relations": "Entities & Relations",
             "profiles": "Profiles",
             "advanced-features": "Advanced features",
