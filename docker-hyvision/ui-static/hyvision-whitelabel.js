@@ -173,6 +173,41 @@
         }
       }
     });
+
+    // Search Tooltips & Placeholders ("Buscar tableros" -> "Buscar sistemas de energía")
+    var inputs = document.querySelectorAll('input[placeholder*="tableros" i], input[placeholder*="dashboards" i]');
+    inputs.forEach(function(inp) {
+      inp.placeholder = inp.placeholder.replace(/tableros/gi, 'sistemas de energía').replace(/dashboards/gi, 'sistemas de energía');
+    });
+
+    var titledElements = document.querySelectorAll('[aria-label*="tablero" i], [mattooltip*="tablero" i], [title*="tablero" i], [aria-label*="dashboard" i], [mattooltip*="dashboard" i], [title*="dashboard" i]');
+    titledElements.forEach(function(el) {
+      ['aria-label', 'mattooltip', 'title'].forEach(function(attr) {
+        var val = el.getAttribute(attr);
+        if (val && (val.toLowerCase().indexOf('tablero') !== -1 || val.toLowerCase().indexOf('dashboard') !== -1)) {
+          var newVal = val.replace(/buscar\s+tableros/gi, 'Buscar sistemas de energía')
+                          .replace(/buscar\s+tablero/gi, 'Buscar sistema de energía')
+                          .replace(/search\s+dashboards/gi, 'Buscar sistemas de energía')
+                          .replace(/tableros/gi, 'sistemas de energía')
+                          .replace(/tablero/gi, 'sistema de energía')
+                          .replace(/dashboards/gi, 'sistemas de energía')
+                          .replace(/dashboard/gi, 'sistema de energía');
+          el.setAttribute(attr, newVal);
+        }
+      });
+    });
+
+    // CDK overlay tooltip containers
+    var tooltips = document.querySelectorAll('.mat-mdc-tooltip, .mat-tooltip');
+    tooltips.forEach(function(tip) {
+      if (tip.innerText && (tip.innerText.toLowerCase().indexOf('tablero') !== -1 || tip.innerText.toLowerCase().indexOf('dashboard') !== -1)) {
+        tip.innerText = tip.innerText.replace(/buscar\s+tableros/gi, 'Buscar sistemas de energía')
+                                     .replace(/buscar\s+tablero/gi, 'Buscar sistema de energía')
+                                     .replace(/search\s+dashboards/gi, 'Buscar sistemas de energía')
+                                     .replace(/tableros/gi, 'sistemas de energía')
+                                     .replace(/tablero/gi, 'sistema de energía');
+      }
+    });
   }
 
   // 6. Inject Native "Reportes" Menu Item in Sidebar under "Sistemas de energía"
