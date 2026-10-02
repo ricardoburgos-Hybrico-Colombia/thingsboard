@@ -208,6 +208,31 @@
                                      .replace(/tablero/gi, 'sistema de energía');
       }
     });
+
+    // Action Buttons & Menu Items: "Añadir tablero" -> "Añadir sistema de energía", etc.
+    var actionButtons = document.querySelectorAll('button, a.mat-mdc-button, a.mat-mdc-raised-button, a.mat-mdc-unelevated-button, .mat-mdc-menu-item, .mat-menu-item, mat-dialog-container h2, mat-dialog-container .mat-mdc-dialog-title');
+    actionButtons.forEach(function(btn) {
+      var span = btn.querySelector('.mdc-button__label, span:not(.mat-icon)') || btn;
+      if (span && span.innerText) {
+        var t = span.innerText.trim();
+        if (t.toLowerCase() === 'añadir tablero' || t.toLowerCase() === 'add dashboard') {
+          span.innerText = '+ Añadir sistema de energía';
+        } else if (t.toLowerCase() === '+ añadir tablero' || t.toLowerCase() === '+ add dashboard') {
+          span.innerText = '+ Añadir sistema de energía';
+        } else if (t.toLowerCase().indexOf('tablero') !== -1 || t.toLowerCase().indexOf('dashboard') !== -1) {
+          span.innerText = span.innerText
+            .replace(/crear\s+nuevo\s+tablero/gi, 'Crear nuevo sistema de energía')
+            .replace(/importar\s+tablero/gi, 'Importar sistema de energía')
+            .replace(/exportar\s+tablero/gi, 'Exportar sistema de energía')
+            .replace(/eliminar\s+tablero/gi, 'Eliminar sistema de energía')
+            .replace(/detalles\s+del\s+tablero/gi, 'Detalles del sistema de energía')
+            .replace(/tableros/gi, 'sistemas de energía')
+            .replace(/tablero/gi, 'sistema de energía')
+            .replace(/dashboards/gi, 'sistemas de energía')
+            .replace(/dashboard/gi, 'sistema de energía');
+        }
+      }
+    });
   }
 
   // 6. Inject Native "Reportes" Menu Item in Sidebar under "Sistemas de energía"
