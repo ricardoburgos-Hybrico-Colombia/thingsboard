@@ -532,3 +532,606 @@ body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
   transform: translateX(-50%) translateY(0);
   opacity: 1;
 }
+
+/* ============================================================
+   HyVision Fleet Control Hub (Portafolio de Sistemas de Energía)
+   ============================================================ */
+
+.hyv-fleet-hub {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  background: radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%);
+  color: #e5ede4;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(130, 195, 120, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  z-index: 10;
+  margin-bottom: 24px;
+}
+
+/* Header & Top Bar */
+.hyv-fleet-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 18px;
+}
+
+.hyv-fleet-title-group h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: 0.5px;
+}
+
+.hyv-fleet-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  background: rgba(67, 106, 60, 0.35);
+  border: 1px solid #64B856;
+  border-radius: 20px;
+  color: #8ce47e;
+}
+
+.hyv-fleet-title-group p {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #9ab396;
+}
+
+.hyv-fleet-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* View Mode Switcher */
+.hyv-fleet-view-switch {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 4px;
+}
+
+.hyv-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #a2bca0;
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hyv-view-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hyv-view-btn.active {
+  background: linear-gradient(135deg, #436A3C 0%, #2f4e2a 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(67, 106, 60, 0.5);
+  border: 1px solid rgba(140, 228, 126, 0.3);
+}
+
+/* Mode Classic toggle */
+.hyv-btn-toggle-classic {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #c7d8c5;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.hyv-btn-toggle-classic:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* KPI Macro Banner */
+.hyv-fleet-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.hyv-kpi-card {
+  background: linear-gradient(160deg, rgba(35, 60, 30, 0.45) 0%, rgba(14, 25, 14, 0.75) 100%);
+  border: 1px solid rgba(130, 195, 120, 0.2);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.hyv-kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(140, 228, 126, 0.45);
+}
+
+.hyv-kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hyv-kpi-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #9bb797;
+}
+
+.hyv-kpi-icon {
+  font-size: 18px;
+  opacity: 0.85;
+}
+
+.hyv-kpi-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.hyv-kpi-value span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #a2c79e;
+  margin-left: 4px;
+}
+
+.hyv-kpi-sub {
+  font-size: 11.5px;
+  color: #7d9e79;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hyv-kpi-sub.positive {
+  color: #6ee760;
+}
+
+/* Filter & Search Bar */
+.hyv-fleet-filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hyv-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+  max-width: 480px;
+}
+
+.hyv-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7f9f7c;
+  pointer-events: none;
+}
+
+.hyv-search-input {
+  width: 100%;
+  background: rgba(14, 26, 14, 0.85);
+  border: 1px solid rgba(130, 195, 120, 0.25);
+  border-radius: 8px;
+  padding: 9px 12px 9px 36px;
+  color: #ffffff;
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.hyv-search-input:focus {
+  border-color: #64B856;
+  box-shadow: 0 0 14px rgba(100, 184, 86, 0.3);
+  background: rgba(20, 36, 20, 0.95);
+}
+
+.hyv-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.hyv-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a4bea2;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.hyv-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.hyv-chip.active {
+  background: rgba(67, 106, 60, 0.6);
+  border-color: #64B856;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(67, 106, 60, 0.4);
+}
+
+/* Cards Grid */
+.hyv-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 18px;
+}
+
+.hyv-site-card {
+  background: linear-gradient(165deg, rgba(32, 54, 28, 0.5) 0%, rgba(14, 25, 14, 0.85) 100%);
+  border: 1px solid rgba(130, 195, 120, 0.22);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+}
+
+.hyv-site-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(140, 228, 126, 0.5);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), 0 0 24px rgba(67, 106, 60, 0.35);
+}
+
+/* Card Header */
+.hyv-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hyv-card-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hyv-card-title {
+  font-size: 16.5px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hyv-card-title:hover {
+  color: #8ce47e;
+}
+
+.hyv-card-sub {
+  font-size: 12px;
+  color: #92b08f;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hyv-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #50e338;
+  box-shadow: 0 0 10px #50e338;
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+.hyv-status-dot.alert {
+  background: #ffc107;
+  box-shadow: 0 0 10px #ffc107;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.hyv-card-type-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #b7d1b5;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Power Triad (Solar, BESS, Load) */
+.hyv-power-triad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.hyv-triad-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.hyv-triad-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #8dae8a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.hyv-triad-val {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.hyv-triad-val.solar { color: #f7d048; }
+.hyv-triad-val.bess { color: #6be35b; }
+.hyv-triad-val.load { color: #62c3f5; }
+
+.hyv-triad-extra {
+  font-size: 10.5px;
+  color: #7b9c78;
+}
+
+/* Sparkline & Health Bar */
+.hyv-card-sparkline-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hyv-sparkline-label {
+  font-size: 10.5px;
+  color: #7e9c7b;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hyv-sparkline-svg {
+  width: 100%;
+  height: 44px;
+  overflow: visible;
+}
+
+.hyv-card-metrics-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #92b08f;
+  padding: 6px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Card Actions */
+.hyv-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.hyv-btn-scada {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #436A3C 0%, #2b4926 100%);
+  color: #ffffff;
+  border: 1px solid rgba(130, 195, 120, 0.4);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(67, 106, 60, 0.4);
+}
+
+.hyv-btn-scada:hover {
+  background: linear-gradient(135deg, #4f7d46 0%, #355c2f 100%);
+  box-shadow: 0 5px 16px rgba(67, 106, 60, 0.6);
+  transform: translateY(-1px);
+  color: #ffffff;
+}
+
+.hyv-btn-report {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d1ded0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hyv-btn-report:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+/* Map View */
+.hyv-map-wrapper {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  background: radial-gradient(circle at 50% 50%, #152615 0%, #0a130a 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(130, 195, 120, 0.2);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hyv-map-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.hyv-map-marker {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.hyv-map-marker:hover {
+  transform: scale(1.2);
+}
+
+.hyv-map-tooltip {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background: rgba(14, 25, 14, 0.95);
+  border: 1px solid #64B856;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  min-width: 260px;
+  pointer-events: auto;
+}
+
+/* SCADA Table View */
+.hyv-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(130, 195, 120, 0.2);
+  background: rgba(14, 25, 14, 0.6);
+}
+
+.hyv-scada-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.hyv-scada-table th {
+  background: rgba(25, 45, 23, 0.85);
+  color: #a4c4a1;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(130, 195, 120, 0.25);
+}
+
+.hyv-scada-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #dbe7da;
+}
+
+.hyv-scada-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.hyv-scada-table tbody tr:hover {
+  background: rgba(67, 106, 60, 0.2);
+}
+
+.hyv-table-bess-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.hyv-progress-bg {
+  flex: 1;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hyv-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #436A3C 0%, #64B856 100%);
+  border-radius: 4px;
+}
+
