@@ -1,0 +1,33 @@
+{
+  "id": {
+    "entityType": "WIDGET_TYPE",
+    "id": "f9200780-be6b-11f1-a395-4fe608e17de1"
+  },
+  "createdTime": 1790950637560,
+  "tenantId": {
+    "entityType": "TENANT",
+    "id": "db80e5d0-be68-11f1-a395-4fe608e17de1"
+  },
+  "fqn": "bess_desbalance_celdas_scada",
+  "name": "SCADA - Desbalance Voltaje Celdas",
+  "deprecated": false,
+  "scada": false,
+  "version": 2,
+  "descriptor": {
+    "type": "latest",
+    "sizeX": 12,
+    "sizeY": 4.5,
+    "resources": [],
+    "templateHtml": "<div id=\"bess-cell-card\" class=\"bess-cell-card healthy\">\n  <div class=\"bess-card-header\">\n    <div class=\"card-title\">\n      <span class=\"card-icon\">\ud83d\udd2c</span>\n      <span>DESBALANCE DE VOLTAJE EN CELDAS</span>\n    </div>\n    <div id=\"cell-health-badge\" class=\"badge-cell healthy\">&lt; 30 mV SALUDABLE</div>\n  </div>\n\n  <div class=\"cell-kpi-body\">\n    <div class=\"cell-main-delta\">\n      <span id=\"cell-delta-val\" class=\"delta-num healthy\">14</span>\n      <span class=\"delta-unit\">mV \u0394V</span>\n    </div>\n    <div class=\"cell-range-box\">\n      <div class=\"cell-item\">\n        <span class=\"c-lbl\">Celda M\u00e1x:</span>\n        <span id=\"cell-max-val\" class=\"c-val\">3285 mV</span>\n      </div>\n      <div class=\"cell-item\">\n        <span class=\"c-lbl\">Celda M\u00edn:</span>\n        <span id=\"cell-min-val\" class=\"c-val\">3271 mV</span>\n      </div>\n    </div>\n  </div>\n\n  <div class=\"bess-card-footer\">\n    <span>Diagn\u00f3stico BMS: <strong style=\"color:#64B856;\">Celdas Ecualizadas</strong></span>\n    <span>L\u00edmite de Alarma: <strong>30 mV</strong></span>\n  </div>\n</div>",
+    "templateCss": ".bess-cell-card {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%;\n  background: linear-gradient(160deg, rgba(14, 25, 16, 0.95) 0%, rgba(8, 15, 9, 0.98) 100%);\n  border-radius: 14px;\n  border: 1px solid rgba(100, 184, 86, 0.22);\n  border-top: 3.5px solid #64B856;\n  padding: 16px 20px;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);\n  transition: border-top-color 0.3s ease;\n}\n.bess-cell-card.alert { border-top-color: #ef4444; }\n.bess-card-header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.card-title {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 13px;\n  font-weight: 700;\n  letter-spacing: 0.6px;\n  color: #94a3b8;\n}\n.card-icon { font-size: 16px; }\n.badge-cell {\n  font-size: 11px;\n  font-weight: 700;\n  padding: 2px 10px;\n  border-radius: 20px;\n}\n.badge-cell.healthy {\n  color: #06b6d4;\n  border: 1.5px solid #06b6d4;\n  background: rgba(6, 182, 212, 0.1);\n}\n.badge-cell.alert {\n  color: #ef4444;\n  border: 1.5px solid #ef4444;\n  background: rgba(239, 68, 68, 0.15);\n}\n.cell-kpi-body {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin: 6px 0;\n}\n.cell-main-delta {\n  display: flex;\n  align-items: baseline;\n  gap: 6px;\n}\n.delta-num {\n  font-size: 38px;\n  font-weight: 800;\n  color: #06b6d4;\n  line-height: 1;\n}\n.delta-num.alert { color: #ef4444; }\n.delta-unit {\n  font-size: 18px;\n  font-weight: 600;\n  color: #94a3b8;\n}\n.cell-range-box {\n  display: flex;\n  flex-direction: column;\n  gap: 4px;\n  background: rgba(255, 255, 255, 0.03);\n  border: 1px solid rgba(100, 184, 86, 0.15);\n  border-radius: 8px;\n  padding: 6px 14px;\n}\n.cell-item {\n  display: flex;\n  justify-content: space-between;\n  gap: 12px;\n  font-size: 12px;\n}\n.c-lbl { color: #64748b; }\n.c-val { color: #e2e8f0; font-weight: 700; }\n.bess-card-footer {\n  display: flex;\n  justify-content: space-between;\n  font-size: 11px;\n  color: #64748b;\n  border-top: 1px solid rgba(148, 163, 184, 0.12);\n  padding-top: 8px;\n  margin-top: 4px;\n}",
+    "controllerScript": "self.onInit = function() { self.onDataUpdated(); };\nself.onDataUpdated = function() {\n  var data = self.ctx.data;\n  var deltaMv = 14;\n  var maxMv = 3285;\n  var minMv = 3271;\n\n  if (data && data.length > 0) {\n    for (var i = 0; i < data.length; i++) {\n      var item = data[i];\n      if (item.data && item.data.length > 0) {\n        var v = parseFloat(item.data[item.data.length - 1][1]);\n        var k = (item.dataKey.label || item.dataKey.name || \"\").toLowerCase();\n        if (!isNaN(v)) {\n          if (k.indexOf('delta') !== -1 || i === 0) deltaMv = v;\n          else if (k.indexOf('max') !== -1 || i === 1) maxMv = v;\n          else if (k.indexOf('min') !== -1 || i === 2) minMv = v;\n        }\n      }\n    }\n  }\n\n  var isHealthy = deltaMv < 30;\n  var container = self.ctx.$container ? self.ctx.$container[0] : null;\n\n  if (container) {\n    var card = container.querySelector('#bess-cell-card');\n    if (card) card.className = 'bess-cell-card ' + (isHealthy ? 'healthy' : 'alert');\n\n    var elD = container.querySelector('#cell-delta-val');\n    if (elD) {\n      elD.textContent = Math.round(deltaMv);\n      elD.className = 'delta-num ' + (isHealthy ? 'healthy' : 'alert');\n    }\n\n    var elMax = container.querySelector('#cell-max-val');\n    if (elMax) elMax.textContent = Math.round(maxMv) + ' mV';\n\n    var elMin = container.querySelector('#cell-min-val');\n    if (elMin) elMin.textContent = Math.round(minMv) + ' mV';\n\n    var elBadge = container.querySelector('#cell-health-badge');\n    if (elBadge) {\n      elBadge.textContent = isHealthy ? '< 30 mV SALUDABLE' : '\u2265 30 mV DESBALANCE';\n      elBadge.className = 'badge-cell ' + (isHealthy ? 'healthy' : 'alert');\n    }\n  }\n};\nself.onDestroy = function() {};",
+    "settingsSchema": "{}",
+    "dataKeySettingsSchema": "{}",
+    "defaultConfig": "{\"datasources\":[{\"type\":\"function\",\"name\":\"Simulador\",\"dataKeys\":[{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"delta_v_celdas_mv\",\"color\":\"#06b6d4\",\"settings\":{},\"_hash\":0.71,\"funcBody\":\"return 14;\"},{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"max_volt_celda_mv\",\"color\":\"#06b6d4\",\"settings\":{},\"_hash\":0.72,\"funcBody\":\"return 3285;\"},{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"min_volt_celda_mv\",\"color\":\"#06b6d4\",\"settings\":{},\"_hash\":0.73,\"funcBody\":\"return 3271;\"}]}],\"timewindow\":{\"realtime\":{\"timewindowMs\":60000}},\"showTitle\":false,\"backgroundColor\":\"transparent\",\"color\":\"rgba(255, 255, 255, 0.87)\",\"padding\":\"0px\",\"settings\":{},\"title\":\"Desbalance Voltaje Celdas\",\"dropShadow\":false}"
+  },
+  "image": null,
+  "description": null,
+  "tags": null,
+  "externalId": null,
+  "resources": null
+}

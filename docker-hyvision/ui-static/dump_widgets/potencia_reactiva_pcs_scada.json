@@ -1,0 +1,33 @@
+{
+  "id": {
+    "entityType": "WIDGET_TYPE",
+    "id": "f9436e00-be6b-11f1-a395-4fe608e17de1"
+  },
+  "createdTime": 1790950637792,
+  "tenantId": {
+    "entityType": "TENANT",
+    "id": "db80e5d0-be68-11f1-a395-4fe608e17de1"
+  },
+  "fqn": "potencia_reactiva_pcs_scada",
+  "name": "SCADA - Potencia Reactiva Inversores",
+  "deprecated": false,
+  "scada": false,
+  "version": 2,
+  "descriptor": {
+    "type": "latest",
+    "sizeX": 12,
+    "sizeY": 4.5,
+    "resources": [],
+    "templateHtml": "<div class=\"pcs-card-container reactive\">\n  <div class=\"pcs-header\">\n    <div class=\"pcs-title\">\n      <span class=\"pcs-icon\">\ud83d\udd04</span>\n      <span>POTENCIA REACTIVA (VAR)</span>\n    </div>\n    <div id=\"q-regime-badge\" class=\"pcs-badge reactive\">INDUCTIVO</div>\n  </div>\n\n  <div class=\"pcs-main-metric\">\n    <span id=\"q-total-val\" class=\"main-num reactive\">2.4</span>\n    <span class=\"main-unit\">kVAR TOTAL</span>\n  </div>\n\n  <div class=\"reactive-grid\">\n    <div class=\"reactive-tile\">\n      <span class=\"tile-title\">PCS-1</span>\n      <span id=\"q-pcs1-val\" class=\"tile-val\">0.8 kVAR</span>\n      <span class=\"tile-sub\">cos \u03c6: 0.99</span>\n    </div>\n    <div class=\"reactive-tile\">\n      <span class=\"tile-title\">PCS-2</span>\n      <span id=\"q-pcs2-val\" class=\"tile-val\">0.8 kVAR</span>\n      <span class=\"tile-sub\">cos \u03c6: 0.99</span>\n    </div>\n    <div class=\"reactive-tile\">\n      <span class=\"tile-title\">PCS-3</span>\n      <span id=\"q-pcs3-val\" class=\"tile-val\">0.8 kVAR</span>\n      <span class=\"tile-sub\">cos \u03c6: 0.99</span>\n    </div>\n  </div>\n\n  <div class=\"pcs-footer\">\n    <span>Compensaci\u00f3n de Red: <strong style=\"color:#a855f7;\">Normalizada</strong></span>\n    <span>L\u00edmite de Inyecci\u00f3n: <strong>\u00b1150 kVAR</strong></span>\n  </div>\n</div>",
+    "templateCss": ".pcs-card-container.reactive {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%;\n  background: linear-gradient(160deg, rgba(14, 25, 16, 0.95) 0%, rgba(8, 15, 9, 0.98) 100%);\n  border-radius: 14px;\n  border: 1px solid rgba(100, 184, 86, 0.22);\n  border-top: 3.5px solid #a855f7;\n  padding: 16px 20px;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);\n}\n.pcs-header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n.pcs-title {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 13px;\n  font-weight: 700;\n  letter-spacing: 0.6px;\n  color: #94a3b8;\n}\n.pcs-icon { font-size: 16px; }\n.pcs-badge.reactive {\n  font-size: 11px;\n  font-weight: 700;\n  color: #a855f7;\n  border: 1.5px solid #a855f7;\n  background: rgba(168, 85, 247, 0.1);\n  padding: 2px 10px;\n  border-radius: 20px;\n}\n.pcs-main-metric {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  margin: 4px 0;\n}\n.main-num.reactive {\n  font-size: 34px;\n  font-weight: 800;\n  color: #a855f7;\n  line-height: 1;\n}\n.main-unit {\n  font-size: 16px;\n  font-weight: 600;\n  color: #94a3b8;\n}\n.reactive-grid {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 10px;\n  margin: 6px 0;\n}\n.reactive-tile {\n  background: rgba(255, 255, 255, 0.03);\n  border: 1px solid rgba(100, 184, 86, 0.15);\n  border-radius: 10px;\n  padding: 8px 10px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  gap: 2px;\n}\n.tile-title { font-size: 11px; color: #94a3b8; font-weight: 600; }\n.tile-val { font-size: 15px; font-weight: 700; color: #e2e8f0; }\n.tile-sub { font-size: 10px; color: #a855f7; font-weight: 600; }\n.pcs-footer {\n  display: flex;\n  justify-content: space-between;\n  font-size: 11px;\n  color: #64748b;\n  border-top: 1px solid rgba(148, 163, 184, 0.12);\n  padding-top: 8px;\n  margin-top: 4px;\n}",
+    "controllerScript": "self.onInit = function() { self.onDataUpdated(); };\nself.onDataUpdated = function() {\n  var data = self.ctx.data;\n  var q1 = 0.8, q2 = 0.8, q3 = 0.8, qTotal = null;\n\n  if (data && data.length > 0) {\n    for (var i = 0; i < data.length; i++) {\n      var item = data[i];\n      if (item.data && item.data.length > 0) {\n        var v = parseFloat(item.data[item.data.length - 1][1]);\n        var k = (item.dataKey.label || item.dataKey.name || \"\").toLowerCase();\n        if (!isNaN(v)) {\n          if (k.indexOf('total') !== -1) qTotal = v;\n          else if (k.indexOf('pcs1') !== -1 || i === 0) q1 = v;\n          else if (k.indexOf('pcs2') !== -1 || i === 1) q2 = v;\n          else if (k.indexOf('pcs3') !== -1 || i === 2) q3 = v;\n        }\n      }\n    }\n  }\n\n  var finalQ = (qTotal !== null) ? qTotal : (q1 + q2 + q3);\n  var container = self.ctx.$container ? self.ctx.$container[0] : null;\n  if (container) {\n    var elTot = container.querySelector('#q-total-val');\n    if (elTot) elTot.textContent = Math.abs(finalQ).toFixed(1);\n\n    var elBadge = container.querySelector('#q-regime-badge');\n    if (elBadge) elBadge.textContent = finalQ >= 0 ? 'INDUCTIVO' : 'CAPACITIVO';\n\n    var setQ = function(idVal, val) {\n      var el = container.querySelector(idVal);\n      if (el) el.textContent = val.toFixed(1) + ' kVAR';\n    };\n    setQ('#q-pcs1-val', q1);\n    setQ('#q-pcs2-val', q2);\n    setQ('#q-pcs3-val', q3);\n  }\n};\nself.onDestroy = function() {};",
+    "settingsSchema": "{}",
+    "dataKeySettingsSchema": "{}",
+    "defaultConfig": "{\"datasources\":[{\"type\":\"function\",\"name\":\"Simulador\",\"dataKeys\":[{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"q_pcs1\",\"color\":\"#a855f7\",\"settings\":{},\"_hash\":0.11,\"funcBody\":\"return 0.8;\"},{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"q_pcs2\",\"color\":\"#a855f7\",\"settings\":{},\"_hash\":0.12,\"funcBody\":\"return 0.8;\"},{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"q_pcs3\",\"color\":\"#a855f7\",\"settings\":{},\"_hash\":0.13,\"funcBody\":\"return 0.8;\"},{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"q_total_kvar\",\"color\":\"#a855f7\",\"settings\":{},\"_hash\":0.14,\"funcBody\":\"return 2.4;\"}]}],\"timewindow\":{\"realtime\":{\"timewindowMs\":60000}},\"showTitle\":false,\"backgroundColor\":\"transparent\",\"color\":\"rgba(255, 255, 255, 0.87)\",\"padding\":\"0px\",\"settings\":{},\"title\":\"Potencia Reactiva Inversores\",\"dropShadow\":false}"
+  },
+  "image": null,
+  "description": null,
+  "tags": null,
+  "externalId": null,
+  "resources": null
+}

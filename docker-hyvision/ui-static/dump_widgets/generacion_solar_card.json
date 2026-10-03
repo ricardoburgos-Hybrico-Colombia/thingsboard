@@ -1,0 +1,33 @@
+{
+  "id": {
+    "entityType": "WIDGET_TYPE",
+    "id": "f932cc30-be6b-11f1-a395-4fe608e17de1"
+  },
+  "createdTime": 1790950637683,
+  "tenantId": {
+    "entityType": "TENANT",
+    "id": "db80e5d0-be68-11f1-a395-4fe608e17de1"
+  },
+  "fqn": "generacion_solar_card",
+  "name": "Generaci\u00f3n Solar SCADA",
+  "deprecated": false,
+  "scada": false,
+  "version": 2,
+  "descriptor": {
+    "type": "latest",
+    "sizeX": 7,
+    "sizeY": 3.5,
+    "resources": [],
+    "templateHtml": "<div class=\"solar-card-container\">\n  <div class=\"solar-card-header\">\n    <div class=\"solar-title\">\n      <span class=\"solar-sun-icon\">\u2600\ufe0f</span>\n      <span>GENERACI\u00d3N SOLAR</span>\n    </div>\n    <div class=\"solar-live-badge\">EN VIVO</div>\n  </div>\n\n  <div class=\"solar-metric-body\">\n    <span id=\"solar-power-value\" class=\"metric-value\">44.8</span>\n    <span class=\"metric-unit\">kW</span>\n  </div>\n\n  <div class=\"solar-divider\"></div>\n\n  <div class=\"solar-card-footer\">\n    <div class=\"footer-left\">\n      <div class=\"footer-label\">Acumulado hoy:</div>\n      <div class=\"footer-subtext\">3 \u00d7 PCS250 en paralelo</div>\n    </div>\n    <div class=\"footer-right\">\n      <div id=\"solar-energy-value\" class=\"footer-value\">5287.3 kWh</div>\n    </div>\n  </div>\n</div>",
+    "templateCss": ".solar-card-container {\n  box-sizing: border-box;\n  width: 100%;\n  height: 100%;\n  background: linear-gradient(160deg, rgba(14, 25, 16, 0.95) 0%, rgba(8, 15, 9, 0.98) 100%);\n  border-radius: 14px;\n  border: 1px solid rgba(100, 184, 86, 0.22);\n  border-top: 3.5px solid #f7d048;\n  padding: 16px 22px;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);\n  overflow: hidden;\n}\n\n.solar-card-header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n\n.solar-title {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  font-size: 13px;\n  font-weight: 700;\n  letter-spacing: 0.6px;\n  color: #94a3b8;\n}\n\n.solar-sun-icon {\n  font-size: 16px;\n}\n\n.solar-live-badge {\n  font-size: 11px;\n  font-weight: 700;\n  letter-spacing: 0.5px;\n  color: #64B856;\n  border: 1.5px solid #64B856;\n  background: rgba(100, 184, 86, 0.08);\n  padding: 2px 10px;\n  border-radius: 20px;\n}\n\n.solar-metric-body {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  margin: 6px 0;\n}\n\n.metric-value {\n  font-size: 40px;\n  font-weight: 800;\n  color: #f7d048;\n  line-height: 1;\n}\n\n.metric-unit {\n  font-size: 20px;\n  font-weight: 600;\n  color: #94a3b8;\n}\n\n.solar-divider {\n  width: 100%;\n  height: 1px;\n  background: rgba(148, 163, 184, 0.15);\n  margin: 8px 0 10px 0;\n}\n\n.solar-card-footer {\n  display: flex;\n  justify-content: space-between;\n  align-items: flex-end;\n}\n\n.footer-left .footer-label {\n  font-size: 13px;\n  font-weight: 500;\n  color: #94a3b8;\n}\n\n.footer-left .footer-subtext {\n  font-size: 12px;\n  color: #556987;\n  margin-top: 3px;\n}\n\n.footer-right .footer-value {\n  font-size: 16px;\n  font-weight: 700;\n  color: #f7d048;\n}",
+    "controllerScript": "self.onInit = function() {\n  self.onDataUpdated();\n};\n\nself.onDataUpdated = function() {\n  var data = self.ctx.data;\n  var powerVal = \"44.8\";\n  var energyVal = \"5287.3\";\n\n  if (data && data.length > 0) {\n    for (var i = 0; i < data.length; i++) {\n      var item = data[i];\n      if (item.data && item.data.length > 0) {\n        var lastVal = item.data[item.data.length - 1][1];\n        var num = parseFloat(lastVal);\n        var formatted = !isNaN(num) ? num.toFixed(1) : lastVal;\n        var keyName = (item.dataKey.label || item.dataKey.name || \"\").toLowerCase();\n\n        if (keyName.indexOf(\"energy\") !== -1 || keyName.indexOf(\"energia\") !== -1 || keyName.indexOf(\"acumulado\") !== -1 || i === 1) {\n          energyVal = formatted;\n        } else {\n          powerVal = formatted;\n        }\n      }\n    }\n  }\n\n  var container = self.ctx.$container ? self.ctx.$container[0] : null;\n  if (container) {\n    var elPower = container.querySelector('#solar-power-value');\n    if (elPower) elPower.textContent = powerVal;\n\n    var elEnergy = container.querySelector('#solar-energy-value');\n    if (elEnergy) elEnergy.textContent = energyVal + ' kWh';\n  }\n};\n\nself.onDestroy = function() {};",
+    "settingsSchema": "{}",
+    "dataKeySettingsSchema": "{}",
+    "defaultConfig": "{\"datasources\":[{\"type\":\"function\",\"name\":\"Simulador\",\"dataKeys\":[{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"potencia_solar\",\"color\":\"#f59e0b\",\"settings\":{},\"_hash\":0.123,\"funcBody\":\"return 44.8;\"},{\"name\":\"f(x)\",\"type\":\"function\",\"label\":\"energia_acumulada\",\"color\":\"#f59e0b\",\"settings\":{},\"_hash\":0.456,\"funcBody\":\"return 5287.3;\"}]}],\"timewindow\":{\"realtime\":{\"timewindowMs\":60000}},\"showTitle\":false,\"backgroundColor\":\"transparent\",\"color\":\"rgba(255, 255, 255, 0.87)\",\"padding\":\"0px\",\"settings\":{},\"title\":\"Generaci\u00f3n Solar\",\"dropShadow\":false}"
+  },
+  "image": null,
+  "description": null,
+  "tags": null,
+  "externalId": null,
+  "resources": null
+}
