@@ -1,0 +1,64 @@
+<div class="pcs-card-container">
+  <div class="pcs-header">
+    <div class="pcs-title">
+      <span class="pcs-icon">⚡</span>
+      <span id="pcs-title-text">DESGLOSE DE POTENCIA POR FUENTE VS DEMANDA</span>
+    </div>
+    <div id="pcs-active-badge" class="pcs-badge">AUTONOMÍA SOLAR</div>
+  </div>
+
+  <!-- KPI Bar con todas las fuentes -->
+  <div class="power-kpi-bar">
+    <div class="pwr-kpi-item solar">
+      <span class="k-label">☀️ SOLAR</span>
+      <span id="kpi-solar-val" class="k-val" style="color: #f7d048;">0.0 kW</span>
+    </div>
+    <div class="pwr-kpi-item grid">
+      <span class="k-label">🌐 RED</span>
+      <span id="kpi-grid-val" class="k-val" style="color: #38bdf8;">0.0 kW</span>
+    </div>
+    <div class="pwr-kpi-item dg">
+      <span class="k-label">⚡ DIÉSEL</span>
+      <span id="kpi-dg-val" class="k-val" style="color: #c084fc;">0.0 kW</span>
+    </div>
+    <div class="pwr-kpi-item load">
+      <span class="k-label">📡 CARGA BTS</span>
+      <span id="kpi-load-val" class="k-val" style="color: #f8fafc;">0.0 kW</span>
+    </div>
+  </div>
+
+  <!-- Gráfica de Tendencia de Potencia de Fuentes vs Demanda -->
+  <div class="chart-power-wrapper">
+    <canvas id="chart-power-breakdown"></canvas>
+  </div>
+
+  <!-- Desglose de Fuentes / Inversores -->
+  <div class="pcs-breakdown-list">
+    <div class="pcs-row">
+      <div class="row-info">
+        <span id="pcs1-label" class="pcs-tag">Solar Fotovoltaico</span>
+        <span id="pac-pcs1-val" class="pcs-val">0.0 kW</span>
+      </div>
+      <div class="bar-track"><div id="pac-pcs1-bar" class="bar-fill" style="width: 0%; background: linear-gradient(90deg, #f7d048, #64B856);"></div></div>
+    </div>
+    <div class="pcs-row">
+      <div class="row-info">
+        <span id="pcs2-label" class="pcs-tag">Red Comercial</span>
+        <span id="pac-pcs2-val" class="pcs-val">0.0 kW</span>
+      </div>
+      <div class="bar-track"><div id="pac-pcs2-bar" class="bar-fill" style="width: 0%; background: linear-gradient(90deg, #38bdf8, #0284c7);"></div></div>
+    </div>
+    <div class="pcs-row">
+      <div class="row-info">
+        <span id="pcs3-label" class="pcs-tag">Respaldo Diésel / Batería</span>
+        <span id="pac-pcs3-val" class="pcs-val">0.0 kW</span>
+      </div>
+      <div class="bar-track"><div id="pac-pcs3-bar" class="bar-fill" style="width: 0%; background: linear-gradient(90deg, #c084fc, #a855f7);"></div></div>
+    </div>
+  </div>
+
+  <div class="pcs-footer">
+    <span id="pac-footer-left">Autonomía Solar: <strong style="color:#64B856;">--%</strong></span>
+    <span id="pac-footer-right">Desglose de Fuentes vs Demanda</span>
+  </div>
+</div>

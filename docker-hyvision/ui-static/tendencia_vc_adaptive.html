@@ -1,0 +1,52 @@
+<div class="trend-card-container elec">
+  <div class="trend-header">
+    <div class="trend-title">
+      <span class="trend-icon">⚡</span>
+      <span id="dc-trend-title">DINÁMICA DE BUS DC Y CORRIENTES TELECOM</span>
+    </div>
+    <div id="dc-trend-badge" class="trend-badge standby">MODO FLOTACIÓN</div>
+  </div>
+
+  <div class="trend-kpi-bar">
+    <div class="kpi-col">
+      <span class="kpi-lbl">TENSIÓN BUS DC</span>
+      <div class="kpi-val-group">
+        <span id="vbat-live-val" class="kpi-num" style="color: #38bdf8;">0.0</span>
+        <span class="kpi-unit">V</span>
+      </div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">CARGA BTS</span>
+      <div class="kpi-val-group">
+        <span id="iload-live-val" class="kpi-num" style="color: #f8fafc;">0.0</span>
+        <span class="kpi-unit">A</span>
+      </div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">RECTIFICADOR</span>
+      <div class="kpi-val-group">
+        <span id="irect-live-val" class="kpi-num" style="color: #64B856;">0.0</span>
+        <span class="kpi-unit">A</span>
+      </div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">BATERÍA DC</span>
+      <div class="kpi-val-group">
+        <span id="ibat-live-val" class="kpi-num" style="color: #f59e0b;">0.0</span>
+        <span class="kpi-unit">A</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <canvas id="chart-vbat-ibat"></canvas>
+  </div>
+
+  <div class="trend-footer">
+    <span>Eje Izq: <strong style="color:#38bdf8;">Tensión Bus (V)</strong> | Eje Der: <strong style="color:#f8fafc;">Carga BTS (A)</strong> · <strong style="color:#64B856;">Rectif (A)</strong></span>
+    <span>Régimen: <strong id="trend-regimen-text" style="color:#64B856;">Bus DC Estabilizado</strong></span>
+  </div>
+</div>
