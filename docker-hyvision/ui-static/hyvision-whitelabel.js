@@ -1061,7 +1061,7 @@
       // Query latest telemetry for every device
       var telPromises = devList.map(function(dev) {
         var devId = dev.id && dev.id.id ? dev.id.id : dev.id;
-        var keys = 'generacion_solar_kw,epv_hoy_kwh,soc_promedio,vbat_promedio,demanda_carga_kw,potencia_bess_kw,temp_bateria_max,ultima_actualizacion,estado_bess';
+        var keys = 'generacion_solar_kw,solar_power_kw,solar_charger_power_kw,epv_hoy_kwh,solar_energy_kwh,soc_promedio,battery_soc,vbat_promedio,battery_voltage,rectifier_voltage,demanda_carga_kw,load_power_kw,load_dc_power_kw,grid_power_kw,potencia_bess_kw,battery_power_kw,temp_bateria_max,battery_temperature,ambient_temperature,battery_cycles,latitude,longitude,ultima_actualizacion,estado_bess';
         return fetch('/api/plugins/telemetry/DEVICE/' + devId + '/values/timeseries?keys=' + keys, { headers: headers })
           .then(function(r) { return r.ok ? r.json() : {}; })
           .then(function(tel) { return { devId: devId, dev: dev, tel: tel }; })
@@ -1127,12 +1127,15 @@
           return fallback;
         };
 
-        var solarKw = getNum('generacion_solar_kw', 0.0);
-        var solarKwh = getNum('epv_hoy_kwh', 0.0);
-        var socVal = getNum('soc_promedio', null);
-        var vbatVal = getNum('vbat_promedio', 0.0);
-        var loadKw = getNum('demanda_carga_kw', 0.0);
-        var tempVal = getNum('temp_bateria_max', 28.5);
+        var solarKw = getNum('generacion_solar_kw', getNum('solar_power_kw', getNum('solar_charger_power_kw', 0.0)));
+        var solarKwh = getNum('epv_hoy_kwh', getNum('solar_energy_kwh', 0.0));
+        var socVal = getNum('soc_promedio', getNum('battery_soc', null));
+        var vbatVal = getNum('vbat_promedio', getNum('battery_voltage', getNum('rectifier_voltage', 0.0)));
+        var loadKw = getNum('demanda_carga_kw', getNum('load_power_kw', getNum('load_dc_power_kw', 0.0)));
+        var tempVal = getNum('temp_bateria_max', getNum('battery_temperature', getNum('ambient_temperature', 28.5)));
+        var latVal = getNum('latitude', null);
+        var lngVal = getNum('longitude', null);
+        var cyclesVal = getNum('battery_cycles', null);
 
         // Regla estricta contra falsos positivos:
         // Si el sitio no transmite o envía únicamente ceros en todas las variables eléctricas (desconectado)
@@ -1147,32 +1150,42 @@
           solarTodayStr = solarKwh.toFixed(1) + ' kWh';
         }
 
+        var titleUpper = title.toUpperCase();
+        var isRoatan = titleUpper.indexOf('ROATAN') !== -1 || titleUpper.indexOf('WEST_') !== -1 || titleUpper.indexOf('DIXON') !== -1 || titleUpper.indexOf('FRENCH') !== -1;
+        var isMosquitia = titleUpper.indexOf('PALACIOS') !== -1 || titleUpper.indexOf('SICO') !== -1 || titleUpper.indexOf('BRUS') !== -1 || titleUpper.indexOf('AHUAS') !== -1;
+        var isHn = isRoatan || isMosquitia || titleUpper.indexOf('HN') !== -1 || titleUpper.indexOf('ARENAL') !== -1 || titleUpper.indexOf('AGUA') !== -1 || titleUpper.indexOf('CAMPO') !== -1 || titleUpper.indexOf('CAMALOTE') !== -1 || titleUpper.indexOf('BUENOS') !== -1;
+
+        var hasSoc = (socVal !== null && !isNaN(socVal) && socVal > 0);
         var bessVoltStr = vbatVal > 0 ? vbatVal.toFixed(1) + ' V' : '-- V';
-        var bessSocDisplay = (socVal !== null && socVal > 0) ? Math.round(socVal) : (isOnline ? 0 : '--');
+        var bessSocDisplay = hasSoc ? Math.round(socVal) : (isRoatan ? 'N/A' : (isOnline ? '--' : '--'));
         var tempStr = tempVal > 0 ? tempVal.toFixed(1) + ' °C' : '-- °C';
+
+        var regionStr = isEpm ? "Vichada, CO" : (isRoatan ? "Roatán, HN" : (isMosquitia ? "Mosquitia, HN" : (isHn ? "Honduras, HN" : "Colombia, CO")));
+        var subtitleStr = isEpm ? "BESS Industrial Off-Grid • Vichada, Colombia" : (isRoatan ? "Microred Híbrida Telecom • Roatán, Honduras" : (isMosquitia ? "Microred Híbrida Off-Grid • Mosquitia, Honduras" : (isHn ? "Microred Híbrida Telecom • Honduras" : "Microred Híbrida Telecom • Colombia")));
+        var typeStr = isEpm ? "BESS Off-Grid" : (isHn ? "Microred Híbrida" : "Microred Solar");
 
         return {
           id: id,
           title: title,
-          subtitle: isEpm ? "BESS Industrial Off-Grid • Vichada, Colombia" : "Sistema de Energía Híbrido • Colombia",
-          region: isEpm ? "Vichada, CO" : "Colombia",
-          type: isEpm ? "BESS Off-Grid" : "Microred Híbrida",
+          subtitle: subtitleStr,
+          region: regionStr,
+          type: typeStr,
           status: isOnline ? "normal" : "alert",
           isOnline: isOnline,
-          hasBess: socVal !== null || isEpm,
+          hasBess: (hasSoc || isEpm),
           solarKw: isOnline ? solarKw : 0.0,
           solarTodayKwh: isOnline ? solarTodayStr : '0.0 kWh',
           solarTodayRawKwh: isOnline ? solarKwh : 0.0,
-          bessSoc: (socVal !== null && socVal > 0 && isOnline) ? socVal : null,
+          bessSoc: (hasSoc && isOnline) ? socVal : null,
           bessSocDisplay: bessSocDisplay,
           bessVolt: isOnline ? bessVoltStr : '-- V',
-          bessCap: isEpm ? "750 V Bus" : "150 kWh",
+          bessCap: isEpm ? "750 V Bus" : (vbatVal > 0 ? (vbatVal.toFixed(0) + " V Bus") : "48V Bus"),
           loadKw: isOnline ? loadKw : 0.0,
           uptime: isOnline ? "99.9%" : "0.0%",
           temp: isOnline ? tempStr : '-- °C',
-          cycles: isEpm ? "1,248" : "420",
-          lat: isEpm ? 4.4238 : (4.7110 + (index * 0.5)),
-          lng: isEpm ? -70.7308 : (-74.0721 - (index * 0.5)),
+          cycles: cyclesVal !== null ? Math.round(cyclesVal).toString() : (isEpm ? "1,248" : (isRoatan ? "N/A" : "420")),
+          lat: (latVal !== null && latVal !== 0) ? latVal : (isEpm ? 4.4238 : (4.7110 + (index * 0.5))),
+          lng: (lngVal !== null && lngVal !== 0) ? lngVal : (isEpm ? -70.7308 : (-74.0721 - (index * 0.5))),
           sparkline: isOnline ? "M0,36 C30,35 60,30 90,20 C120,10 150,2 180,4 C210,12 240,24 270,30" : "M0,40 L270,40"
         };
       });
@@ -1383,7 +1396,7 @@
                 </div>
                 <div class="hyv-triad-item">
                   <span class="hyv-triad-label">🔋 BESS</span>
-                  <span class="hyv-triad-val bess">${s.bessSocDisplay !== '--' ? s.bessSocDisplay + '%' : '--'}</span>
+                  <span class="hyv-triad-val bess">${s.bessSocDisplay === 'N/A' ? 'Flotación' : (s.bessSocDisplay !== '--' ? s.bessSocDisplay + '%' : '--')}</span>
                   <span class="hyv-triad-extra">${s.bessVolt}</span>
                 </div>
                 <div class="hyv-triad-item">
@@ -1533,10 +1546,16 @@
               <td><strong style="color:#f7d048;">${s.solarKw.toFixed(1)} kW</strong></td>
               <td>
                 <div class="hyv-table-bess-bar">
-                  <span style="color:#6be35b; font-weight:700; min-width:38px;">${s.bessSocDisplay !== '--' ? s.bessSocDisplay + '%' : '--'}</span>
-                  <div class="hyv-progress-bg">
-                    <div class="hyv-progress-fill" style="width:${s.bessSocDisplay !== '--' ? s.bessSocDisplay : 0}%;"></div>
-                  </div>
+                  ${s.bessSocDisplay === 'N/A'
+                    ? `<span style="color:#38bdf8; font-size:10.5px; font-weight:700; background:rgba(56,189,248,0.12); padding:2px 7px; border-radius:4px; border:1px solid rgba(56,189,248,0.25);">Flotación</span>`
+                    : (s.bessSocDisplay !== '--'
+                        ? `<span style="color:#6be35b; font-weight:700; min-width:38px;">${s.bessSocDisplay}%</span>
+                           <div class="hyv-progress-bg">
+                             <div class="hyv-progress-fill" style="width:${s.bessSocDisplay}%;"></div>
+                           </div>`
+                        : `<span style="color:#94a3b8; font-weight:600;">--</span>`
+                      )
+                  }
                 </div>
               </td>
               <td><strong style="color:#62c3f5;">${s.loadKw.toFixed(1)} kW</strong></td>

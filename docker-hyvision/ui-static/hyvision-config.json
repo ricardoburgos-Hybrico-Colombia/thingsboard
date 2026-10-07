@@ -18,6 +18,7 @@
     "enabled": true,
     "frequency": "weekly",
     "hour": "07:30",
-    "target": "telegram"
+    "target": "telegram",
+    "lastRun": ""
   }
 }
