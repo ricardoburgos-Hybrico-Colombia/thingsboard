@@ -9,6 +9,8 @@ self.onDataUpdated = function() {
   var energyVal = 0.0;
   var scKw = 0.0;
   var invSolKw = 0.0;
+  var scVolt = null;
+  var scCurr = null;
   var isIndustrial = false;
 
   if (data && data.length > 0) {
@@ -19,7 +21,11 @@ self.onDataUpdated = function() {
         var num = parseFloat(lastVal);
         var keyName = (item.dataKey.label || item.dataKey.name || "").toLowerCase();
 
-        if (keyName.indexOf("solar_charger_power") !== -1) {
+        if (keyName === "solar_charger_voltage") {
+          if (!isNaN(num) && num > 0) scVolt = num;
+        } else if (keyName === "solar_charger_current") {
+          if (!isNaN(num)) scCurr = num;
+        } else if (keyName.indexOf("solar_charger_power") !== -1) {
           if (!isNaN(num)) scKw = num;
         } else if (keyName.indexOf("solar_inverter_power") !== -1) {
           if (!isNaN(num)) invSolKw = num;
@@ -58,6 +64,8 @@ self.onDataUpdated = function() {
     if (elSub) {
       if (isIndustrial) {
         elSub.textContent = '3 × PCS250 en paralelo';
+      } else if (scVolt !== null) {
+        elSub.textContent = 'Cargador: ' + scVolt.toFixed(1) + ' V' + (scCurr !== null ? (' | ' + Math.max(0, scCurr).toFixed(1) + ' A') : ' | MPPT 48V');
       } else if (scKw > 0 && invSolKw > 0) {
         elSub.textContent = 'Solar Dual (MPPT + Inv AC)';
       } else if (invSolKw > 0) {

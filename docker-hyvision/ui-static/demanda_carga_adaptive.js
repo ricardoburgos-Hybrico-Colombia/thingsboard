@@ -7,6 +7,8 @@ self.onDataUpdated = function() {
   var data = self.ctx.data;
   var powerVal = 0.0;
   var energyVal = 0.0;
+  var vLoad = null;
+  var iLoad = null;
   var isIndustrial = false;
 
   if (data && data.length > 0) {
@@ -19,6 +21,10 @@ self.onDataUpdated = function() {
 
         if (keyName.indexOf("energy") !== -1 || keyName.indexOf("energia") !== -1 || keyName.indexOf("eload_hoy") !== -1) {
           if (!isNaN(num)) energyVal = num;
+        } else if (keyName === "load_dc_voltage") {
+          if (!isNaN(num) && num > 0) vLoad = num;
+        } else if (keyName === "load_dc_current") {
+          if (!isNaN(num)) iLoad = num;
         } else if (keyName.indexOf("load") !== -1 || keyName.indexOf("demanda") !== -1 || keyName.indexOf("carga") !== -1) {
           if (!isNaN(num)) powerVal = num;
         } else if (keyName.indexOf("pcs") !== -1) {
@@ -45,7 +51,16 @@ self.onDataUpdated = function() {
 
     var elSub = container.querySelector('#load-subtext-arch');
     if (elSub) {
-      elSub.textContent = isIndustrial ? 'Carga Crítica de Planta' : 'Estación Base BTS 48V';
+      if (isIndustrial) {
+        elSub.textContent = 'Carga Crítica de Planta';
+      } else if (vLoad !== null && iLoad !== null) {
+        elSub.textContent = 'BTS DC: ' + vLoad.toFixed(1) + ' V | ' + Math.max(0, iLoad).toFixed(1) + ' A';
+      } else if (powerVal > 0) {
+        var estA = (powerVal * 1000.0 / 52.0).toFixed(1);
+        elSub.textContent = 'BTS DC: 52.0 V | ' + estA + ' A';
+      } else {
+        elSub.textContent = 'Estación Base BTS 48V';
+      }
     }
 
     var elBadge = container.querySelector('#load-badge-status');

@@ -9,8 +9,11 @@ self.onDataUpdated = function() {
 
   // Variables normalizadas
   var solarKw = 0.0, solarKwh = 0.0, scKw = 0.0, invSolKw = 0.0;
+  var scVolt = null, scCurr = null;
   var soc = null, bessKw = 0.0, vdc = 0.0, idc = 0.0, estadoBess = 'STANDBY';
+  var batNetEnergy = null;
   var loadKw = 0.0, loadKwh = 0.0, loadDcKw = 0.0;
+  var ldVolt = null, ldCurr = null;
   var dgKw = 0.0, dgEstado = 'STANDBY', dgHours = 0.0, dgKwh = 0.0;
   var gridKw = 0.0, gridV = 0.0, gridHz = 60.0, gridKwh = 0.0, gridAvail = 0;
   var rectKw = 0.0, rectV = 0.0, rectI = 0.0, rectKwh = 0.0;
@@ -37,6 +40,12 @@ self.onDataUpdated = function() {
         else if (k.indexOf('epv_hoy') !== -1 || k.indexOf('solar_energy') !== -1) {
           if (!isNaN(v)) solarKwh = v;
         }
+        else if (k === 'solar_charger_voltage') {
+          if (!isNaN(v) && v > 0) scVolt = v;
+        }
+        else if (k === 'solar_charger_current') {
+          if (!isNaN(v)) scCurr = v;
+        }
         // 2. Batería (BESS)
         else if (k === 'battery_soc' || k === 'soc_promedio' || k === 'bess_soc') {
           if (!isNaN(v)) soc = v;
@@ -53,8 +62,11 @@ self.onDataUpdated = function() {
         else if (k.indexOf('estado_bess') !== -1) {
           estadoBess = strV.toUpperCase();
         }
-        else if (k === 'temp_bateria_max' || k.indexOf('temp_bateria') !== -1) {
+        else if (k === 'temp_bateria_max' || k.indexOf('temp_bateria') !== -1 || k === 'battery_temperature') {
           if (!isNaN(v)) tempBat = v;
+        }
+        else if (k.indexOf('net_energy') !== -1 || k === 'battery_net_energy_kwh') {
+          if (!isNaN(v)) batNetEnergy = v;
         }
         else if (k === 'ambient_temperature') {
           if (!isNaN(v)) ambientTemp = v;
@@ -71,6 +83,12 @@ self.onDataUpdated = function() {
         }
         else if (k.indexOf('eload_hoy') !== -1 || k.indexOf('load_energy') !== -1) {
           if (!isNaN(v)) loadKwh = v;
+        }
+        else if (k === 'load_dc_voltage') {
+          if (!isNaN(v) && v > 0) ldVolt = v;
+        }
+        else if (k === 'load_dc_current') {
+          if (!isNaN(v)) ldCurr = v;
         }
         // 5. Inversores PCS (Industrial GAORI)
         else if (k.indexOf('carga_pcs1') !== -1 || k.indexOf('pac_pcs1') !== -1) {
@@ -395,12 +413,16 @@ self.onDataUpdated = function() {
     elSolKw.setAttribute('fill', isSolarProducing ? '#f7d048' : '#94a3b8');
   }
   var elSolKwh = container.querySelector('#svg-solar-kwh');
-  if (elSolKwh) elSolKwh.textContent = 'Hoy: ' + solarKwh.toFixed(2) + ' kWh';
+  if (elSolKwh) elSolKwh.textContent = 'Hoy: ' + solarKwh.toFixed(1) + ' kWh';
 
   var elSolV = container.querySelector('#svg-solar-v');
   if (elSolV) {
-    var vMppt = rectV > 0 ? rectV : (vdc > 0 ? vdc : 50.0);
-    elSolV.textContent = 'MPPT: ' + vMppt.toFixed(1) + ' V';
+    if (scVolt !== null && scVolt > 0) {
+      elSolV.textContent = 'Cargador: ' + scVolt.toFixed(1) + ' V' + (scCurr !== null ? (' | ' + Math.max(0, scCurr).toFixed(1) + ' A') : '');
+    } else {
+      var vMppt = rectV > 0 ? rectV : (vdc > 0 ? vdc : 50.0);
+      elSolV.textContent = 'MPPT: ' + vMppt.toFixed(1) + ' V';
+    }
   }
 
   var elSolSt = container.querySelector('#svg-solar-status');
@@ -455,12 +477,16 @@ self.onDataUpdated = function() {
   var elBessDc = container.querySelector('#svg-bess-dc');
   if (elBessDc) {
     var sIdc = idc >= 0 ? '+' : '';
-    elBessDc.textContent = 'Bus DC: ' + vdc.toFixed(1) + ' V | ' + (idc !== 0 ? (sIdc + idc.toFixed(1) + ' A') : '0.0 A');
+    elBessDc.textContent = 'Banco: ' + vdc.toFixed(1) + ' V | ' + (idc !== 0 ? (sIdc + idc.toFixed(1) + ' A') : '0.0 A');
   }
   var elBessTemp = container.querySelector('#svg-bess-temp');
   if (elBessTemp) {
     var tReal = tempBat !== null ? tempBat : (ambientTemp !== null ? ambientTemp : 28.0);
-    elBessTemp.textContent = 'Temp: ' + tReal.toFixed(1) + ' °C';
+    var strTemp = 'Temp: ' + tReal.toFixed(0) + ' °C';
+    if (batNetEnergy !== null && batNetEnergy > 0) {
+      strTemp += ' | Neta: ' + batNetEnergy.toFixed(1) + ' kWh';
+    }
+    elBessTemp.textContent = strTemp;
   }
 
   // C. Conversión / Rectificador / MPPT (Center)
@@ -508,10 +534,14 @@ self.onDataUpdated = function() {
   var elLdKw = container.querySelector('#svg-load-kw');
   if (elLdKw) elLdKw.innerHTML = loadKw.toFixed(2) + ' <tspan font-size="13" fill="#94a3b8">kW</tspan>';
   var elLdKwh = container.querySelector('#svg-load-kwh');
-  if (elLdKwh) elLdKwh.textContent = 'Hoy: ' + loadKwh.toFixed(2) + ' kWh';
+  if (elLdKwh) elLdKwh.textContent = 'Hoy: ' + loadKwh.toFixed(1) + ' kWh';
   var elLdTel = container.querySelector('#svg-load-telemetry');
   if (elLdTel) {
-    elLdTel.textContent = 'DC: ' + vdc.toFixed(1) + ' V | ' + loadAmps + ' A';
+    if (ldVolt !== null && ldCurr !== null) {
+      elLdTel.textContent = 'Tensión: ' + ldVolt.toFixed(1) + ' V | ' + Math.max(0, ldCurr).toFixed(1) + ' A';
+    } else {
+      elLdTel.textContent = 'DC: ' + vdc.toFixed(1) + ' V | ' + loadAmps + ' A';
+    }
   }
   var elLdSub = container.querySelector('#svg-load-sub');
   if (elLdSub) {

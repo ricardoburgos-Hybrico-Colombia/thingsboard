@@ -9,6 +9,8 @@ self.onDataUpdated = function() {
   var bessKw = 0.0;
   var vdc = 0.0;
   var idc = 0.0;
+  var temp = null;
+  var netEnergy = null;
   var estadoBess = "STANDBY";
   var isIndustrial = false;
 
@@ -26,6 +28,10 @@ self.onDataUpdated = function() {
           if (!isNaN(num) && num > 0) vdc = num;
         } else if (keyName.indexOf("current") !== -1 || keyName.indexOf("ibat") !== -1) {
           if (!isNaN(num)) idc = num;
+        } else if (keyName.indexOf("temp") !== -1) {
+          if (!isNaN(num)) temp = num;
+        } else if (keyName.indexOf("net_energy") !== -1) {
+          if (!isNaN(num)) netEnergy = num;
         } else if (keyName.indexOf("potencia") !== -1 || keyName.indexOf("power") !== -1) {
           if (!isNaN(num)) bessKw = num;
         } else if (keyName.indexOf("estado") !== -1) {
@@ -70,7 +76,15 @@ self.onDataUpdated = function() {
       if (elBadge) { elBadge.textContent = badgeText; elBadge.className = "bess-status-badge " + modeClass; }
       if (elSoc) elSoc.textContent = Math.round(socVal);
       if (elUnit) elUnit.textContent = "% SOC";
-      if (elSub) elSub.textContent = isIndustrial ? "Promedio 3 racks LFP 750V" : ("Bus DC: " + vdc.toFixed(1) + " V | " + (idc !== 0 ? (idc.toFixed(1) + " A") : "Estabilizado"));
+      
+      // Telecom info rica (Bus V, Temp °C, Neta kWh)
+      var subInfo = "Bus DC: " + vdc.toFixed(1) + " V";
+      if (temp !== null) subInfo += " | " + temp.toFixed(0) + "°C";
+      if (netEnergy !== null && netEnergy > 0) subInfo += " | Neta: " + netEnergy.toFixed(1) + " kWh";
+      else if (idc !== 0) subInfo += " | " + (idc >= 0 ? "+" : "") + idc.toFixed(1) + " A";
+      else subInfo += " | Estabilizado";
+
+      if (elSub) elSub.textContent = isIndustrial ? "Promedio 3 racks LFP 750V" : subInfo;
       if (elPower) {
         elPower.textContent = arrowIcon + " " + pDisp.toFixed(1) + " kW";
         elPower.className = "footer-value " + modeClass;

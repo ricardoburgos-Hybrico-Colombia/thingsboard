@@ -18,7 +18,11 @@ self.onDataUpdated = function() {
         var k = (item.dataKey.label || item.dataKey.name || '').toLowerCase();
 
         if (!isNaN(num)) {
-          if (k.indexOf('bus_voltage') !== -1 || k.indexOf('vbus') !== -1 || k.indexOf('battery_voltage') !== -1 || k.indexOf('rectifier_voltage') !== -1) {
+          if (k === 'solar_charger_current') {
+            if (num > 0) strings[0] = num;
+          } else if (k === 'solar_charger_voltage') {
+            if (num > 0) vbus = num;
+          } else if (k.indexOf('bus_voltage') !== -1 || k.indexOf('vbus') !== -1 || k.indexOf('battery_voltage') !== -1 || k.indexOf('rectifier_voltage') !== -1) {
             if (num > 0) vbus = num;
           } else if (k.indexOf('string_1') !== -1 || k.indexOf('ipv1') !== -1) strings[0] = num;
           else if (k.indexOf('string_2') !== -1 || k.indexOf('ipv2') !== -1) strings[1] = num;

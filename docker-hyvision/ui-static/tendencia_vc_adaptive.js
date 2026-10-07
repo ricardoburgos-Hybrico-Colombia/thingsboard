@@ -36,6 +36,15 @@ self.onDataUpdated = function() {
             curIbat = v;
             iBatSeries = item.data;
           }
+          else if (k === 'load_dc_current') {
+            curIload = Math.max(0, v);
+            iLoadSeries = (item.data || []).map(function(p) {
+              return [p[0], Math.max(0, parseFloat(p[1]) || 0)];
+            });
+          }
+          else if (k === 'load_dc_voltage') {
+            if (v > 0) curV = v;
+          }
           else if (k === 'load_power_kw' || k === 'load_dc_power_kw' || k === 'demanda_carga_kw') {
             loadKw = Math.max(loadKw, Math.max(0, v));
             loadSeries = item.data;
@@ -47,11 +56,10 @@ self.onDataUpdated = function() {
 
   loadKw = Math.max(0, loadKw);
   if (curV === 0) curV = 51.1;
-  var curIload = curV > 0 ? (loadKw * 1000 / curV) : 0.0;
+  if (curIload === 0) curIload = curV > 0 ? (loadKw * 1000 / curV) : 0.0;
 
-  // Construir serie calculada de corriente de carga (Estrictamente no-negativa)
-  var iLoadSeries = [];
-  if (loadSeries && loadSeries.length > 0) {
+  // Construir serie calculada de corriente de carga si no vino load_dc_current directa
+  if (iLoadSeries.length === 0 && loadSeries && loadSeries.length > 0) {
     iLoadSeries = loadSeries.map(function(p) {
       var pKw = Math.max(0, parseFloat(p[1]) || 0);
       var a = curV > 0 ? (pKw * 1000 / curV) : 0;

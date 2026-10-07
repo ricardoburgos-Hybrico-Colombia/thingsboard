@@ -129,6 +129,16 @@ update_widget_type("f95b62d0-be6b-11f1-a395-4fe608e17de1",
                    "docker-hyvision/ui-static/tendencia_vc_adaptive.js",
                    "docker-hyvision/ui-static/tendencia_vc_adaptive.css")
 
+# 16. Perfil Térmico Inversores / Ambiental
+update_widget_type("f9390dc0-be6b-11f1-a395-4fe608e17de1",
+                   "docker-hyvision/ui-static/perfil_termico_adaptive.html",
+                   "docker-hyvision/ui-static/perfil_termico_adaptive.js")
+
+# 17. Tendencia Dispersión Térmica BESS
+update_widget_type("f9580770-be6b-11f1-a395-4fe608e17de1",
+                   "docker-hyvision/ui-static/tendencia_termica_adaptive.html",
+                   "docker-hyvision/ui-static/tendencia_termica_adaptive.js")
+
 print("\n=== STEP 2: ENHANCING ALL 15 DASHBOARDS DATASOURCES AND ALIASES ===")
 
 req_dash = urllib.request.Request(f"{BASE_URL}/api/tenant/dashboards?pageSize=50&page=0", headers=headers)
@@ -178,11 +188,14 @@ for d in dashboards:
         if "sinoptico" in fqn or "Sinóptico" in title or "Sinoptico" in title:
             ensure_keys(ds, [
                 "grid_power_kw", "grid_energy_kwh", "grid_available",
-                "solar_charger_power_kw", "solar_inverter_power_kw", "solar_power_kw", "epv_hoy_kwh",
+                "solar_charger_power_kw", "solar_inverter_power_kw", "solar_power_kw", "epv_hoy_kwh", "solar_energy_kwh",
+                "solar_charger_voltage", "solar_charger_current",
                 "rectifier_voltage", "rectifier_power_kw", "rectifier_current", "rectifier_energy_kwh",
                 "generator_power_kw", "generator_energy_kwh", "generator_runtime_hours", 
                 "battery_soc", "battery_voltage", "battery_current", "battery_power_kw", "estado_bess",
-                "load_dc_power_kw", "load_power_kw", "eload_hoy_kwh",
+                "battery_temperature", "battery_net_energy_kwh",
+                "load_dc_power_kw", "load_power_kw", "eload_hoy_kwh", "load_energy_kwh",
+                "load_dc_voltage", "load_dc_current",
                 "grid_voltage", "grid_frequency", "tension_fase_u", "frecuencia_red_hz",
                 "estado_generador", "ambient_temperature", "temp_bateria_max",
                 "solar_fraction_pct", "net_balance_kw"
@@ -204,7 +217,7 @@ for d in dashboards:
         elif "tendencia_voltaje" in fqn or "Tendencia Tensión" in title or "Tendencia Tension" in title:
             ensure_keys(ds, [
                 "battery_voltage", "rectifier_voltage", "battery_current", "rectifier_current",
-                "load_power_kw", "load_dc_power_kw"
+                "load_power_kw", "load_dc_power_kw", "load_dc_voltage", "load_dc_current"
             ])
             modified += 1
         elif "dispersion_termica" in fqn or "Dispersión Térmica" in title or "Dispersion Termica" in title:
@@ -216,25 +229,34 @@ for d in dashboards:
             ensure_keys(ds, ["battery_soc", "battery_voltage", "rectifier_voltage"])
             modified += 1
         elif "Generación Solar" in title or "Generacion Solar" in title:
-            ensure_keys(ds, ["solar_power_kw", "solar_charger_power_kw", "solar_inverter_power_kw", "epv_hoy_kwh"])
+            ensure_keys(ds, [
+                "solar_power_kw", "solar_charger_power_kw", "solar_inverter_power_kw", 
+                "epv_hoy_kwh", "solar_energy_kwh", "solar_charger_voltage", "solar_charger_current"
+            ])
             modified += 1
         elif "Demanda de Carga" in title:
-            ensure_keys(ds, ["load_power_kw", "load_dc_power_kw", "eload_hoy_kwh"])
+            ensure_keys(ds, [
+                "load_power_kw", "load_dc_power_kw", "eload_hoy_kwh", 
+                "load_energy_kwh", "load_dc_voltage", "load_dc_current"
+            ])
             modified += 1
         elif "Almacenamiento BESS" in title:
-            ensure_keys(ds, ["battery_soc", "battery_power_kw", "battery_voltage", "rectifier_voltage", "battery_current", "estado_bess"])
+            ensure_keys(ds, [
+                "battery_soc", "battery_power_kw", "battery_voltage", "rectifier_voltage", 
+                "battery_current", "estado_bess", "battery_temperature", "battery_net_energy_kwh"
+            ])
             modified += 1
         elif "Respaldo DG" in title:
             ensure_keys(ds, ["generator_power_kw", "generator_runtime_hours", "grid_power_kw", "grid_voltage", "estado_generador"])
             modified += 1
         elif "Balance de Planta" in title:
-            ensure_keys(ds, ["solar_power_kw", "battery_power_kw", "load_power_kw"])
+            ensure_keys(ds, ["solar_power_kw", "battery_power_kw", "load_power_kw", "grid_power_kw", "generator_power_kw"])
             modified += 1
         elif "Estabilidad Sincronismo" in title or "sincronismo" in fqn:
             ensure_keys(ds, ["frecuencia_red_hz", "tension_fase_u", "tension_fase_v", "tension_fase_w", "grid_voltage", "grid_frequency", "generator_power_kw"])
             modified += 1
         elif "Tableros DC" in title or "pbd_tableros" in fqn:
-            ensure_keys(ds, ["pbd_bus_voltage", "battery_voltage", "rectifier_voltage", "string_1_corriente_a", "string_2_corriente_a"])
+            ensure_keys(ds, ["pbd_bus_voltage", "battery_voltage", "rectifier_voltage", "solar_charger_voltage", "solar_charger_current", "string_1_corriente_a", "string_2_corriente_a"])
             modified += 1
         elif "SOC por Rack" in title or "soc_racks" in fqn:
             ensure_keys(ds, ["battery_soc", "soc_promedio", "battery_voltage", "rectifier_voltage"])
