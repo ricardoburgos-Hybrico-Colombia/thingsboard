@@ -1,0 +1,44 @@
+<div id="therm-card" class="trend-card-container therm ok">
+  <div class="trend-header">
+    <div class="trend-title">
+      <span class="trend-icon">🌡️</span>
+      <span id="therm-title-text">TENDENCIA DISPERSIÓN TÉRMICA DE CELDAS</span>
+    </div>
+    <div id="therm-trend-badge" class="trend-badge ok">ΔT &lt; 3°C ÓPTIMO</div>
+  </div>
+
+  <div class="trend-kpi-bar">
+    <div class="kpi-col">
+      <span class="kpi-lbl">TÉRMICA PRINCIPAL</span>
+      <div class="kpi-val-group">
+        <span id="dt-live-val" class="kpi-num dt-color">0.0</span>
+        <span id="dt-unit-text" class="kpi-unit">°C</span>
+      </div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">REFERENCIA MÁX</span>
+      <div class="kpi-val-group">
+        <span id="tmax-live-val" class="kpi-num tmax-color">0.0</span>
+        <span class="kpi-unit">°C</span>
+      </div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">REFERENCIA MÍN</span>
+      <div class="kpi-val-group">
+        <span id="tmin-live-val" class="kpi-num tmin-color">0.0</span>
+        <span class="kpi-unit">°C</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <canvas id="chart-delta-temp"></canvas>
+  </div>
+
+  <div class="trend-footer">
+    <span>Límite de Control: <strong style="color:#ef4444;">-- 3.0°C / 35°C</strong></span>
+    <span id="therm-diag-text">Estado: <strong style="color:#64B856;">Gradiente Estable</strong></span>
+  </div>
+</div>

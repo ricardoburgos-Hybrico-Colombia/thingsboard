@@ -1,0 +1,44 @@
+<div id="therm-card" class="trend-card-container therm alert">
+  <div class="trend-header">
+    <div class="trend-title">
+      <span class="trend-icon">🌡️</span>
+      <span>TENDENCIA DISPERSIÓN TÉRMICA DE CELDAS</span>
+    </div>
+    <div id="therm-trend-badge" class="trend-badge alert">ΔT &gt; 3°C DISPERSIÓN</div>
+  </div>
+
+  <div class="trend-kpi-bar">
+    <div class="kpi-col">
+      <span class="kpi-lbl">DISPERSIÓN (ΔT)</span>
+      <div class="kpi-val-group">
+        <span id="dt-live-val" class="kpi-num dt-color">10.0</span>
+        <span class="kpi-unit">°C ΔT</span>
+      </div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">CELDA MÁXIMA</span>
+      <div class="kpi-val-group">
+        <span id="tmax-live-val" class="kpi-num tmax-color">25.0</span>
+        <span class="kpi-unit">°C</span>
+      </div>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">CELDA MÍNIMA</span>
+      <div class="kpi-val-group">
+        <span id="tmin-live-val" class="kpi-num tmin-color">15.0</span>
+        <span class="kpi-unit">°C</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <canvas id="chart-delta-temp"></canvas>
+  </div>
+
+  <div class="trend-footer">
+    <span>Límite de Control: <strong style="color:#ef4444;">-- 3.0 °C (Alarma BMS)</strong></span>
+    <span id="therm-diag-text">Estado: <strong style="color:#ef4444;">Desbalance Térmico Activo</strong></span>
+  </div>
+</div>
