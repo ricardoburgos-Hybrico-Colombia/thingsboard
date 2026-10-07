@@ -10,8 +10,8 @@ self.onResize = function() {
 
 self.onDataUpdated = function() {
   var data = self.ctx.data;
-  var curV = 0.0, curIbat = 0.0, curIrect = 0.0, loadKw = 0.0;
-  var vSeries = [], iBatSeries = [], iRectSeries = [], loadSeries = [];
+  var curV = 0.0, curIbat = 0.0, curIrect = 0.0, curIload = 0.0, loadKw = 0.0;
+  var vSeries = [], iBatSeries = [], iRectSeries = [], loadSeries = [], iLoadSeries = [];
 
   if (data && data.length > 0) {
     for (var i = 0; i < data.length; i++) {
@@ -55,8 +55,7 @@ self.onDataUpdated = function() {
   }
 
   loadKw = Math.max(0, loadKw);
-  if (curV === 0) curV = 51.1;
-  if (curIload === 0) curIload = curV > 0 ? (loadKw * 1000 / curV) : 0.0;
+  if (curIload === 0 && curV > 0) curIload = (loadKw * 1000 / curV);
 
   // Construir serie calculada de corriente de carga si no vino load_dc_current directa
   if (iLoadSeries.length === 0 && loadSeries && loadSeries.length > 0) {
@@ -103,7 +102,7 @@ self.onDataUpdated = function() {
     if (elReg) elReg.textContent = 'Bus DC 750V Operativo';
   } else {
     if (elTitle) elTitle.textContent = 'DINÁMICA DE BUS DC Y CORRIENTES TELECOM';
-    var bText = 'MODO FLOTACIÓN (' + curV.toFixed(1) + 'V)';
+    var bText = curV > 0 ? ('MODO FLOTACIÓN (' + curV.toFixed(1) + 'V)') : 'BUS DC ESTABILIZADO';
     if (curIbat > 0.5) bText = 'BATERÍA EN CARGA';
     else if (curIbat < -0.5) bText = 'BATERÍA EN DESCARGA';
 
@@ -112,7 +111,7 @@ self.onDataUpdated = function() {
       elBadge.className = 'trend-badge ' + (curIbat > 0.5 ? 'charging' : 'standby');
     }
 
-    if (elV) elV.textContent = curV.toFixed(1);
+    if (elV) elV.textContent = curV > 0 ? curV.toFixed(1) : '--';
     if (elIload) elIload.textContent = curIload.toFixed(1);
     if (elIrect) elIrect.textContent = curIrect.toFixed(1);
     var sIbat = curIbat > 0 ? '+' : '';

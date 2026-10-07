@@ -64,6 +64,12 @@ self.onDataUpdated = function() {
           else if (k === 'solar_fraction_pct') {
             solarFraction = Math.max(0, Math.min(100, v));
           }
+          else if (k === 'grid_energy_kwh' || k.indexOf('grid_energy') !== -1) {
+            self.latestGridKwh = Math.max(0, v);
+          }
+          else if (k === 'generator_runtime_hours' || k.indexOf('runtime_hours') !== -1 || k.indexOf('horometro') !== -1) {
+            self.latestDgHours = Math.max(0, v);
+          }
           else if (k === 'rectifier_voltage' || k === 'battery_voltage') {
             if (v > 0) vdc = v;
           }
@@ -124,23 +130,65 @@ self.onDataUpdated = function() {
     if (elFootL) elFootL.innerHTML = 'Balance de Carga: <strong style="color:#64B856;">Equilibrado</strong>';
     if (elFootR) elFootR.innerHTML = 'Capacidad: <strong>750 kVA</strong>';
   } else {
-    if (elTitle) elTitle.textContent = 'DESGLOSE DE POTENCIA POR FUENTE VS DEMANDA';
+    var hasGridInstalled = gridKw > 0.05 || (self.latestGridKwh > 0.5);
+    var hasDgInstalled = dgKw > 0.05 || (self.latestDgHours > 10.0);
+    var isOffGrid = !hasGridInstalled && !hasDgInstalled;
+
     var autoPct = solarFraction !== null ? solarFraction.toFixed(1) : (loadKw > 0 ? Math.min(100, Math.round((solarKw / loadKw) * 100)) : 100);
-    if (elBadge) {
-      elBadge.textContent = autoPct + '% AUTONOMÍA SOLAR';
-      elBadge.className = 'pcs-badge' + (solarKw > 0 ? ' solar' : '');
-    }
 
-    var maxSource = Math.max(solarKw, gridKw, dgKw, loadKw, 1.5);
-    setRow('#pcs1-label', '#pac-pcs1-val', '#pac-pcs1-bar', 'Solar Fotovoltaico', solarKw, maxSource, 'linear-gradient(90deg, #f7d048, #64B856)');
-    setRow('#pcs2-label', '#pac-pcs2-val', '#pac-pcs2-bar', 'Red Comercial (Grid)', gridKw, maxSource, 'linear-gradient(90deg, #38bdf8, #0284c7)');
-    setRow('#pcs3-label', '#pac-pcs3-val', '#pac-pcs3-bar', 'Generador Diésel (MG)', dgKw, maxSource, 'linear-gradient(90deg, #c084fc, #a855f7)');
+    if (isOffGrid) {
+      if (elTitle) elTitle.textContent = 'DESGLOSE ENERGÉTICO (100% SOLAR AUTÓNOMO)';
+      if (elBadge) {
+        elBadge.textContent = '100% SOLAR AUTÓNOMO';
+        elBadge.className = 'pcs-badge solar';
+      }
+      if (elKpiGrid) elKpiGrid.textContent = 'OFF-GRID';
+      if (elKpiDg) elKpiDg.textContent = 'OFF-GRID';
 
-    if (elFootL) {
-      elFootL.innerHTML = 'Autonomía Solar: <strong style="color:' + (autoPct >= 70 ? '#64B856' : '#f7d048') + ';">' + autoPct + '%</strong> | Cobertura BTS';
-    }
-    if (elFootR) {
-      elFootR.innerHTML = 'Demanda: <strong style="color:#f8fafc;">' + loadKw.toFixed(2) + ' kW</strong>';
+      var maxSource = Math.max(solarKw, Math.abs(bessKw), loadKw, 1.5);
+      setRow('#pcs1-label', '#pac-pcs1-val', '#pac-pcs1-bar', 'Solar Fotovoltaico MPPT', solarKw, maxSource, 'linear-gradient(90deg, #f7d048, #64B856)');
+      
+      var bLabel = bessKw < -0.1 ? 'Descarga Baterías (Suministro)' : (bessKw > 0.1 ? 'Carga Baterías (Acumulación)' : 'Baterías 48V (Flotación/Standby)');
+      var bColor = bessKw < -0.1 ? 'linear-gradient(90deg, #38bdf8, #0284c7)' : 'linear-gradient(90deg, #64B856, #059669)';
+      setRow('#pcs2-label', '#pac-pcs2-val', '#pac-pcs2-bar', bLabel, Math.abs(bessKw), maxSource, bColor);
+      setRow('#pcs3-label', '#pac-pcs3-val', '#pac-pcs3-bar', 'Demanda Carga BTS Telecom', loadKw, maxSource, 'linear-gradient(90deg, #e2e8f0, #94a3b8)');
+
+      if (elFootL) elFootL.innerHTML = 'Operación: <strong style="color:#64B856;">100% Autosuficiente</strong> | Isla Solar';
+      if (elFootR) elFootR.innerHTML = 'Consumo BTS: <strong style="color:#f8fafc;">' + loadKw.toFixed(2) + ' kW</strong>';
+    } else if (!hasDgInstalled && hasGridInstalled) {
+      if (elTitle) elTitle.textContent = 'DESGLOSE DE POTENCIA (RED + SOLAR BESS)';
+      if (elBadge) {
+        elBadge.textContent = autoPct + '% AUTONOMÍA SOLAR';
+        elBadge.className = 'pcs-badge' + (solarKw > 0 ? ' solar' : '');
+      }
+      if (elKpiDg) elKpiDg.textContent = 'NO INST.';
+
+      var maxSource = Math.max(solarKw, gridKw, Math.abs(bessKw), loadKw, 1.5);
+      setRow('#pcs1-label', '#pac-pcs1-val', '#pac-pcs1-bar', 'Solar Fotovoltaico MPPT', solarKw, maxSource, 'linear-gradient(90deg, #f7d048, #64B856)');
+      setRow('#pcs2-label', '#pac-pcs2-val', '#pac-pcs2-bar', 'Red Comercial (Grid)', gridKw, maxSource, 'linear-gradient(90deg, #38bdf8, #0284c7)');
+      var bLabel = bessKw < -0.1 ? 'Descarga Batería' : (bessKw > 0.1 ? 'Carga Batería' : 'Batería 48V (Standby)');
+      setRow('#pcs3-label', '#pac-pcs3-val', '#pac-pcs3-bar', bLabel, Math.abs(bessKw), maxSource, 'linear-gradient(90deg, #64B856, #059669)');
+
+      if (elFootL) elFootL.innerHTML = 'Autonomía Solar: <strong style="color:' + (autoPct >= 70 ? '#64B856' : '#f7d048') + ';">' + autoPct + '%</strong> | Cobertura Red';
+      if (elFootR) elFootR.innerHTML = 'Demanda: <strong style="color:#f8fafc;">' + loadKw.toFixed(2) + ' kW</strong>';
+    } else {
+      if (elTitle) elTitle.textContent = 'DESGLOSE DE POTENCIA POR FUENTE VS DEMANDA';
+      if (elBadge) {
+        elBadge.textContent = autoPct + '% AUTONOMÍA SOLAR';
+        elBadge.className = 'pcs-badge' + (solarKw > 0 ? ' solar' : '');
+      }
+
+      var maxSource = Math.max(solarKw, gridKw, dgKw, loadKw, 1.5);
+      setRow('#pcs1-label', '#pac-pcs1-val', '#pac-pcs1-bar', 'Solar Fotovoltaico', solarKw, maxSource, 'linear-gradient(90deg, #f7d048, #64B856)');
+      setRow('#pcs2-label', '#pac-pcs2-val', '#pac-pcs2-bar', 'Red Comercial (Grid)', gridKw, maxSource, 'linear-gradient(90deg, #38bdf8, #0284c7)');
+      setRow('#pcs3-label', '#pac-pcs3-val', '#pac-pcs3-bar', 'Generador Diésel (MG)', dgKw, maxSource, 'linear-gradient(90deg, #c084fc, #a855f7)');
+
+      if (elFootL) {
+        elFootL.innerHTML = 'Autonomía Solar: <strong style="color:' + (autoPct >= 70 ? '#64B856' : '#f7d048') + ';">' + autoPct + '%</strong> | Cobertura Híbrida';
+      }
+      if (elFootR) {
+        elFootR.innerHTML = 'Demanda: <strong style="color:#f8fafc;">' + loadKw.toFixed(2) + ' kW</strong>';
+      }
     }
   }
 

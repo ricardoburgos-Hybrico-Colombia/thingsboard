@@ -38,9 +38,6 @@ self.onDataUpdated = function() {
   }
 
   isIndustrial = vbus > 200.0;
-  if (vbus === 0.0) {
-    vbus = isIndustrial ? 766.0 : 50.0;
-  }
 
   var totalI = strings[0] + strings[1] + strings[2] + strings[3] + strings[4];
   var isClosed = statusStr.indexOf('ABIERTO') === -1 && statusStr.indexOf('DESCONECT') === -1;
@@ -51,7 +48,7 @@ self.onDataUpdated = function() {
     if (elTitle) elTitle.textContent = isIndustrial ? 'TABLEROS DC / STRINGS SOLARES (PBD250)' : 'TABLEROS DC / STRINGS MPPT';
 
     var elV = container.querySelector('#pbd-vbus-val');
-    if (elV) elV.textContent = vbus.toFixed(1);
+    if (elV) elV.textContent = vbus > 0 ? vbus.toFixed(1) : '--';
 
     var elTot = container.querySelector('#pbd-itot-val');
     if (elTot) elTot.textContent = totalI.toFixed(1);

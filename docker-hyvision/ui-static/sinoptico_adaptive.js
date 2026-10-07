@@ -15,9 +15,9 @@ self.onDataUpdated = function() {
   var loadKw = 0.0, loadKwh = 0.0, loadDcKw = 0.0;
   var ldVolt = null, ldCurr = null;
   var dgKw = 0.0, dgEstado = 'STANDBY', dgHours = 0.0, dgKwh = 0.0;
-  var gridKw = 0.0, gridV = 0.0, gridHz = 60.0, gridKwh = 0.0, gridAvail = 0;
+  var gridKw = 0.0, gridV = null, gridHz = null, gridKwh = 0.0, gridAvail = 0;
   var rectKw = 0.0, rectV = 0.0, rectI = 0.0, rectKwh = 0.0;
-  var freqHz = 60.0, vac = 220.0;
+  var freqHz = null, vac = null;
   var pcs1 = 0.0, pcs2 = 0.0, pcs3 = 0.0;
   var hasPcsData = false;
   var ambientTemp = null, tempBat = null, solarFraction = null, netBalance = null;
@@ -121,9 +121,9 @@ self.onDataUpdated = function() {
         else if (k.indexOf('grid_frequency') !== -1 || k.indexOf('frecuencia_red') !== -1) {
           if (!isNaN(v) && v > 40 && v < 70) gridHz = v;
         }
-        else if (k.indexOf('frecuencia') !== -1) { if (!isNaN(v)) freqHz = v; }
+        else if (k.indexOf('frecuencia') !== -1) { if (!isNaN(v) && v > 40 && v < 70) freqHz = v; }
         else if (k.indexOf('tension_fase') !== -1 || k === 'vacu') {
-          vac = v > 180 ? v : Math.round(v * 1.732 * 10) / 10;
+          if (!isNaN(v) && v > 80) vac = v > 180 ? v : Math.round(v * 1.732 * 10) / 10;
         }
         // 8. KPIs adicionales
         else if (k === 'solar_fraction_pct') { if (!isNaN(v)) solarFraction = v; }
@@ -145,8 +145,11 @@ self.onDataUpdated = function() {
   if (rectV === 0 && vdc > 40 && vdc < 65) {
     rectV = vdc;
   }
-  if (gridV === 0 && vac > 100) {
+  if (gridV === null && vac !== null && vac > 80) {
     gridV = vac;
+  }
+  if (gridHz === null && freqHz !== null) {
+    gridHz = freqHz;
   }
 
   // DETECCIÓN ESTRICTA DE MODO OPERATIVO
@@ -160,12 +163,12 @@ self.onDataUpdated = function() {
 
   // Telemetría externa y estados de operación
   var isSolarProducing = solarKw > 0.05;
-  var isDgRunning = dgKw > 0.1 || dgEstado.indexOf('OPER') !== -1 || dgEstado.indexOf('RUN') !== -1;
-  var isGridActive = gridKw > 0.05 || (gridV > 85.0) || gridAvail === 1;
-  var siteHasGrid = isGridActive || (gridKw !== 0 && !isNaN(gridKw)) || (gridV > 50.0) || gridAvail === 1;
-  var hasDgInstalled = dgHours > 20.0 || dgKw > 0.05 || (dgEstado && dgEstado !== 'APAGADO' && dgEstado !== 'STANDBY');
+  var isDgRunning = dgKw > 0.1 || (dgEstado && (dgEstado.indexOf('OPER') !== -1 || dgEstado.indexOf('RUN') !== -1 || dgEstado.indexOf('MARCHA') !== -1));
+  var isGridActive = (gridKw > 0.05) || (gridV !== null && gridV > 85.0) || (gridAvail === 1);
+  var siteHasGrid = isGridActive || (gridKwh > 0.5) || (gridKw > 0.05) || (gridV !== null && gridV > 50.0);
+  var hasDgInstalled = (dgHours > 10.0) || (dgKw > 0.05) || (dgKwh > 0.5) || (dgEstado && dgEstado !== 'APAGADO' && dgEstado !== 'STANDBY');
 
-  // Clasificación de Topología
+  // Clasificación de Topología Estricta
   var topologyMode = 'FULL_SOLAR';
   if (isIndustrial) {
     topologyMode = 'INDUSTRIAL';
@@ -237,11 +240,23 @@ self.onDataUpdated = function() {
       elMode.textContent = isGridActive ? 'RED COMERCIAL ACTIVA (ON-GRID)' : 'CORTE DE RED COMERCIAL';
       elMode.className = 'scada-badge ' + (isGridActive ? 'ongrid' : 'offgrid');
     }
+  } else if (topologyMode === 'DG_SOLAR') {
+    if (elTitle) elTitle.textContent = 'DIAGRAMA UNIFILAR SOLAR + GENERADOR';
+    if (elSub) elSub.textContent = 'Microrred Autónoma Off-Grid: Generación Solar + Batería 48V + Respaldo Motogenerador';
+    if (elMode) {
+      if (isDgRunning) {
+        elMode.textContent = 'RESPALDO DIÉSEL (MG ACTIVO)';
+        elMode.className = 'scada-badge dg';
+      } else {
+        elMode.textContent = 'AUTÓNOMO SOLAR + BESS (MG EN STANDBY)';
+        elMode.className = 'scada-badge offgrid';
+      }
+    }
   } else {
-    // HYBRID / DG_SOLAR
+    // HYBRID
     if (elTitle) elTitle.textContent = 'DIAGRAMA UNIFILAR SINÓPTICO HÍBRIDO';
     if (elSub) {
-      var hDesc = 'Microrred Híbrida: Solar Dual + Batería 48V ' + (siteHasGrid ? '+ Red ' : '') + '+ Respaldo MG + ATS';
+      var hDesc = 'Microrred Híbrida: Solar Dual + Batería 48V + Red Comercial + Respaldo MG + ATS';
       elSub.textContent = hDesc;
     }
     if (elMode) {
@@ -252,7 +267,7 @@ self.onDataUpdated = function() {
         elMode.textContent = 'RED COMERCIAL ACTIVA (ON-GRID)';
         elMode.className = 'scada-badge ongrid';
       } else {
-        elMode.textContent = 'MODO AUTÓNOMO (BATERÍA AL MANDO)';
+        elMode.textContent = 'MICRORRED EN ISLA (SOLAR+BESS)';
         elMode.className = 'scada-badge offgrid';
       }
     }
@@ -596,8 +611,13 @@ self.onDataUpdated = function() {
         elDgSt.textContent = '● DIÉSEL EN MARCHA (' + dgKw.toFixed(2) + ' kW)';
         elDgSt.setAttribute('fill', '#a855f7');
       } else if (isGridActive) {
-        elDgSt.textContent = '● RED: ' + (gridV > 0 ? gridV.toFixed(0) : '220') + ' V | ' + gridHz.toFixed(1) + ' Hz';
+        var strGV = (gridV !== null && gridV > 0) ? gridV.toFixed(0) : '220';
+        var strGH = (gridHz !== null && gridHz > 0) ? gridHz.toFixed(1) : '60.0';
+        elDgSt.textContent = '● RED: ' + strGV + ' V | ' + strGH + ' Hz';
         elDgSt.setAttribute('fill', '#38bdf8');
+      } else if (topologyMode === 'GRID_ONLY') {
+        elDgSt.textContent = '○ RED DESCONECTADA';
+        elDgSt.setAttribute('fill', '#64748b');
       } else {
         elDgSt.textContent = '○ STANDBY AUTOMÁTICO';
         elDgSt.setAttribute('fill', '#64748b');
@@ -669,7 +689,9 @@ self.onDataUpdated = function() {
     if (topologyMode === 'FULL_SOLAR') {
       elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar MPPT</strong> → <strong style="color:#64B856;">2° Batería 48V</strong>';
     } else if (topologyMode === 'GRID_ONLY') {
-      elDisp.innerHTML = 'Prioridad: <strong style="color:#38bdf8;">1° Red Comercial</strong> → <strong style="color:#64B856;">2° Batería Flotación (54.8V)</strong>';
+      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar</strong> → <strong style="color:#38bdf8;">2° Red Comercial</strong> → <strong style="color:#64B856;">3° Batería Flotación</strong>';
+    } else if (topologyMode === 'DG_SOLAR') {
+      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar MPPT</strong> → <strong style="color:#64B856;">2° Batería 48V</strong> → <strong style="color:#a855f7;">3° Grupo Electrógeno</strong>';
     } else if (topologyMode === 'INDUSTRIAL') {
       elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar</strong> → <strong style="color:#64B856;">2° BESS</strong> → <strong style="color:#38bdf8;">3° Red / Diésel</strong>';
     } else {

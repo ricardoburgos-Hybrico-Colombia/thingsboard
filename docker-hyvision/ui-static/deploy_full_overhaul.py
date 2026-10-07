@@ -84,7 +84,7 @@ update_widget_type("f91cfa40-be6b-11f1-a395-4fe608e17de1",
 
 # 7. Corrientes DG por Fase (Eliminación Math.sin)
 update_widget_type("f9262200-be6b-11f1-a395-4fe608e17de1",
-                   None,
+                   "docker-hyvision/ui-static/dg_corrientes_adaptive.html",
                    "docker-hyvision/ui-static/dg_corrientes_adaptive.js")
 
 # 8. Potencia Reactiva Inversores (Eliminación fake 0.8)
@@ -109,7 +109,7 @@ update_widget_type("f9200780-be6b-11f1-a395-4fe608e17de1",
 
 # 12. Estabilidad y Sincronismo DG (Eliminación fake 220V en standby)
 update_widget_type("f92c1570-be6b-11f1-a395-4fe608e17de1",
-                   None,
+                   "docker-hyvision/ui-static/dg_sincronismo_adaptive.html",
                    "docker-hyvision/ui-static/dg_sincronismo_adaptive.js")
 
 # 13. Registro de Eventos y Fallas (Eliminación fake 1 falla / 4 warnings)
@@ -138,6 +138,11 @@ update_widget_type("f9390dc0-be6b-11f1-a395-4fe608e17de1",
 update_widget_type("f9580770-be6b-11f1-a395-4fe608e17de1",
                    "docker-hyvision/ui-static/tendencia_termica_adaptive.html",
                    "docker-hyvision/ui-static/tendencia_termica_adaptive.js")
+
+# 18. Potencia Aparente y Reactiva DG
+update_widget_type("f9292f40-be6b-11f1-a395-4fe608e17de1",
+                   "docker-hyvision/ui-static/dg_potencia_ac_adaptive.html",
+                   "docker-hyvision/ui-static/dg_potencia_ac_adaptive.js")
 
 print("\n=== STEP 2: ENHANCING ALL 15 DASHBOARDS DATASOURCES AND ALIASES ===")
 
@@ -203,8 +208,8 @@ for d in dashboards:
             modified += 1
         elif "potencia_activa" in fqn or "Potencia Activa" in title:
             ensure_keys(ds, [
-                "solar_power_kw", "solar_charger_power_kw", "grid_power_kw", 
-                "generator_power_kw", "battery_power_kw", "load_power_kw",
+                "solar_power_kw", "solar_charger_power_kw", "grid_power_kw", "grid_energy_kwh",
+                "generator_power_kw", "generator_runtime_hours", "battery_power_kw", "load_power_kw",
                 "load_dc_power_kw", "solar_fraction_pct", "rectifier_voltage", "battery_voltage"
             ])
             modified += 1
@@ -247,13 +252,29 @@ for d in dashboards:
             ])
             modified += 1
         elif "Respaldo DG" in title:
-            ensure_keys(ds, ["generator_power_kw", "generator_runtime_hours", "grid_power_kw", "grid_voltage", "estado_generador"])
+            ensure_keys(ds, ["generator_power_kw", "generator_runtime_hours", "grid_power_kw", "grid_energy_kwh", "grid_voltage", "estado_generador"])
             modified += 1
         elif "Balance de Planta" in title:
             ensure_keys(ds, ["solar_power_kw", "battery_power_kw", "load_power_kw", "grid_power_kw", "generator_power_kw"])
             modified += 1
         elif "Estabilidad Sincronismo" in title or "sincronismo" in fqn:
-            ensure_keys(ds, ["frecuencia_red_hz", "tension_fase_u", "tension_fase_v", "tension_fase_w", "grid_voltage", "grid_frequency", "generator_power_kw"])
+            ensure_keys(ds, [
+                "frecuencia_red_hz", "tension_fase_u", "tension_fase_v", "tension_fase_w", 
+                "grid_voltage", "grid_frequency", "grid_power_kw", "grid_energy_kwh",
+                "generator_power_kw", "generator_runtime_hours"
+            ])
+            modified += 1
+        elif "Corrientes DG" in title or "dg_corrientes" in fqn:
+            ensure_keys(ds, [
+                "corriente_fase_u", "corriente_fase_v", "corriente_fase_w",
+                "generator_power_kw", "generator_runtime_hours"
+            ])
+            modified += 1
+        elif "Potencia Aparente" in title or "dg_potencia_ac" in fqn:
+            ensure_keys(ds, [
+                "dg_potencia_aparente_kva", "dg_potencia_reactiva_kvar",
+                "generator_power_kw", "generator_runtime_hours"
+            ])
             modified += 1
         elif "Tableros DC" in title or "pbd_tableros" in fqn:
             ensure_keys(ds, ["pbd_bus_voltage", "battery_voltage", "rectifier_voltage", "solar_charger_voltage", "solar_charger_current", "string_1_corriente_a", "string_2_corriente_a"])

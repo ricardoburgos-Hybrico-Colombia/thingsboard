@@ -88,6 +88,8 @@ self.drawChart = function() {
 self.onDataUpdated = function() {
   var data = self.ctx.data;
   var iu = 0.0, iv = 0.0, iw = 0.0;
+  var dgHours = 0.0, dgKw = 0.0;
+  var hasDgInfo = false;
 
   if (data && data.length > 0) {
     for (var i = 0; i < data.length; i++) {
@@ -96,9 +98,11 @@ self.onDataUpdated = function() {
       if (item.data && item.data.length > 0) {
         var lastPt = parseFloat(item.data[item.data.length - 1][1]);
         if (!isNaN(lastPt)) {
-          if (k.indexOf('fase_u') !== -1 || i === 0) { iu = lastPt; self.uSeries = item.data; }
-          else if (k.indexOf('fase_v') !== -1 || i === 1) { iv = lastPt; self.vSeries = item.data; }
-          else if (k.indexOf('fase_w') !== -1 || i === 2) { iw = lastPt; self.wSeries = item.data; }
+          if (k.indexOf('fase_u') !== -1 || (i === 0 && k.indexOf('corriente') !== -1)) { iu = lastPt; self.uSeries = item.data; }
+          else if (k.indexOf('fase_v') !== -1 || (i === 1 && k.indexOf('corriente') !== -1)) { iv = lastPt; self.vSeries = item.data; }
+          else if (k.indexOf('fase_w') !== -1 || (i === 2 && k.indexOf('corriente') !== -1)) { iw = lastPt; self.wSeries = item.data; }
+          else if (k.indexOf('generator_runtime') !== -1 || k.indexOf('horometro') !== -1) { dgHours = lastPt; hasDgInfo = true; }
+          else if (k.indexOf('generator_power') !== -1 || k.indexOf('dg_potencia') !== -1) { dgKw = lastPt; hasDgInfo = true; }
         }
       }
     }
@@ -112,9 +116,11 @@ self.onDataUpdated = function() {
   var maxDiff = Math.max(Math.abs(iu - avg), Math.abs(iv - avg), Math.abs(iw - avg));
   var unbalancePct = avg > 1 ? (maxDiff / avg) * 100 : 0;
   var isOk = unbalancePct < 5.0;
+  var hasDgInstalled = dgHours > 10.0 || dgKw > 0.05;
 
   var container = self.ctx.$container ? self.ctx.$container[0] : null;
   if (container) {
+    var elTitle = container.querySelector('#dg-cur-title');
     var elU = container.querySelector('#iu-val');
     var elV = container.querySelector('#iv-val');
     var elW = container.querySelector('#iw-val');
@@ -127,12 +133,24 @@ self.onDataUpdated = function() {
 
     var elBadge = container.querySelector('#current-unbalance-badge');
     if (elBadge) {
-      if (avg < 0.5) {
-        elBadge.textContent = 'STANDBY / APAGADO (0.0 A)';
-        elBadge.className = 'badge-dg ok';
-      } else {
+      if (avg >= 0.5) {
         elBadge.textContent = isOk ? 'BALANCEADO (Δ ' + unbalancePct.toFixed(1) + '%)' : 'DESBALANCE (Δ ' + unbalancePct.toFixed(1) + '%)';
         elBadge.className = 'badge-dg ' + (isOk ? 'ok' : 'warn');
+      } else if (hasDgInfo && !hasDgInstalled) {
+        elBadge.textContent = 'NO APLICA (OFF-GRID DC)';
+        elBadge.className = 'badge-dg ok';
+      } else {
+        elBadge.textContent = 'STANDBY / APAGADO (0.0 A)';
+        elBadge.className = 'badge-dg ok';
+      }
+    }
+
+    var elCap = container.querySelector('#cap-alt-footer');
+    if (elCap) {
+      if (hasDgInfo && !hasDgInstalled) {
+        elCap.innerHTML = 'Topología: <strong>DC Telecom 48V</strong>';
+      } else {
+        elCap.innerHTML = 'Capacidad Alternador: <strong>350 A / Fase</strong>';
       }
     }
   }

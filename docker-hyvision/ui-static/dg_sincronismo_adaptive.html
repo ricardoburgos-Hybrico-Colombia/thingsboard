@@ -1,0 +1,47 @@
+<div class="dg-sync-card">
+  <div class="card-header-sync">
+    <div class="title-sync">
+      <span class="icon-sync">📻</span>
+      <span id="sync-title-text">ESTABILIDAD DE TENSIÓN Y FRECUENCIA</span>
+    </div>
+    <div id="sync-badge" class="badge-sync standby">STANDBY / DESCONECTADO</div>
+  </div>
+
+  <div class="sync-body-grid">
+    <!-- Frecuencia -->
+    <div class="freq-col">
+      <span id="freq-sub-lbl" class="sync-sub">FRECUENCIA DE RED / DG</span>
+      <div class="freq-num-group">
+        <span id="hz-val" class="freq-num">--</span>
+        <span class="freq-unit">Hz</span>
+      </div>
+      <!-- Tacómetro de precisión 58 a 62 Hz -->
+      <div class="freq-gauge-bar">
+        <div class="gauge-zone safe"></div>
+        <div id="freq-pointer" class="gauge-pointer" style="left: 50%;"></div>
+      </div>
+      <div class="gauge-labels">
+        <span>58 Hz</span>
+        <span style="color:#06b6d4; font-weight:700;">60.0</span>
+        <span>62 Hz</span>
+      </div>
+    </div>
+
+    <div class="sync-sep"></div>
+
+    <!-- Voltajes de Fase -->
+    <div class="volt-col">
+      <span id="volt-sub-lbl" class="sync-sub">TENSIÓN AC (L-L)</span>
+      <div class="volt-table">
+        <div class="v-row"><span class="v-tag">Fase U:</span><span id="vu-val" class="v-num">-- V</span></div>
+        <div class="v-row"><span class="v-tag">Fase V:</span><span id="vv-val" class="v-num">-- V</span></div>
+        <div class="v-row"><span class="v-tag">Fase W:</span><span id="vw-val" class="v-num">-- V</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer-sync">
+    <span>Ventana Frecuencia: <strong>59.5 - 60.5 Hz</strong></span>
+    <span id="sync-nominal-foot">Tensión Nominal: <strong>220 V (±5%)</strong></span>
+  </div>
+</div>
