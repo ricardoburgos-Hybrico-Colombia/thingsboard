@@ -24,6 +24,10 @@ self.onDataUpdated = function() {
     }
   }
 
+  // Sanitización de fiabilidad física
+  solar = Math.max(0, solar);
+  load = Math.max(0, load);
+
   // Si BESS descarga (bess < 0), actúa como fuente generadora
   var genBess = bess < 0 ? Math.abs(bess) : 0.0;
   var cargaBess = bess > 0 ? bess : 0.0;

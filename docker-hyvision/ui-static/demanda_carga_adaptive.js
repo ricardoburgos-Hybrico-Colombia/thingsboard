@@ -28,6 +28,10 @@ self.onDataUpdated = function() {
     }
   }
 
+  // Filtrado de fiabilidad: Carga BTS siempre es no-negativa (P >= 0)
+  powerVal = Math.max(0, powerVal);
+  energyVal = Math.max(0, energyVal);
+
   // Filtrado contador Modbus centinela
   if (energyVal >= 60000) energyVal = Math.round((energyVal % 65535) * 10) / 10;
 

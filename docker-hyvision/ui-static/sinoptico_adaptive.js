@@ -169,9 +169,21 @@ self.onDataUpdated = function() {
     pBatDisp = Math.abs(Math.round((vdc * idc) / 100) / 10);
   }
 
+  // Sanitización de fiabilidad física: Cargas, solar, rectificador y red son no-negativos
+  loadKw = Math.max(0, loadKw);
+  loadDcKw = Math.max(0, loadDcKw);
+  solarKw = Math.max(0, solarKw);
+  scKw = Math.max(0, scKw);
+  gridKw = Math.max(0, gridKw);
+  dgKw = Math.max(0, dgKw);
+  rectKw = Math.max(0, rectKw);
+  loadKwh = Math.max(0, loadKwh);
+  solarKwh = Math.max(0, solarKwh);
+  gridKwh = Math.max(0, gridKwh);
+
   // Corriente de carga BTS estimada/real (I = P / V)
   var loadAmps = vdc > 0 ? (loadKw * 1000 / vdc).toFixed(1) : '0.0';
-  var rectAmps = rectI > 0 ? rectI.toFixed(1) : (vdc > 0 && rectKw > 0 ? (rectKw * 1000 / vdc).toFixed(1) : '0.0');
+  var rectAmps = rectI > 0 ? Math.max(0, rectI).toFixed(1) : (vdc > 0 && rectKw > 0 ? (rectKw * 1000 / vdc).toFixed(1) : '0.0');
 
   // Filtrado Modbus 65535
   if (loadKwh >= 60000) loadKwh = Math.round((loadKwh % 65535) * 100) / 100;

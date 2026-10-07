@@ -35,26 +35,34 @@ self.onDataUpdated = function() {
           else if (k.indexOf('pac_pcs3') !== -1 || k.indexOf('carga_pcs3') !== -1) { p3 = v; hasPcsData = true; }
           
           if (k === 'solar_power_kw' || k === 'generacion_solar_kw' || k === 'solar_charger_power_kw') {
-            solarKw = Math.max(solarKw, v);
-            self.solarSeries = item.data;
+            solarKw = Math.max(solarKw, Math.max(0, v));
+            self.solarSeries = (item.data || []).map(function(pt) {
+              return [pt[0], Math.max(0, parseFloat(pt[1]) || 0)];
+            });
           }
           else if (k === 'grid_power_kw') {
-            gridKw = Math.max(gridKw, v);
-            self.gridSeries = item.data;
+            gridKw = Math.max(gridKw, Math.max(0, v));
+            self.gridSeries = (item.data || []).map(function(pt) {
+              return [pt[0], Math.max(0, parseFloat(pt[1]) || 0)];
+            });
           }
           else if (k === 'generator_power_kw' || k === 'dg_potencia_activa_kw') {
-            dgKw = Math.max(dgKw, v);
-            self.dgSeries = item.data;
+            dgKw = Math.max(dgKw, Math.max(0, v));
+            self.dgSeries = (item.data || []).map(function(pt) {
+              return [pt[0], Math.max(0, parseFloat(pt[1]) || 0)];
+            });
           }
           else if (k === 'battery_power_kw' || k === 'potencia_bess_kw') {
             bessKw = v;
           }
           else if (k === 'load_power_kw' || k === 'demanda_carga_kw' || k === 'load_dc_power_kw') {
-            loadKw = Math.max(loadKw, v);
-            self.loadSeries = item.data;
+            loadKw = Math.max(loadKw, Math.max(0, v));
+            self.loadSeries = (item.data || []).map(function(pt) {
+              return [pt[0], Math.max(0, parseFloat(pt[1]) || 0)];
+            });
           }
           else if (k === 'solar_fraction_pct') {
-            solarFraction = v;
+            solarFraction = Math.max(0, Math.min(100, v));
           }
           else if (k === 'rectifier_voltage' || k === 'battery_voltage') {
             if (v > 0) vdc = v;
@@ -64,10 +72,10 @@ self.onDataUpdated = function() {
     }
   }
 
-  self.latestSolar = solarKw;
-  self.latestGrid = gridKw;
-  self.latestDg = dgKw;
-  self.latestLoad = loadKw;
+  self.latestSolar = Math.max(0, solarKw);
+  self.latestGrid = Math.max(0, gridKw);
+  self.latestDg = Math.max(0, dgKw);
+  self.latestLoad = Math.max(0, loadKw);
   self.latestVdc = vdc;
 
   var isIndustrial = (vdc > 200.0) || hasPcsData;

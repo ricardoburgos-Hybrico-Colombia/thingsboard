@@ -39,6 +39,10 @@ self.onDataUpdated = function() {
     powerVal = scKw + invSolKw;
   }
 
+  // Sanitización de fiabilidad física
+  powerVal = Math.max(0, powerVal);
+  energyVal = Math.max(0, energyVal);
+
   // Filtrado de contador Modbus centinela
   if (energyVal >= 60000) energyVal = Math.round((energyVal % 65535) * 10) / 10;
 

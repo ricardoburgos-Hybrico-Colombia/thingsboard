@@ -37,7 +37,7 @@ self.onDataUpdated = function() {
             iBatSeries = item.data;
           }
           else if (k === 'load_power_kw' || k === 'load_dc_power_kw' || k === 'demanda_carga_kw') {
-            loadKw = Math.max(loadKw, v);
+            loadKw = Math.max(loadKw, Math.max(0, v));
             loadSeries = item.data;
           }
         }
@@ -45,14 +45,15 @@ self.onDataUpdated = function() {
     }
   }
 
+  loadKw = Math.max(0, loadKw);
   if (curV === 0) curV = 51.1;
   var curIload = curV > 0 ? (loadKw * 1000 / curV) : 0.0;
 
-  // Construir serie calculada de corriente de carga
+  // Construir serie calculada de corriente de carga (Estrictamente no-negativa)
   var iLoadSeries = [];
   if (loadSeries && loadSeries.length > 0) {
     iLoadSeries = loadSeries.map(function(p) {
-      var pKw = parseFloat(p[1]) || 0;
+      var pKw = Math.max(0, parseFloat(p[1]) || 0);
       var a = curV > 0 ? (pKw * 1000 / curV) : 0;
       return [p[0], a];
     });

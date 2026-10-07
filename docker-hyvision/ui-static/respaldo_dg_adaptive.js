@@ -31,6 +31,10 @@ self.onDataUpdated = function() {
     }
   }
 
+  // Sanitización de fiabilidad física
+  dgKw = Math.max(0, dgKw);
+  gridKw = Math.max(0, gridKw);
+
   var isDgRunning = dgKw > 0.1 || estadoVal.indexOf("MARCHA") !== -1 || estadoVal.indexOf("OPER") !== -1 || estadoVal.indexOf("RUN") !== -1;
   var isGridActive = gridKw > 0.05 || gridV > 85.0;
 
