@@ -95,6 +95,8 @@ class MaestroCoordinatesLoader:
                     "cliente": str(ws.cell(r, 7).value or 'TIGO'),
                     "capacidad_solar_kwp": float(ws.cell(r, 21).value or 0.0) if ws.cell(r, 21).value else 0.0,
                     "capacidad_carga_kw": float(ws.cell(r, 22).value or 0.0) if ws.cell(r, 22).value else 0.0,
+                    "topologia": str(ws.cell(r, 18).value or '').strip(),
+                    "consumo_red_linea_base": float(ws.cell(r, 32).value or 0.0) if ws.cell(r, 32).value else 0.0,
                     "variable_solar": str(ws.cell(r, 19).value or 'solarChargerPower'),
                 }
             print(f"[*] Archivo Maestro cargado con {len(self.sites)} sitios y coordenadas GPS.")
@@ -121,6 +123,7 @@ def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
             m = maestro_data.sites.get(ps_id, {})
             token = s["device_token"]
             
+            dev_id = existing.get(alias, {}).get("id", {}).get("id")
             # Si no existe, crear
             if alias not in existing:
                 dev_res = requests.post(f"{THINGSBOARD_HOST}/api/device", headers=tb_headers, json={
@@ -136,6 +139,18 @@ def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
                         cred = r_cred.json()
                         cred["credentialsId"] = token
                         requests.post(f"{THINGSBOARD_HOST}/api/device/credentials", headers=tb_headers, json=cred)
+
+            # Auto-purgar variables fantasma en ThingsBoard si el sitio es Off-Grid por Maestro
+            m_top = (m.get("topologia") or "").strip().lower()
+            if dev_id and ("off-grid" in m_top or "offgrid" in m_top):
+                try:
+                    requests.delete(
+                        f"{THINGSBOARD_HOST}/api/plugins/telemetry/DEVICE/{dev_id}/timeseries/delete?keys=tension_fase_u,tension_fase_v,tension_fase_w,frecuencia_red_hz,grid_voltage,grid_frequency,grid_current&deleteAllDataForKeys=true",
+                        headers=tb_headers,
+                        timeout=5
+                    )
+                except Exception:
+                    pass
             
             # Enviar atributos fijos con coordenadas DEL ARCHIVO MAESTRO
             lat = m.get("latitud") or s.get("latitude") or 0.0
@@ -144,6 +159,7 @@ def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
                 "latitude": float(lat),
                 "longitude": float(lon),
                 "solar_topology": m.get("variable_solar") or s.get("solar_topology") or "solarChargerPower",
+                "master_topology": m.get("topologia", ""),
                 "solar_capacity_kwp": m.get("capacidad_solar_kwp", 0.0),
                 "load_capacity_kw": m.get("capacidad_carga_kw", 0.0),
                 "country": m.get("pais", ""),
@@ -154,7 +170,7 @@ def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
             }
             requests.post(f"{THINGSBOARD_HOST}/api/v1/{token}/attributes", json=attrs, timeout=5)
             
-        print("[*] Verificación de 15 dispositivos y atributos de coordenadas completada.")
+        print("[*] Verificación de 15 dispositivos, atributos de coordenadas y purga de topología completada.")
     except Exception as e:
         print(f"[!] Error al asegurar dispositivos: {e}")
 
@@ -377,7 +393,122 @@ def sincronizar_un_sitio(site_config, maestro_info):
         elif batt_low or alarm_count > 0:
             health_status = "WARNING"
 
-        # ── 9. KPIS CALCULADOS CONFIABLES ──
+        # ── 9. DETERMINACIÓN INTELIGENTE DE TOPOLOGÍA REAL ──
+        # Jerarquía estricta:
+        # 1. Maestro Sitios Consolidado (Col 18: Topología, Col 32: Consumo Red Línea Base)
+        # 2. Telemetría física de instrumentación (Presencia real de tensión/potencia de red y horómetros diésel)
+        maestro_topologia = (maestro_info.get("topologia") or "").strip().lower()
+        consumo_red_base = float(maestro_info.get("consumo_red_linea_base") or 0.0)
+        is_maestro_offgrid = ("off-grid" in maestro_topologia) or ("offgrid" in maestro_topologia) or ("off grid" in maestro_topologia)
+        is_maestro_ongrid = ("on-grid" in maestro_topologia) or ("ongrid" in maestro_topologia) or ("on grid" in maestro_topologia)
+
+        # A) Presencia física real de Generador Diésel
+        # Existe generador físico si tiene horómetro acumulado > 10h, potencia diésel > 0.05 kW o energía diésel acumulada > 0.5 kWh
+        has_dg_physically = (
+            (gen_runtime > 10.0) or
+            (gen_kw > 0.05) or
+            (gen_energy_kwh > 0.5)
+        )
+
+        # B) Presencia física real de Red Comercial
+        # Regla 1: Si el archivo maestro indica Off-Grid y consumo base = 0 (sitios autónomos rurales ej. Colombia ANT, BOY, CHO, CUN, PALACIOS):
+        # La red comercial NO existe físicamente bajo ninguna circunstancia.
+        if is_maestro_offgrid:
+            # Solo si existiera inyección medible sostenida real de red (>0.5 kW Y >1 kWh diario acumulado) se consideraría híbrido
+            has_grid_physically = (grid_kw > 0.5 and grid_energy_kwh > 1.0)
+        elif is_maestro_ongrid or consumo_red_base > 1.0:
+            has_grid_physically = True
+        else:
+            # En caso de sitio no categorizado en maestro, inferir por sensores físicos
+            has_grid_physically = (grid_energy_kwh > 0.5) or (grid_kw > 0.05) or (grid_v is not None and grid_v > 85.0)
+
+        # Clasificación topológica unívoca
+        if has_grid_physically and has_dg_physically:
+            site_top_class = "HIBRIDO_GRID_DG"
+        elif has_grid_physically and not has_dg_physically:
+            site_top_class = "ON_GRID_SOLAR_BESS"
+        elif not has_grid_physically and has_dg_physically:
+            site_top_class = "OFF_GRID_DG_SOLAR"
+        else:
+            site_top_class = "OFF_GRID_100_SOLAR"
+
+        # APLICACIÓN DE REGLAS SEGÚN TOPOLOGÍA (CERO VALORES FALSOS O ASUMIDOS)
+        if site_top_class == "OFF_GRID_100_SOLAR":
+            # 100% Fotovoltaico Autónomo con BESS: Red y Generador NO existen físicamente
+            grid_kw = 0.0
+            grid_energy_kwh = 0.0
+            grid_v = None
+            grid_hz = None
+            grid_curr = None
+            grid_available = 0
+            tension_fase_u = None
+            tension_fase_v = None
+            tension_fase_w = None
+            frecuencia_red_hz = None
+            gen_kw = 0.0
+            gen_runtime = 0.0
+            gen_energy_kwh = 0.0
+            gen_running = 0
+            gen_fuel = None
+            gen_starts = 0
+            dg_potencia_activa_kw = 0.0
+            estado_generador = "NO INSTALADO"
+            modo_operacion = "100% SOLAR AUTÓNOMO"
+            fuente_activa = "SOLAR / BESS"
+
+        elif site_top_class == "OFF_GRID_DG_SOLAR":
+            # Microrred Aislada con Respaldo Motogenerador Diésel: Red NO existe
+            grid_kw = 0.0
+            grid_energy_kwh = 0.0
+            grid_v = None
+            grid_hz = None
+            grid_curr = None
+            grid_available = 0
+            tension_fase_u = None
+            tension_fase_v = None
+            tension_fase_w = None
+            frecuencia_red_hz = None
+            # Generador con telemetría real de sensores
+            dg_potencia_activa_kw = gen_kw
+            estado_generador = "ENCENDIDO" if gen_kw > 0.1 else "STANDBY"
+            modo_operacion = "RESPALDO DIÉSEL ACTIVO" if gen_kw > 0.1 else "AUTÓNOMO SOLAR + BESS"
+            fuente_activa = "DIÉSEL / SOLAR" if gen_kw > 0.1 else "SOLAR / BESS"
+
+        elif site_top_class == "ON_GRID_SOLAR_BESS":
+            # Conexión a Red Comercial + Solar + BESS: Generador NO existe
+            gen_kw = 0.0
+            gen_runtime = 0.0
+            gen_energy_kwh = 0.0
+            gen_running = 0
+            gen_fuel = None
+            gen_starts = 0
+            dg_potencia_activa_kw = 0.0
+            estado_generador = "NO INSTALADO"
+            # Red comercial con valores físicos medidos (NUNCA asignar 220V o 60Hz arbitrarios)
+            tension_fase_u = grid_v
+            frecuencia_red_hz = grid_hz
+            grid_available = 1 if (grid_kw > 0.05 or (grid_v is not None and grid_v > 50.0)) else 0
+            modo_operacion = "CONEXIÓN A RED (ON-GRID)" if grid_available else "CORTE DE RED (ISLA BESS)"
+            fuente_activa = "SOLAR / RED" if (solar_kw > 0.05 and grid_kw > 0.05) else ("RED COMERCIAL" if grid_kw > 0.05 else "SOLAR / BESS")
+
+        elif site_top_class == "HIBRIDO_GRID_DG":
+            # Sitio Multifuente Completo (Red Comercial + Diésel + Solar + BESS)
+            tension_fase_u = grid_v
+            frecuencia_red_hz = grid_hz
+            dg_potencia_activa_kw = gen_kw
+            estado_generador = "ENCENDIDO" if gen_kw > 0.1 else "STANDBY"
+            grid_available = 1 if (grid_kw > 0.05 or (grid_v is not None and grid_v > 50.0)) else 0
+            if gen_kw > 0.1:
+                modo_operacion = "RESPALDO DIÉSEL ACTIVO"
+                fuente_activa = "DIÉSEL / SOLAR"
+            elif grid_available:
+                modo_operacion = "MICRORRED HÍBRIDA (RED)"
+                fuente_activa = "SOLAR / RED" if solar_kw > 0.05 else "RED COMERCIAL"
+            else:
+                modo_operacion = "MICRORRED EN ISLA (SOLAR+BESS)"
+                fuente_activa = "SOLAR / BESS"
+
+        # ── 10. KPIS CALCULADOS CONFIABLES ──
         net_balance = round((solar_kw + grid_kw + gen_kw) - load_kw, 3)
         solar_fraction = round(min(100.0, max(0.0, (solar_kw / max(0.01, load_kw)) * 100.0)), 1) if load_kw > 0.01 else (100.0 if solar_kw > 0.05 else 0.0)
 
@@ -388,6 +519,8 @@ def sincronizar_un_sitio(site_config, maestro_info):
 
         # ── CONSTRUCCIÓN DEL PAYLOAD A THINGSBOARD ──
         payload = {
+            # Topología Real
+            "site_topology": site_top_class,
             # Solar
             "solar_power_kw": solar_kw,
             "solar_charger_power_kw": sc_kw,
@@ -454,7 +587,7 @@ def sincronizar_un_sitio(site_config, maestro_info):
             # Coordenadas DEL MAESTRO para mapas
             "latitude": float(lat) if lat is not None else 0.0,
             "longitude": float(lon) if lon is not None else 0.0,
-            # Compatibilidad nativa con Widgets SCADA existentes (Gaori / HyVision)
+            # Compatibilidad nativa con Widgets SCADA existentes
             "generacion_solar_kw": solar_kw,
             "epv_hoy_kwh": sol_energy_kwh,
             "demanda_carga_kw": load_kw,
@@ -464,14 +597,14 @@ def sincronizar_un_sitio(site_config, maestro_info):
             "estado_bess": "CARGANDO" if (ibat is not None and ibat > 0.5) else ("DESCARGANDO" if (ibat is not None and ibat < -0.5) else "STANDBY"),
             "vbat_promedio": vbat,
             "ibat_total": ibat,
-            "temp_bateria_max": tbat if tbat is not None else 28.0,
-            "dg_potencia_activa_kw": gen_kw,
-            "estado_generador": "ENCENDIDO" if gen_kw > 0.1 else "APAGADO",
-            "frecuencia_red_hz": grid_hz if grid_hz is not None else 60.0,
-            "tension_fase_u": grid_v if grid_v is not None else 220.0,
+            "temp_bateria_max": tbat,
+            "dg_potencia_activa_kw": dg_potencia_activa_kw,
+            "estado_generador": estado_generador,
+            "frecuencia_red_hz": frecuencia_red_hz,
+            "tension_fase_u": tension_fase_u,
             "alarmas_activas_total": alarm_count,
-            "modo_operacion": "MICRORED AUTÓNOMA" if grid_kw == 0 else "CONEXIÓN A RED",
-            "fuente_activa": "SOLAR / BESS" if solar_kw > 0 else "BATERÍA / RED",
+            "modo_operacion": modo_operacion,
+            "fuente_activa": fuente_activa,
             "estado_sistema": health_status,
         }
 

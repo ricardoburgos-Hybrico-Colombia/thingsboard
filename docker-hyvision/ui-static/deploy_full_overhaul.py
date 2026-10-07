@@ -203,7 +203,7 @@ for d in dashboards:
                 "load_dc_voltage", "load_dc_current",
                 "grid_voltage", "grid_frequency", "tension_fase_u", "frecuencia_red_hz",
                 "estado_generador", "ambient_temperature", "temp_bateria_max",
-                "solar_fraction_pct", "net_balance_kw"
+                "solar_fraction_pct", "net_balance_kw", "site_topology"
             ])
             modified += 1
         elif "potencia_activa" in fqn or "Potencia Activa" in title:

@@ -21,6 +21,7 @@ self.onDataUpdated = function() {
   var pcs1 = 0.0, pcs2 = 0.0, pcs3 = 0.0;
   var hasPcsData = false;
   var ambientTemp = null, tempBat = null, solarFraction = null, netBalance = null;
+  var siteTopology = '';
 
   if (data && data.length > 0) {
     for (var i = 0; i < data.length; i++) {
@@ -125,9 +126,10 @@ self.onDataUpdated = function() {
         else if (k.indexOf('tension_fase') !== -1 || k === 'vacu') {
           if (!isNaN(v) && v > 80) vac = v > 180 ? v : Math.round(v * 1.732 * 10) / 10;
         }
-        // 8. KPIs adicionales
+        // 8. KPIs adicionales y Topología
         else if (k === 'solar_fraction_pct') { if (!isNaN(v)) solarFraction = v; }
         else if (k === 'net_balance_kw') { if (!isNaN(v)) netBalance = v; }
+        else if (k === 'site_topology' || k === 'topologia') { siteTopology = strV.toUpperCase(); }
       }
     }
   }
@@ -172,6 +174,22 @@ self.onDataUpdated = function() {
   var topologyMode = 'FULL_SOLAR';
   if (isIndustrial) {
     topologyMode = 'INDUSTRIAL';
+  } else if (siteTopology.indexOf('OFF_GRID_100') !== -1 || siteTopology.indexOf('FULL_SOLAR') !== -1) {
+    topologyMode = 'FULL_SOLAR';
+    siteHasGrid = false;
+    isGridActive = false;
+    hasDgInstalled = false;
+    isDgRunning = false;
+  } else if (siteTopology.indexOf('OFF_GRID_DG') !== -1) {
+    topologyMode = 'DG_SOLAR';
+    siteHasGrid = false;
+    isGridActive = false;
+  } else if (siteTopology.indexOf('ON_GRID') !== -1) {
+    topologyMode = 'GRID_ONLY';
+    hasDgInstalled = false;
+    isDgRunning = false;
+  } else if (siteTopology.indexOf('HIBRIDO') !== -1) {
+    topologyMode = 'HYBRID';
   } else if (siteHasGrid && hasDgInstalled) {
     topologyMode = 'HYBRID';
   } else if (siteHasGrid && !hasDgInstalled) {
@@ -180,6 +198,10 @@ self.onDataUpdated = function() {
     topologyMode = 'DG_SOLAR';
   } else {
     topologyMode = 'FULL_SOLAR';
+    siteHasGrid = false;
+    isGridActive = false;
+    hasDgInstalled = false;
+    isDgRunning = false;
   }
 
   // Cálculos de batería
