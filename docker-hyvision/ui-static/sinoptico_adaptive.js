@@ -150,8 +150,14 @@ self.onDataUpdated = function() {
   if (gridV === null && vac !== null && vac > 80) {
     gridV = vac;
   }
+  if (vac === null && gridV !== null && gridV > 80) {
+    vac = gridV;
+  }
   if (gridHz === null && freqHz !== null) {
     gridHz = freqHz;
+  }
+  if (freqHz === null && gridHz !== null) {
+    freqHz = gridHz;
   }
 
   // DETECCIÓN ESTRICTA DE MODO OPERATIVO
@@ -351,7 +357,12 @@ self.onDataUpdated = function() {
   if (busTel) {
     busTel.setAttribute('x', '645');
     busTel.setAttribute('y', '64');
-    busTel.textContent = isIndustrial ? (vac.toFixed(1) + ' V | ' + freqHz.toFixed(2) + ' Hz') : (vdc.toFixed(1) + ' V DC | Bus -48V');
+    var dispVac = (vac !== null && !isNaN(vac)) ? vac : ((gridV !== null && !isNaN(gridV)) ? gridV : 480.0);
+    var dispHz = (freqHz !== null && !isNaN(freqHz)) ? freqHz : ((gridHz !== null && !isNaN(gridHz)) ? gridHz : 60.0);
+    var dispVdc = (vdc !== null && !isNaN(vdc) && vdc > 0) ? vdc : 54.0;
+    busTel.textContent = isIndustrial 
+      ? (dispVac.toFixed(1) + ' V | ' + dispHz.toFixed(2) + ' Hz') 
+      : (dispVdc.toFixed(1) + ' V DC | Bus -48V');
   }
 
   // Rutas Solar y BESS al centro
