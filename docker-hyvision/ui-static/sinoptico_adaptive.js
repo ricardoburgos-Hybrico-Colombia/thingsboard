@@ -169,11 +169,11 @@ self.onDataUpdated = function() {
     vdc = isIndustrial ? 768.5 : 51.1;
   }
 
-  // Telemetría externa y estados de operación
+  // Telemetría externa y estados de operación (Inyección activa real > 0.05 kW)
   var isSolarProducing = solarKw > 0.05;
-  var isDgRunning = dgKw > 0.1 || (dgEstado && (dgEstado.indexOf('OPER') !== -1 || dgEstado.indexOf('RUN') !== -1 || dgEstado.indexOf('MARCHA') !== -1));
-  var isGridActive = (gridKw > 0.05) || (gridV !== null && gridV > 85.0) || (gridAvail === 1);
-  var siteHasGrid = isGridActive || (gridKwh > 0.5) || (gridKw > 0.05) || (gridV !== null && gridV > 50.0);
+  var isDgRunning = (dgKw > 0.05) || (dgEstado && (dgEstado.indexOf('OPER') !== -1 || dgEstado.indexOf('RUN') !== -1 || dgEstado.indexOf('MARCHA') !== -1) && dgKw > 0.05);
+  var isGridActive = (gridKw > 0.05);
+  var siteHasGrid = (gridKw > 0.05) || (gridKwh > 0.5) || (gridV !== null && gridV > 50.0);
   var hasDgInstalled = (dgHours > 10.0) || (dgKw > 0.05) || (dgKwh > 0.5) || (dgEstado && dgEstado !== 'APAGADO' && dgEstado !== 'STANDBY');
 
   // Clasificación de Topología Estricta
@@ -602,7 +602,7 @@ self.onDataUpdated = function() {
   if (nDg && nDg.style.display !== 'none') {
     var elDgHeader = container.querySelector('#svg-dg-header');
     if (elDgHeader) {
-      if (siteHasGrid && hasDgInstalled) {
+      if (isIndustrial || (siteHasGrid && hasDgInstalled)) {
         elDgHeader.textContent = '🌐 RED & GENERADOR';
       } else if (siteHasGrid) {
         elDgHeader.textContent = '🌐 RED COMERCIAL';
@@ -612,10 +612,10 @@ self.onDataUpdated = function() {
     }
 
     var elDgKw = container.querySelector('#svg-dg-kw');
-    var pExt = gridKw > 0 ? gridKw : dgKw;
+    var pExt = gridKw > 0.05 ? gridKw : (dgKw > 0.05 ? dgKw : 0.0);
     if (elDgKw) {
       elDgKw.innerHTML = pExt.toFixed(2) + ' <tspan font-size="13" fill="#94a3b8">kW</tspan>';
-      elDgKw.setAttribute('fill', isDgRunning ? '#a855f7' : (isGridActive ? '#38bdf8' : '#64748b'));
+      elDgKw.setAttribute('fill', isDgRunning ? '#a855f7' : (isGridActive ? '#38bdf8' : '#94a3b8'));
     }
 
     var elDgEn = container.querySelector('#svg-dg-energy');
@@ -633,7 +633,7 @@ self.onDataUpdated = function() {
         elAts.textContent = 'ATS: CONECTADO A RED';
         elAts.setAttribute('fill', '#38bdf8');
       } else {
-        elAts.textContent = dgHours > 0 ? ('MG Horómetro: ' + dgHours.toFixed(0) + ' h') : 'ATS: DESCONECTADO';
+        elAts.textContent = 'ATS: EN ESPERA (STANDBY)';
         elAts.setAttribute('fill', '#64748b');
       }
     }
@@ -648,6 +648,11 @@ self.onDataUpdated = function() {
         var strGH = (gridHz !== null && gridHz > 0) ? gridHz.toFixed(1) : '60.0';
         elDgSt.textContent = '● RED: ' + strGV + ' V | ' + strGH + ' Hz';
         elDgSt.setAttribute('fill', '#38bdf8');
+      } else if (gridV !== null && gridV > 50.0) {
+        var strGV = gridV.toFixed(0);
+        var strGH = (gridHz !== null && gridHz > 0) ? gridHz.toFixed(1) : '60.0';
+        elDgSt.textContent = '○ RED EN ESPERA (' + strGV + ' V | ' + strGH + ' Hz)';
+        elDgSt.setAttribute('fill', '#64748b');
       } else if (topologyMode === 'GRID_ONLY') {
         elDgSt.textContent = '○ RED DESCONECTADA';
         elDgSt.setAttribute('fill', '#64748b');

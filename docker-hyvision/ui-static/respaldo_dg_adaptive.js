@@ -37,10 +37,10 @@ self.onDataUpdated = function() {
   dgKw = Math.max(0, dgKw);
   gridKw = Math.max(0, gridKw);
 
-  var isDgRunning = dgKw > 0.1 || estadoVal.indexOf("MARCHA") !== -1 || estadoVal.indexOf("OPER") !== -1 || estadoVal.indexOf("RUN") !== -1;
-  var isGridActive = gridKw > 0.05 || (gridV !== null && gridV > 85.0);
+  var isDgRunning = dgKw > 0.1 || ((estadoVal.indexOf("MARCHA") !== -1 || estadoVal.indexOf("OPER") !== -1 || estadoVal.indexOf("RUN") !== -1) && dgKw > 0.05);
+  var isGridActive = gridKw > 0.05;
   var hasDgInstalled = dgHours > 10.0 || dgKw > 0.05;
-  var siteHasGrid = isGridActive || gridKwh > 0.5 || (gridV !== null && gridV > 50.0);
+  var siteHasGrid = (gridKw > 0.05) || gridKwh > 0.5 || (gridV !== null && gridV > 50.0);
 
   var container = self.ctx.$container ? self.ctx.$container[0] : null;
   if (container) {
@@ -74,23 +74,31 @@ self.onDataUpdated = function() {
         }
       }
       if (elState) { elState.textContent = "CONECTADA"; elState.className = "footer-value running"; }
+    } else if (hasDgInstalled && siteHasGrid) {
+      // Sitio híbrido con Red y Diésel en Standby
+      if (card) card.className = "dg-card-container standby";
+      if (elIcon) elIcon.textContent = "🌐";
+      if (elTitle) elTitle.textContent = "RED & GENERADOR";
+      if (elPower) { elPower.textContent = "0.0"; elPower.className = "metric-value standby"; }
+      if (elBadge) { elBadge.textContent = "STANDBY"; elBadge.className = "dg-status-badge standby"; }
+      if (elSub) elSub.textContent = (gridV !== null && gridV > 50) ? ("Red en Espera (" + gridV.toFixed(0) + " V)") : "Fuentes en Espera";
+      if (elState) { elState.textContent = "SIN INYECCIÓN"; elState.className = "footer-value standby"; }
     } else if (hasDgInstalled) {
       if (card) card.className = "dg-card-container standby";
       if (elIcon) elIcon.textContent = "⛽";
-      if (elTitle) elTitle.textContent = siteHasGrid ? "RESPALDO & RED" : "RESPALDO (DG)";
+      if (elTitle) elTitle.textContent = "RESPALDO (DG)";
       if (elPower) { elPower.textContent = "0.0"; elPower.className = "metric-value standby"; }
       if (elBadge) { elBadge.textContent = "STANDBY"; elBadge.className = "dg-status-badge standby"; }
-      if (elSub) elSub.textContent = "Horómetro: " + dgHours.toFixed(0) + " h";
+      if (elSub) elSub.textContent = dgHours > 0 ? ("Horómetro: " + dgHours.toFixed(0) + " h") : "Diésel en Espera";
       if (elState) { elState.textContent = "APAGADO"; elState.className = "footer-value standby"; }
     } else if (siteHasGrid) {
-      // Sitio de Red sin Generador pero Red en corte
       if (card) card.className = "dg-card-container standby";
       if (elIcon) elIcon.textContent = "🌐";
       if (elTitle) elTitle.textContent = "RED COMERCIAL";
       if (elPower) { elPower.textContent = "0.0"; elPower.className = "metric-value standby"; }
-      if (elBadge) { elBadge.textContent = "CORTE DE RED"; elBadge.className = "dg-status-badge standby"; }
-      if (elSub) elSub.textContent = "Sin Tensión AC";
-      if (elState) { elState.textContent = "DESCONECTADA"; elState.className = "footer-value standby"; }
+      if (elBadge) { elBadge.textContent = "STANDBY"; elBadge.className = "dg-status-badge standby"; }
+      if (elSub) elSub.textContent = (gridV !== null && gridV > 50) ? ("Red en Espera (" + gridV.toFixed(0) + " V)") : "Sin Inyección AC";
+      if (elState) { elState.textContent = "EN ESPERA"; elState.className = "footer-value standby"; }
     } else {
       // 100% Solar autónomo (Off-Grid)
       if (card) card.className = "dg-card-container standby";
