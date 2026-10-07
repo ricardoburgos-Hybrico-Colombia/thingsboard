@@ -1005,11 +1005,48 @@
   var fleetHubState = {
     activeView: 'cards', // 'cards' | 'map' | 'table'
     activeFilter: 'all',  // 'all' | 'normal' | 'alert' | 'bess' | 'solar' | 'hybrid'
+    mapMode: 'reg',       // 'reg' | 'co' | 'hn'
+    selectedMapSite: null,
     searchTerm: '',
     isClassicMode: false,
     realSites: [],
     lastTelemetryFetch: 0,
     refreshIntervalId: null
+  };
+
+  var HYV_MAP_DATA = {
+    paths: {"regional": {"Colombia": "M 625.9,530.1 L 609.8,523.4 L 591.3,514.0 L 580.7,518.5 L 548.7,514.5 L 539.5,502.3 L 532.5,502.8 L 494.9,486.5 L 489.8,477.7 L 503.8,475.6 L 502.1,461.3 L 511.0,451.1 L 529.6,449.1 L 545.5,431.3 L 559.9,416.4 L 546.0,409.6 L 553.1,393.1 L 544.6,367.1 L 552.7,359.7 L 546.8,335.6 L 531.5,320.5 L 536.3,306.7 L 548.5,308.7 L 555.6,300.3 L 546.8,283.5 L 551.4,279.4 L 570.9,280.3 L 599.1,260.4 L 614.6,257.4 L 615.0,248.0 L 621.9,224.0 L 643.5,210.8 L 667.2,210.3 L 670.2,204.3 L 699.7,206.7 L 729.3,192.4 L 744.0,186.0 L 762.2,172.3 L 775.5,174.0 L 785.4,181.5 L 778.1,191.1 L 753.9,195.9 L 744.4,210.1 L 729.8,218.2 L 718.9,228.8 L 714.3,249.1 L 703.8,265.7 L 723.2,267.6 L 728.1,280.6 L 736.4,286.9 L 739.4,298.3 L 734.9,308.9 L 736.2,314.8 L 745.5,317.2 L 754.4,327.1 L 802.9,324.3 L 824.7,328.0 L 851.2,352.4 L 866.4,349.4 L 893.6,350.9 L 915.0,347.7 L 928.3,352.5 L 921.5,367.9 L 913.1,377.4 L 910.2,397.8 L 917.8,416.7 L 928.5,425.1 L 929.8,431.5 L 910.7,445.6 L 924.3,451.9 L 934.4,461.8 L 945.8,490.2 L 938.7,493.7 L 931.4,476.9 L 920.9,467.9 L 908.5,477.7 L 835.1,477.1 L 835.6,494.8 L 857.7,497.8 L 856.4,508.7 L 848.9,505.7 L 827.6,510.4 L 827.5,531.1 L 844.2,541.4 L 850.1,557.7 L 849.2,570.0 L 832.2,647.9 L 813.4,632.8 L 802.2,632.2 L 826.4,603.2 L 797.6,589.9 L 775.0,592.4 L 761.4,587.5 L 740.7,595.0 L 712.6,591.4 L 690.5,561.6 L 673.0,554.3 L 661.0,540.9 L 636.0,527.4 L 625.9,530.1 Z", "Honduras": "M 176.3,156.8 L 169.8,147.9 L 158.4,145.4 L 161.0,134.0 L 155.9,130.9 L 148.1,128.9 L 131.6,132.3 L 130.2,128.5 L 118.8,123.9 L 110.7,118.2 L 99.6,115.8 L 107.5,108.6 L 104.5,103.0 L 107.1,97.6 L 125.0,89.6 L 142.1,78.8 L 146.0,79.9 L 154.3,74.9 L 165.1,74.5 L 168.5,76.8 L 174.4,75.4 L 191.9,78.0 L 209.3,77.2 L 221.4,74.1 L 225.8,70.9 L 237.8,72.4 L 246.8,74.3 L 256.7,73.6 L 264.1,71.2 L 281.3,75.1 L 287.3,75.7 L 298.8,81.0 L 309.7,87.4 L 323.4,91.8 L 333.3,99.6 L 320.4,99.0 L 315.2,102.9 L 302.1,106.6 L 292.6,106.6 L 284.3,110.2 L 276.7,108.9 L 270.3,104.6 L 266.4,105.4 L 261.5,112.2 L 257.9,112.0 L 257.3,117.8 L 244.2,125.6 L 237.2,129.0 L 233.4,132.6 L 222.3,126.8 L 214.1,134.4 L 206.3,134.2 L 197.5,134.9 L 198.3,148.8 L 192.7,149.1 L 188.0,155.6 L 176.3,156.8 Z", "Panama": "M 531.5,320.5 L 519.0,312.3 L 510.9,296.9 L 520.2,289.3 L 510.7,287.4 L 503.6,278.0 L 484.9,270.1 L 468.4,271.9 L 460.8,281.8 L 445.6,288.9 L 437.4,289.9 L 433.7,295.9 L 451.6,311.3 L 441.3,314.9 L 435.9,319.1 L 418.4,320.6 L 411.9,303.6 L 407.0,308.4 L 394.6,306.8 L 387.0,295.3 L 371.5,293.4 L 361.8,290.1 L 345.6,290.2 L 344.4,296.3 L 340.1,292.0 L 342.1,286.4 L 345.2,280.6 L 343.8,275.5 L 349.4,272.1 L 341.6,267.9 L 341.3,256.4 L 355.9,253.9 L 369.4,264.1 L 368.7,270.1 L 383.7,271.4 L 387.2,269.1 L 397.6,276.1 L 416.1,274.0 L 432.1,266.8 L 455.0,261.1 L 467.8,252.6 L 488.6,254.3 L 487.2,257.1 L 508.2,258.1 L 525.0,263.0 L 537.2,271.5 L 551.4,279.4 L 546.8,283.5 L 555.6,300.3 L 548.5,308.7 L 536.3,306.7 L 531.5,320.5 Z", "Costa Rica": "M 340.1,292.0 L 319.7,285.7 L 312.0,279.8 L 316.4,274.8 L 315.0,268.5 L 304.6,261.7 L 289.8,256.1 L 276.8,252.5 L 274.3,244.2 L 264.4,239.1 L 266.9,247.4 L 259.4,254.2 L 250.7,246.3 L 238.7,243.5 L 233.5,237.7 L 233.7,229.1 L 238.7,220.1 L 228.1,216.1 L 236.7,210.6 L 242.4,207.0 L 267.2,214.5 L 275.8,210.8 L 287.8,213.2 L 294.0,219.0 L 305.1,220.9 L 314.1,214.9 L 323.7,230.3 L 338.2,241.8 L 355.9,253.9 L 341.3,256.4 L 341.6,267.9 L 349.4,272.1 L 343.8,275.5 L 345.2,280.6 L 342.1,286.4 L 340.1,292.0 Z", "Nicaragua": "M 236.7,210.6 L 223.7,201.7 L 206.1,190.2 L 197.8,180.6 L 181.9,171.7 L 163.1,158.9 L 167.2,154.5 L 173.5,158.8 L 176.3,156.8 L 188.0,155.6 L 192.7,149.1 L 198.3,148.8 L 197.5,134.9 L 206.3,134.2 L 214.1,134.4 L 222.3,126.8 L 233.4,132.6 L 237.2,129.0 L 244.2,125.6 L 257.3,117.8 L 257.9,112.0 L 261.5,112.2 L 266.4,105.4 L 270.3,104.6 L 276.7,108.9 L 284.3,110.2 L 292.6,106.6 L 302.1,106.6 L 315.2,102.9 L 320.4,99.0 L 333.3,99.6 L 330.0,102.3 L 328.1,108.7 L 332.0,119.1 L 323.3,128.7 L 319.3,140.2 L 318.0,152.7 L 320.1,160.0 L 321.0,172.8 L 315.3,175.6 L 311.7,187.8 L 314.3,195.3 L 306.6,202.5 L 308.4,210.2 L 314.1,214.9 L 305.1,220.9 L 294.0,219.0 L 287.8,213.2 L 275.8,210.8 L 267.2,214.5 L 242.4,207.0 L 236.7,210.6 Z", "Guatemala": "M 71.7,135.4 L 52.4,130.5 L 28.9,129.9 L 11.7,124.3 L -8.6,112.6 L -7.7,104.3 L -3.3,97.6 L -8.6,92.3 L 9.5,69.2 L 57.8,69.1 L 58.8,59.4 L 52.7,57.7 L 48.5,51.5 L 34.6,44.9 L 20.6,35.5 L 37.6,35.4 L 37.6,19.4 L 72.7,19.3 L 107.6,19.7 L 107.3,42.2 L 104.3,74.3 L 115.6,74.3 L 127.8,79.4 L 131.1,75.2 L 142.1,78.8 L 125.0,89.6 L 107.1,97.6 L 104.5,103.0 L 107.5,108.6 L 99.6,115.8 L 90.8,117.6 L 92.8,120.9 L 85.8,124.1 L 72.9,131.2 L 71.7,135.4 Z", "El Salvador": "M 158.4,145.4 L 154.2,152.1 L 132.4,151.7 L 118.8,148.9 L 103.3,143.3 L 82.4,141.5 L 71.7,135.4 L 72.9,131.2 L 85.8,124.1 L 92.8,120.9 L 90.8,117.6 L 99.6,115.8 L 110.7,118.2 L 118.8,123.9 L 130.2,128.5 L 131.6,132.3 L 148.1,128.9 L 155.9,130.9 L 161.0,134.0 L 158.4,145.4 Z", "Venezuela": "M 778.1,191.1 L 777.0,197.8 L 754.9,201.1 L 767.2,214.0 L 766.8,228.9 L 750.1,245.4 L 764.4,267.9 L 780.6,266.1 L 789.1,245.6 L 777.4,235.6 L 775.5,214.0 L 822.4,202.5 L 817.2,189.1 L 830.4,180.1 L 843.9,200.1 L 870.3,200.6 L 894.7,216.4 L 896.2,225.8 L 930.0,226.1 L 970.2,223.1 L 991.8,235.9 L 1020.6,239.4 L 1041.7,230.5 L 1042.1,223.3 L 1088.8,221.6 L 1133.9,221.2 L 1101.9,229.6 L 1114.8,243.1 L 1144.9,245.2 L 1173.4,259.2 L 1179.4,281.9 L 1199.1,281.3 L 1213.8,288.0 L 1184.0,304.7 L 1180.7,315.0 L 1193.6,325.6 L 1184.2,330.9 L 1161.1,335.5 L 1161.8,348.6 L 1151.6,356.4 L 1177.1,378.0 L 1182.1,386.0 L 1168.3,396.9 L 1126.2,407.5 L 1099.1,411.9 L 1088.3,418.6 L 1058.3,411.5 L 1030.5,407.9 L 1023.4,410.5 L 1040.2,417.9 L 1038.7,436.9 L 1044.0,454.8 L 1075.8,457.3 L 1077.9,463.2 L 1051.0,471.3 L 1046.6,483.4 L 1031.1,488.0 L 1003.1,494.7 L 995.8,503.4 L 966.6,505.2 L 945.8,490.2 L 934.4,461.8 L 924.3,451.9 L 910.7,445.6 L 929.8,431.5 L 928.5,425.1 L 917.8,416.7 L 910.2,397.8 L 913.1,377.4 L 921.5,367.9 L 928.3,352.5 L 915.0,347.7 L 893.6,350.9 L 866.4,349.4 L 851.2,352.4 L 824.7,328.0 L 802.9,324.3 L 754.4,327.1 L 745.5,317.2 L 736.2,314.8 L 734.9,308.9 L 739.4,298.3 L 736.4,286.9 L 728.1,280.6 L 723.2,267.6 L 703.8,265.7 L 714.3,249.1 L 718.9,228.8 L 729.8,218.2 L 744.4,210.1 L 753.9,195.9 L 778.1,191.1 Z", "Ecuador": "M 440.4,622.6 L 460.4,601.3 L 452.3,588.9 L 437.9,602.1 L 415.3,589.6 L 423.0,581.6 L 416.6,555.8 L 429.8,551.6 L 436.7,533.9 L 451.0,515.5 L 448.4,503.9 L 469.0,497.9 L 494.9,486.5 L 532.5,502.8 L 539.5,502.3 L 548.7,514.5 L 580.7,518.5 L 591.3,514.0 L 609.8,523.4 L 625.9,530.1 L 631.2,551.7 L 619.5,570.2 L 578.4,599.9 L 533.2,611.1 L 510.1,635.9 L 503.0,655.0 L 481.7,666.7 L 465.9,652.4 L 450.7,649.3 L 435.1,651.6 L 434.1,641.2 L 444.8,634.4 L 440.4,622.6 Z"}, "colombia_zoom": "M 304.7,405.8 L 273.1,398.5 L 236.9,388.3 L 215.9,393.2 L 153.2,388.9 L 135.2,375.7 L 121.5,376.2 L 47.6,358.5 L 37.6,349.0 L 65.1,346.6 L 61.9,331.2 L 79.2,320.0 L 115.8,317.9 L 146.9,298.5 L 175.2,282.4 L 148.0,275.0 L 161.9,257.1 L 145.2,228.9 L 161.1,220.8 L 149.4,194.7 L 119.5,178.2 L 129.0,163.2 L 152.8,165.5 L 166.7,156.3 L 149.6,138.1 L 158.5,133.6 L 196.7,134.6 L 252.1,113.0 L 282.5,109.8 L 283.2,99.5 L 296.8,73.5 L 339.2,59.2 L 385.7,58.6 L 391.6,52.1 L 449.4,54.7 L 507.5,39.1 L 536.3,32.2 L 572.0,17.4 L 598.2,19.3 L 617.5,27.4 L 603.2,37.8 L 555.8,42.9 L 537.0,58.4 L 508.5,67.2 L 487.0,78.7 L 478.0,100.7 L 457.5,118.7 L 495.6,120.8 L 505.1,135.0 L 521.4,141.8 L 527.2,154.2 L 518.4,165.6 L 521.0,172.1 L 539.2,174.6 L 556.8,185.4 L 651.7,182.4 L 694.6,186.4 L 746.6,212.9 L 776.5,209.6 L 829.7,211.3 L 871.7,207.8 L 897.9,213.1 L 884.6,229.7 L 868.1,240.0 L 862.3,262.2 L 877.2,282.7 L 898.1,291.8 L 900.7,298.7 L 863.3,314.1 L 890.1,320.9 L 909.7,331.7 L 932.2,362.5 L 918.3,366.3 L 903.9,348.1 L 883.4,338.3 L 858.9,348.9 L 715.1,348.2 L 716.0,367.5 L 759.2,370.7 L 756.7,382.5 L 742.0,379.4 L 700.4,384.4 L 700.0,406.9 L 732.8,418.1 L 744.3,435.8 L 742.6,449.2 L 709.4,533.8 L 672.4,517.4 L 650.4,516.6 L 698.0,485.2 L 641.5,470.8 L 597.1,473.4 L 570.5,468.1 L 529.8,476.3 L 474.8,472.4 L 431.3,440.0 L 397.1,432.1 L 373.5,417.5 L 324.4,402.9 L 304.7,405.8 Z", "honduras_zoom": "M 368.0,516.3 L 344.3,476.0 L 302.7,464.9 L 312.2,413.4 L 293.6,399.4 L 265.3,390.3 L 205.2,405.6 L 200.1,388.3 L 158.7,367.6 L 129.1,342.0 L 88.7,331.2 L 117.2,298.5 L 106.3,273.3 L 115.9,248.6 L 180.9,212.6 L 243.4,163.6 L 257.7,168.6 L 287.8,146.0 L 327.0,144.2 L 339.7,154.6 L 361.0,148.3 L 424.7,159.9 L 488.1,156.5 L 532.2,142.3 L 548.3,127.9 L 592.0,134.5 L 624.8,143.3 L 660.7,140.3 L 687.9,129.1 L 750.6,146.9 L 772.4,149.8 L 814.2,173.8 L 853.9,202.6 L 903.7,222.3 L 939.8,257.7 L 892.8,255.1 L 873.8,272.6 L 826.2,289.4 L 791.5,289.4 L 761.2,305.8 L 733.8,300.0 L 710.4,280.3 L 696.1,284.1 L 678.5,314.8 L 665.3,313.7 L 663.0,340.2 L 615.2,375.6 L 589.9,390.8 L 575.8,406.8 L 535.4,380.8 L 505.8,415.1 L 477.2,414.2 L 445.0,417.2 L 447.9,480.5 L 427.8,481.6 L 410.6,511.0 L 368.0,516.3 Z"},
+    siteCoords: {
+      'WEST_END_II': { lat: 16.30067, lng: -86.59189, country: 'HN', region: 'Roatán, HN' },
+      'DIXON_HILL': { lat: 16.33433, lng: -86.52457, country: 'HN', region: 'Roatán, HN' },
+      'WEST_BAY': { lat: 16.28167, lng: -86.59215, country: 'HN', region: 'Roatán, HN' },
+      'FRENCH_HARBOR_ESTE': { lat: 16.35489, lng: -86.46308, country: 'HN', region: 'Roatán, HN' },
+      'PALACIOS': { lat: 15.95126, lng: -84.93999, country: 'HN', region: 'Mosquitia, HN' },
+      'ARENAL - HN794': { lat: 15.36822, lng: -86.82975, country: 'HN', region: 'Yoro, HN' },
+      'AGUA CALIENTE - HN801': { lat: 14.53897, lng: -89.27398, country: 'HN', region: 'Ocotepeque, HN' },
+      'BUENOS AIRES II SPS - HN682': { lat: 15.45942, lng: -87.94242, country: 'HN', region: 'Cortés, HN' },
+      'CAMPO LIMONES LOS ENCUENTROS - HN493': { lat: 15.36239, lng: -86.69150, country: 'HN', region: 'Yoro, HN' },
+      'CAMALOTE - HN2013': { lat: 14.87386, lng: -88.86933, country: 'HN', region: 'Copán, HN' },
+      'COR9007': { lat: 8.08950, lng: -76.11310, country: 'CO', region: 'Córdoba, CO' },
+      'CUN7016': { lat: 4.46032, lng: -74.48129, country: 'CO', region: 'Cundinamarca, CO' },
+      'ANT7086': { lat: 6.71674, lng: -75.03038, country: 'CO', region: 'Antioquia, CO' },
+      'CHO7151': { lat: 4.38636, lng: -77.30950, country: 'CO', region: 'Chocó, CO' },
+      'BOY7014': { lat: 5.16495, lng: -73.35622, country: 'CO', region: 'Boyacá, CO' },
+      'EPM_GAORI': { lat: 4.42380, lng: -70.73080, country: 'CO', region: 'Vichada, CO' }
+    },
+    project: function(lat, lng, mode) {
+      var minLng, maxLng, minLat, maxLat, w = 960, h = 540;
+      if (mode === 'co') {
+        minLng = -79.5; maxLng = -66.5; minLat = -4.5; maxLat = 13.0;
+      } else if (mode === 'hn') {
+        minLng = -90.0; maxLng = -83.0; minLat = 12.8; maxLat = 17.0;
+      } else {
+        minLng = -92.0; maxLng = -66.5; minLat = -0.5; maxLat = 18.5;
+      }
+      var x = ((lng - minLng) / (maxLng - minLng)) * w;
+      var y = ((maxLat - lat) / (maxLat - minLat)) * h;
+      return { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 };
+    }
   };
 
   function isDashboardsListView() {
@@ -1129,6 +1166,11 @@
 
         var solarKw = getNum('generacion_solar_kw', getNum('solar_power_kw', getNum('solar_charger_power_kw', 0.0)));
         var solarKwh = getNum('epv_hoy_kwh', getNum('solar_energy_kwh', 0.0));
+        // Auditoría de Calidad y Veracidad: telecom sites PV arrays son <20 kWp.
+        // Si el acumulador diario supera 500 kWh, el controlador reportó en Wh. Convertir estrictamente a kWh.
+        if (solarKwh > 500.0 && !isEpm) {
+          solarKwh = solarKwh / 1000.0;
+        }
         var socVal = getNum('soc_promedio', getNum('battery_soc', null));
         var vbatVal = getNum('vbat_promedio', getNum('battery_voltage', getNum('rectifier_voltage', 0.0)));
         var loadKw = getNum('demanda_carga_kw', getNum('load_power_kw', getNum('load_dc_power_kw', 0.0)));
@@ -1184,8 +1226,17 @@
           uptime: isOnline ? "99.9%" : "0.0%",
           temp: isOnline ? tempStr : '-- °C',
           cycles: cyclesVal !== null ? Math.round(cyclesVal).toString() : (isEpm ? "1,248" : (isRoatan ? "N/A" : "420")),
-          lat: (latVal !== null && latVal !== 0) ? latVal : (isEpm ? 4.4238 : (4.7110 + (index * 0.5))),
-          lng: (lngVal !== null && lngVal !== 0) ? lngVal : (isEpm ? -70.7308 : (-74.0721 - (index * 0.5))),
+          country: isHn ? 'HN' : 'CO',
+          lat: (function() {
+            var geo = HYV_MAP_DATA.siteCoords[title] || HYV_MAP_DATA.siteCoords[title.toUpperCase()];
+            var val = (latVal !== null && latVal !== 0) ? latVal : (geo ? geo.lat : (isEpm ? 4.4238 : 14.5));
+            if (titleUpper.indexOf('FRENCH_HARBOR') !== -1 && val > 17.0) val = 16.35489;
+            return val;
+          })(),
+          lng: (function() {
+            var geo = HYV_MAP_DATA.siteCoords[title] || HYV_MAP_DATA.siteCoords[title.toUpperCase()];
+            return (lngVal !== null && lngVal !== 0) ? lngVal : (geo ? geo.lng : (isEpm ? -70.7308 : -87.0));
+          })(),
           sparkline: isOnline ? "M0,36 C30,35 60,30 90,20 C120,10 150,2 180,4 C210,12 240,24 270,30" : "M0,40 L270,40"
         };
       });
@@ -1447,66 +1498,225 @@
       html += '</div>';
       container.innerHTML = html;
 
-    } else if (fleetHubState.activeView === 'map') {
-      var mapMarkers = '';
-      sites.forEach(function(s) {
+        } else if (fleetHubState.activeView === 'map') {
+      var currentMode = fleetHubState.mapMode || 'reg';
+      var allFleetSites = sites;
+
+      var filteredMapSites = allFleetSites;
+      if (currentMode === 'co') {
+        filteredMapSites = allFleetSites.filter(function(s) { return s.country === 'CO' || s.region.indexOf('CO') !== -1; });
+      } else if (currentMode === 'hn') {
+        filteredMapSites = allFleetSites.filter(function(s) { return s.country === 'HN' || s.region.indexOf('HN') !== -1; });
+      }
+
+      var coCount = allFleetSites.filter(function(s) { return s.country === 'CO' || s.region.indexOf('CO') !== -1; }).length;
+      var hnCount = allFleetSites.filter(function(s) { return s.country === 'HN' || s.region.indexOf('HN') !== -1; }).length;
+
+      var selectedSite = null;
+      if (fleetHubState.selectedMapSite) {
+        selectedSite = filteredMapSites.find(function(s) { return s.title === fleetHubState.selectedMapSite; });
+      }
+      if (!selectedSite) {
+        selectedSite = filteredMapSites[0] || allFleetSites[0] || {
+          title: 'Sin sistemas', subtitle: '', solarKw: 0, bessSocDisplay: '--', loadKw: 0, id: '', isOnline: false, lat: 0, lng: 0, region: '--', type: '--'
+        };
+      }
+
+      // Generate Interactive Pins
+      var mapPins = '';
+      filteredMapSites.forEach(function(s) {
+        var pos = HYV_MAP_DATA.project(s.lat, s.lng, currentMode);
+        var displayX = pos.x;
+        var displayY = pos.y;
+
+        // In regional mode, Roatán island sites are closely spaced geographically (~2-3 px).
+        // Stagger them slightly so each pin and title label is readable and distinct:
+        if (currentMode === 'reg' && s.region.indexOf('Roatán') !== -1) {
+          var offsets = {
+            'WEST_BAY': { dx: -16, dy: 6 },
+            'WEST_END_II': { dx: -6, dy: -6 },
+            'DIXON_HILL': { dx: 6, dy: 6 },
+            'FRENCH_HARBOR_ESTE': { dx: 16, dy: -6 }
+          };
+          if (offsets[s.title]) {
+            displayX += offsets[s.title].dx;
+            displayY += offsets[s.title].dy;
+          }
+        }
+
+        var isSelected = (s.title === selectedSite.title);
         var dotColor = s.isOnline ? '#50e338' : '#ef4444';
-        var pulseColor = s.isOnline ? '#64B856' : '#ef4444';
-        mapMarkers += `
-          <g class="hyv-map-marker" data-name="${s.title}" transform="translate(345, 175)">
-            <circle r="14" fill="${pulseColor}" opacity="0.3" class="hyv-map-marker-pulse" />
-            <circle r="6" fill="${dotColor}" filter="url(#markerGlow)" />
-            <text x="12" y="4" fill="#ffffff" font-size="11" font-weight="700">${s.title} (${s.region})</text>
-            <text x="12" y="16" fill="${s.isOnline ? '#8ce47e' : '#f87171'}" font-size="9.5">${s.isOnline ? s.solarKw.toFixed(1) + ' kW • ' + s.bessSocDisplay + '% SOC' : 'FUERA DE LÍNEA'}</text>
+        var pulseColor = s.isOnline ? 'rgba(80,227,56,0.45)' : 'rgba(239,68,68,0.45)';
+
+        mapPins += `
+          <g class="hyv-map-pin ${isSelected ? 'selected' : ''}"
+             data-site="${s.title}"
+             transform="translate(${displayX}, ${displayY})">
+            <circle class="hyv-pin-pulse" r="14" fill="${pulseColor}" />
+            <circle r="7" fill="${dotColor}" opacity="0.3" filter="url(#markerGlow)"/>
+            <circle class="hyv-pin-core" r="4.5" fill="${dotColor}" stroke="#ffffff" stroke-width="1.2"/>
+            <text class="hyv-pin-label" x="8" y="3">${s.title}</text>
           </g>
         `;
       });
 
-      var firstSite = sites[0] || { title: 'Sin sistemas', subtitle: '', solarKw: 0, bessSocDisplay: '--', loadKw: 0, id: '', isOnline: false };
+      // SVG Geographic Silhouettes
+      var svgGeoLayers = '';
+      if (currentMode === 'reg') {
+        svgGeoLayers = `
+          <!-- Países Vecinos de Referencia Geográfica -->
+          <path class="hyv-land-neighbor" d="${HYV_MAP_DATA.paths.regional.Guatemala}"/>
+          <path class="hyv-land-neighbor" d="${HYV_MAP_DATA.paths.regional['El Salvador']}"/>
+          <path class="hyv-land-neighbor" d="${HYV_MAP_DATA.paths.regional.Nicaragua}"/>
+          <path class="hyv-land-neighbor" d="${HYV_MAP_DATA.paths.regional['Costa Rica']}"/>
+          <path class="hyv-land-neighbor" d="${HYV_MAP_DATA.paths.regional.Panama}"/>
+          <path class="hyv-land-neighbor" d="${HYV_MAP_DATA.paths.regional.Venezuela}"/>
+          <path class="hyv-land-neighbor" d="${HYV_MAP_DATA.paths.regional.Ecuador}"/>
+
+          <!-- Países con Operación Activa -->
+          <path class="hyv-land-active" d="${HYV_MAP_DATA.paths.regional.Honduras}"/>
+          <path class="hyv-land-active" d="${HYV_MAP_DATA.paths.regional.Colombia}"/>
+
+          <!-- Islas de la Bahía (Roatán) -->
+          <ellipse cx="206" cy="62" rx="14" ry="4" transform="rotate(-15 206 62)" class="hyv-island-active"/>
+          <ellipse cx="192" cy="69" rx="5" ry="3" class="hyv-island-active"/>
+          <ellipse cx="230" cy="57" rx="6" ry="4" class="hyv-island-active"/>
+
+          <!-- Rótulos Territoriales -->
+          <text x="180" y="105" fill="#8ce47e" font-size="12" font-weight="800" letter-spacing="1">HONDURAS</text>
+          <text x="690" y="375" fill="#8ce47e" font-size="14" font-weight="800" letter-spacing="1.5">COLOMBIA</text>
+          <text x="215" y="48" fill="#a4c4a1" font-size="9" font-weight="700">Islas de la Bahía (Roatán)</text>
+          <text x="790" y="270" fill="rgba(255,255,255,0.2)" font-size="11" font-weight="700">VENEZUELA</text>
+          <text x="460" y="280" fill="rgba(255,255,255,0.18)" font-size="10">PANAMÁ</text>
+        `;
+      } else if (currentMode === 'co') {
+        svgGeoLayers = `
+          <!-- Silueta Detallada de Colombia -->
+          <path class="hyv-land-active" d="${HYV_MAP_DATA.paths.colombia_zoom}"/>
+
+          <!-- Departamentos y Zonas de Operación -->
+          <text x="230" y="130" fill="#a4c4a1" font-size="11" font-weight="700">Córdoba</text>
+          <text x="315" y="175" fill="#a4c4a1" font-size="11" font-weight="700">Antioquia</text>
+          <text x="145" y="245" fill="#a4c4a1" font-size="11" font-weight="700">Chocó</text>
+          <text x="460" y="225" fill="#a4c4a1" font-size="11" font-weight="700">Boyacá</text>
+          <text x="350" y="285" fill="#a4c4a1" font-size="11" font-weight="700">Cundinamarca</text>
+          <text x="660" y="245" fill="#a4c4a1" font-size="12" font-weight="800">Vichada (GAORI)</text>
+          <text x="440" y="440" fill="rgba(100,184,86,0.3)" font-size="20" font-weight="900" letter-spacing="6">COLOMBIA</text>
+        `;
+      } else if (currentMode === 'hn') {
+        svgGeoLayers = `
+          <!-- Silueta Detallada de Honduras -->
+          <path class="hyv-land-active" d="${HYV_MAP_DATA.paths.honduras_zoom}"/>
+
+          <!-- Islas de la Bahía (Roatán, Utila, Guanaja) -->
+          <g filter="url(#markerGlow)">
+            <ellipse cx="463" cy="88" rx="28" ry="7" transform="rotate(-15 463 88)" class="hyv-island-active"/>
+            <ellipse cx="425" cy="115" rx="10" ry="5" class="hyv-island-active"/>
+            <ellipse cx="565" cy="68" rx="12" ry="7" class="hyv-island-active"/>
+          </g>
+
+          <!-- Regiones y Departamentos -->
+          <text x="465" y="65" fill="#8ce47e" font-size="12" font-weight="800">ISLAS DE LA BAHÍA (ROATÁN)</text>
+          <text x="240" y="175" fill="#a4c4a1" font-size="11" font-weight="700">San Pedro Sula (Cortés)</text>
+          <text x="410" y="235" fill="#a4c4a1" font-size="11" font-weight="700">Yoro</text>
+          <text x="110" y="255" fill="#a4c4a1" font-size="11" font-weight="700">Copán</text>
+          <text x="50" y="335" fill="#a4c4a1" font-size="11" font-weight="700">Ocotepeque</text>
+          <text x="680" y="115" fill="#a4c4a1" font-size="11" font-weight="700">Mosquitia (Palacios)</text>
+          <text x="380" y="380" fill="rgba(100,184,86,0.3)" font-size="22" font-weight="900" letter-spacing="6">HONDURAS</text>
+        `;
+      }
+
       var mapHtml = `
-        <div class="hyv-map-wrapper">
-          <svg class="hyv-map-svg" viewBox="0 0 900 520" style="background:#091209;">
-            <defs>
-              <radialGradient id="mapGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#436A3C" stop-opacity="0.35"/>
-                <stop offset="100%" stop-color="#091209" stop-opacity="0"/>
-              </radialGradient>
-              <filter id="markerGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            <rect width="900" height="520" fill="url(#mapGlow)" />
-            <path d="M 0,130 L 900,130 M 0,260 L 900,260 M 0,390 L 900,390 M 225,0 L 225,520 M 450,0 L 450,520 M 675,0 L 675,520" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
-
-            <path d="M 120,90 Q 210,120 280,180 Q 320,240 340,320 Q 380,440 450,500 L 580,500 Q 600,420 540,330 Q 480,240 450,180 Q 400,100 280,70 Z" fill="#122412" stroke="#436A3C" stroke-width="1.2" opacity="0.75" />
-            <path d="M 310,140 Q 350,120 400,130 Q 430,170 380,220 Q 330,220 310,140 Z" fill="#162e16" stroke="#64B856" stroke-width="1.5" opacity="0.9" />
-
-            <!-- Dynamic Site Markers -->
-            ${mapMarkers}
-          </svg>
-
-          <!-- Interactive Tooltip Overlay -->
-          <div class="hyv-map-tooltip">
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-              <span class="hyv-status-dot ${firstSite.isOnline ? '' : 'offline'}"></span>
-              <strong style="color:#ffffff; font-size:14.5px;">${firstSite.title}</strong>
+        <div class="hyv-map-container-card">
+          <div class="hyv-map-header-bar">
+            <div class="hyv-map-header-title">
+              <span style="font-size:18px;">📍</span>
+              <div>
+                <h3>Distribución Geográfica y Posicionamiento GPS</h3>
+                <span>${filteredMapSites.length} Sistemas de Energía con Telemetría Activa</span>
+              </div>
             </div>
-            <div style="font-size:11.5px; color:#98b894; margin-bottom:10px;">${firstSite.subtitle}</div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; font-size:11.5px; margin-bottom:12px;">
-              <div>Solar: <strong style="color:#f7d048;">${firstSite.solarKw.toFixed(1)} kW</strong></div>
-              <div>BESS: <strong style="color:#6be35b;">${firstSite.bessSocDisplay}% SOC</strong></div>
-              <div>Carga: <strong style="color:#62c3f5;">${firstSite.loadKw.toFixed(1)} kW</strong></div>
-              <div>Uptime: <strong style="color:#ffffff;">${firstSite.uptime || '99.9%'}</strong></div>
+            <div class="hyv-map-nav-tabs">
+              <button class="hyv-map-tab-btn ${currentMode === 'reg' ? 'active' : ''}" data-mode="reg">
+                <span>🌎</span> Latinoamérica (${allFleetSites.length})
+              </button>
+              <button class="hyv-map-tab-btn ${currentMode === 'co' ? 'active' : ''}" data-mode="co">
+                <span>🇨🇴</span> Colombia (${coCount})
+              </button>
+              <button class="hyv-map-tab-btn ${currentMode === 'hn' ? 'active' : ''}" data-mode="hn">
+                <span>🇭🇳</span> Honduras (${hnCount})
+              </button>
             </div>
-            <a class="hyv-btn-scada" style="padding:6px 12px; font-size:11.5px;" href="/dashboards/${firstSite.id}">⚡ Abrir SCADA en Vivo</a>
+          </div>
+
+          <div class="hyv-map-wrapper">
+            <svg class="hyv-map-svg" viewBox="0 0 960 540">
+              <defs>
+                <radialGradient id="oceanGlow" cx="50%" cy="50%" r="55%">
+                  <stop offset="0%" stop-color="#142614" stop-opacity="0.6"/>
+                  <stop offset="100%" stop-color="#071007" stop-opacity="1"/>
+                </radialGradient>
+                <filter id="markerGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <rect width="960" height="540" fill="url(#oceanGlow)" />
+              <path class="hyv-graticule" d="M 0,135 L 960,135 M 0,270 L 960,270 M 0,405 L 960,405 M 240,0 L 240,540 M 480,0 L 480,540 M 720,0 L 720,540" />
+
+              ${svgGeoLayers}
+              ${mapPins}
+            </svg>
+
+            <!-- Floating SCADA Telemetry Card -->
+            <div class="hyv-map-float-card">
+              <div class="hyv-float-header">
+                <a class="hyv-float-title" href="/dashboards/${selectedSite.id}">${selectedSite.title}</a>
+                <span class="hyv-float-badge">${selectedSite.type}</span>
+              </div>
+              <div class="hyv-float-sub">📍 ${selectedSite.region} • GPS: ${selectedSite.lat.toFixed(4)}°, ${selectedSite.lng.toFixed(4)}°</div>
+              <div class="hyv-float-grid">
+                <div>☀️ Solar: <strong style="color:#f7d048;">${selectedSite.solarKw.toFixed(1)} kW</strong></div>
+                <div>🔋 BESS: <strong style="color:#6be35b;">${selectedSite.bessSocDisplay === 'N/A' ? 'Flotación' : selectedSite.bessSocDisplay + '%'}</strong></div>
+                <div>💡 Carga: <strong style="color:#62c3f5;">${selectedSite.loadKw.toFixed(1)} kW</strong></div>
+                <div>⚡ SLA: <strong style="color:#ffffff;">${selectedSite.uptime}</strong></div>
+              </div>
+              <a class="hyv-float-scada-btn" href="/dashboards/${selectedSite.id}">⚡ Abrir SCADA en Vivo</a>
+            </div>
           </div>
         </div>
       `;
       container.innerHTML = mapHtml;
+
+      // Listeners para pestañas de mapa (LatAm, CO, HN)
+      container.querySelectorAll('.hyv-map-tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          var mode = btn.getAttribute('data-mode');
+          fleetHubState.mapMode = mode;
+          fleetHubState.selectedMapSite = null;
+          renderFleetHubContent(hub);
+        });
+      });
+
+      // Listeners para interactividad con los pines
+      container.querySelectorAll('.hyv-map-pin').forEach(function(pin) {
+        var siteTitle = pin.getAttribute('data-site');
+        pin.addEventListener('click', function(e) {
+          e.stopPropagation();
+          fleetHubState.selectedMapSite = siteTitle;
+          renderFleetHubContent(hub);
+        });
+        pin.addEventListener('mouseenter', function() {
+          if (fleetHubState.selectedMapSite !== siteTitle) {
+            fleetHubState.selectedMapSite = siteTitle;
+            renderFleetHubContent(hub);
+          }
+        });
+      });
 
     } else if (fleetHubState.activeView === 'table') {
       var tableHtml = `
