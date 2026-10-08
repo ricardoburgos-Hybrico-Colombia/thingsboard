@@ -593,7 +593,11 @@ self.onDataUpdated = function() {
   if (elLdKwh) elLdKwh.textContent = 'Hoy: ' + loadKwh.toFixed(1) + ' kWh';
   var elLdTel = container.querySelector('#svg-load-telemetry');
   if (elLdTel) {
-    if (ldVolt !== null && ldCurr !== null) {
+    if (isIndustrial) {
+      var strVac = (vac !== null && vac > 80) ? (vac.toFixed(0) + ' V AC') : '400 V AC';
+      var strHz = (freqHz !== null && freqHz > 40) ? (' | ' + freqHz.toFixed(1) + ' Hz') : ' | 60.0 Hz';
+      elLdTel.textContent = 'Red Crítica: ' + strVac + strHz;
+    } else if (ldVolt !== null && ldCurr !== null) {
       elLdTel.textContent = 'Tensión: ' + ldVolt.toFixed(1) + ' V | ' + Math.max(0, ldCurr).toFixed(1) + ' A';
     } else {
       elLdTel.textContent = 'DC: ' + vdc.toFixed(1) + ' V | ' + loadAmps + ' A';
@@ -716,7 +720,8 @@ self.onDataUpdated = function() {
         elBal.textContent = 'SUPERÁVIT SOLAR (+' + (solarKw - loadKw).toFixed(2) + ' kW NETO) → BESS EN CARGA';
         elBal.style.color = '#64B856';
       } else if (isDischarging) {
-        elBal.textContent = 'DESCARGA BESS NOCTURNA (Carga ' + loadKw.toFixed(2) + ' kW cubierta por BESS)';
+        var txtDesc = isSolarProducing ? 'DESCARGA BESS DIURNA' : 'DESCARGA BESS NOCTURNA';
+        elBal.textContent = txtDesc + ' (Carga ' + loadKw.toFixed(2) + ' kW cubierta por BESS)';
         elBal.style.color = '#f59e0b';
       } else {
         elBal.textContent = 'MICRORRED EN EQUILIBRIO OPERATIVO (Carga: ' + loadKw.toFixed(2) + ' kW)';
