@@ -45,7 +45,7 @@ self.onDataUpdated = function() {
 
   if (container) {
     var elTitle = container.querySelector('#pbd-title-text');
-    if (elTitle) elTitle.textContent = isIndustrial ? 'TABLEROS DC / STRINGS SOLARES (PBD250)' : 'TABLEROS DC / STRINGS MPPT';
+    if (elTitle) elTitle.textContent = isIndustrial ? 'TABLERO SOLAR PBD-01 (STRINGS DC)' : 'TABLEROS DC / STRINGS MPPT';
 
     var elV = container.querySelector('#pbd-vbus-val');
     if (elV) elV.textContent = vbus > 0 ? vbus.toFixed(1) : '--';

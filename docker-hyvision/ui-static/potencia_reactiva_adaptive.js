@@ -31,8 +31,8 @@ self.onDataUpdated = function() {
 
     var elBadge = container.querySelector('#q-regime-badge');
     if (elBadge) {
-      if (!hasRealQ || Math.abs(finalQ) < 0.1) {
-        elBadge.textContent = 'RÉGIMEN DC PURO';
+      if (!hasRealQ || Math.abs(finalQ) < 0.2) {
+        elBadge.textContent = isIndustrial ? 'FP UNITARIO (1.00)' : 'RÉGIMEN DC PURO';
         elBadge.className = 'pcs-badge ok';
       } else {
         elBadge.textContent = finalQ >= 0 ? 'INDUCTIVO' : 'CAPACITIVO';

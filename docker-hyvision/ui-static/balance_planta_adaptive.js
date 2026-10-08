@@ -34,20 +34,43 @@ self.onDataUpdated = function() {
   dg = Math.max(0, dg);
   load = Math.max(0, load);
 
-  // Si BESS descarga (bess < 0), actúa como fuente generadora hacia el bus
+  // 1. Fuentes primarias de generación (Solar + Red + Diésel)
+  var primaryGen = solar + grid + dg;
+
+  // 2. Potencia de batería (BESS)
+  // bess < -0.1: BESS aportando energía a la carga (descarga)
+  // bess > 0.1: BESS absorbiendo energía (carga con excedente solar/red)
   var genBess = bess < -0.1 ? Math.abs(bess) : 0.0;
   var cargaBess = bess > 0.1 ? bess : 0.0;
 
-  // Generación total entregada al bus (Solar + Red + Diésel + Descarga BESS)
-  var totalGen = solar + grid + dg + genBess;
-  var totalLoad = load + cargaBess;
-  var netBalance = totalGen - totalLoad;
+  var netBalance = 0.0;
+  var statusBadge = "EQUILIBRIO";
+  var modeClass = "surplus";
 
-  var isBalanced = Math.abs(netBalance) <= 0.25;
-  var isSurplus = netBalance > 0.25;
-  var statusBadge = isBalanced ? "EQUILIBRIO" : (isSurplus ? "SUPERÁVIT" : "DÉFICIT");
-  var modeClass = (isBalanced || isSurplus) ? "surplus" : "deficit";
-  var netSign = netBalance > 0 ? "+" : "";
+  if (primaryGen >= load + 0.5) {
+    // Superávit solar/generación primaria frente al consumo de la microrred
+    netBalance = primaryGen - load;
+    statusBadge = "SUPERÁVIT";
+    modeClass = "surplus";
+  } else {
+    // Generación primaria insuficiente (noche o déficit solar)
+    var deficit = load - primaryGen;
+    if (genBess >= deficit - 0.5) {
+      // El BESS respalda la carga -> Microrred en equilibrio autónomo
+      netBalance = (primaryGen + genBess) - load;
+      statusBadge = "EQUILIBRIO";
+      modeClass = "surplus";
+    } else {
+      // Déficit real no cubierto por BESS
+      netBalance = (primaryGen + genBess) - load;
+      statusBadge = "DÉFICIT";
+      modeClass = "deficit";
+    }
+  }
+
+  var isBalanced = statusBadge === "EQUILIBRIO" || Math.abs(netBalance) <= 0.25;
+  var isSurplus = statusBadge === "SUPERÁVIT";
+  var netSign = netBalance > 0.05 ? "+" : "";
   var netString = isBalanced ? "±0.0" : (netSign + netBalance.toFixed(1));
 
   var container = self.ctx.$container ? self.ctx.$container[0] : null;
