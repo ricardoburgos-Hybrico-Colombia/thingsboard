@@ -608,12 +608,15 @@ self.onDataUpdated = function() {
 
   // E. Fuente Externa Red / Diésel (Bottom-Right)
   if (nDg && nDg.style.display !== 'none') {
+    // Detección inteligente de instrumentación: CT Monofásico en acometida Bifásica (relación ~2x rectificador vs red)
+    var isSplitPhaseSingleCt = (isGridActive && !isDgRunning && gridKw > 0.2 && rectKw > 0.8 && (rectKw / gridKw >= 1.75 && rectKw / gridKw <= 2.25));
+
     var elDgHeader = container.querySelector('#svg-dg-header');
     if (elDgHeader) {
       if (isIndustrial || (siteHasGrid && hasDgInstalled)) {
-        elDgHeader.textContent = '🌐 RED & GENERADOR';
+        elDgHeader.textContent = isSplitPhaseSingleCt ? '🌐 RED BIFÁSICA (CT L1) & DG' : '🌐 RED & GENERADOR';
       } else if (siteHasGrid) {
-        elDgHeader.textContent = '🌐 RED COMERCIAL';
+        elDgHeader.textContent = isSplitPhaseSingleCt ? '🌐 RED BIFÁSICA (CT L1)' : '🌐 RED COMERCIAL';
       } else {
         elDgHeader.textContent = '⚡ GRUPO ELECTRÓGENO';
       }
@@ -622,7 +625,11 @@ self.onDataUpdated = function() {
     var elDgKw = container.querySelector('#svg-dg-kw');
     var pExt = gridKw > 0.05 ? gridKw : (dgKw > 0.05 ? dgKw : 0.0);
     if (elDgKw) {
-      elDgKw.innerHTML = pExt.toFixed(2) + ' <tspan font-size="13" fill="#94a3b8">kW</tspan>';
+      if (isSplitPhaseSingleCt) {
+        elDgKw.innerHTML = pExt.toFixed(2) + ' <tspan font-size="11" fill="#94a3b8">kW (L1) • ~' + (pExt * 2).toFixed(1) + 'kW Tot</tspan>';
+      } else {
+        elDgKw.innerHTML = pExt.toFixed(2) + ' <tspan font-size="13" fill="#94a3b8">kW</tspan>';
+      }
       elDgKw.setAttribute('fill', isDgRunning ? '#a855f7' : (isGridActive ? '#38bdf8' : '#94a3b8'));
     }
 
@@ -638,7 +645,7 @@ self.onDataUpdated = function() {
         elAts.textContent = 'ATS: CONECTADO A DIÉSEL';
         elAts.setAttribute('fill', '#a855f7');
       } else if (isGridActive) {
-        elAts.textContent = 'ATS: CONECTADO A RED';
+        elAts.textContent = isSplitPhaseSingleCt ? 'ATS: CONECTADO A RED (L1+L2)' : 'ATS: CONECTADO A RED';
         elAts.setAttribute('fill', '#38bdf8');
       } else {
         elAts.textContent = 'ATS: EN ESPERA (STANDBY)';
@@ -652,9 +659,13 @@ self.onDataUpdated = function() {
         elDgSt.textContent = '● DIÉSEL EN MARCHA (' + dgKw.toFixed(2) + ' kW)';
         elDgSt.setAttribute('fill', '#a855f7');
       } else if (isGridActive) {
-        var strGV = (gridV !== null && gridV > 0) ? gridV.toFixed(0) : '220';
-        var strGH = (gridHz !== null && gridHz > 0) ? gridHz.toFixed(1) : '60.0';
-        elDgSt.textContent = '● RED: ' + strGV + ' V | ' + strGH + ' Hz';
+        if (gridV !== null && gridV > 50) {
+          var strGV = gridV.toFixed(0);
+          var strGH = (gridHz !== null && gridHz > 0) ? (gridHz.toFixed(1) + ' Hz') : '60.0 Hz';
+          elDgSt.textContent = '● RED: ' + strGV + ' V | ' + strGH;
+        } else {
+          elDgSt.textContent = isSplitPhaseSingleCt ? '● RED: L1+L2 ACTIVA (~240V)' : '● RED CONECTADA (AC OK)';
+        }
         elDgSt.setAttribute('fill', '#38bdf8');
       } else if (gridV !== null && gridV > 50.0) {
         var strGV = gridV.toFixed(0);
@@ -713,7 +724,8 @@ self.onDataUpdated = function() {
       }
     } else {
       if (isGridActive) {
-        elBal.textContent = 'ALIMENTACIÓN DE RED COMERCIAL (Red: ' + gridKw.toFixed(2) + ' kW | Solar: ' + solarKw.toFixed(2) + ' kW | Autonomía Solar: ' + autoPct + '%)';
+        var strBalGrid = isSplitPhaseSingleCt ? ('Red L1: ' + gridKw.toFixed(2) + ' kW [P.Tot Est: ~' + (gridKw * 2).toFixed(1) + ' kW]') : ('Red: ' + gridKw.toFixed(2) + ' kW');
+        elBal.textContent = 'ALIMENTACIÓN DE RED COMERCIAL (' + strBalGrid + ' | Solar: ' + solarKw.toFixed(2) + ' kW | Autonomía Solar: ' + autoPct + '%)';
         elBal.style.color = '#38bdf8';
       } else if (isDgRunning) {
         elBal.textContent = 'RESPALDO GRUPO ELECTRÓGENO ACTIVO (DG: +' + dgKw.toFixed(2) + ' kW → Bus 48V)';

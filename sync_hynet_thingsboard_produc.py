@@ -390,6 +390,11 @@ def sincronizar_un_sitio(site_config, maestro_info):
             rect_curr = expected_rect_curr
         rect_energy_kwh = round(max(0.0, float(pt.get("rectifierEnergy") or 0.0)), 3)
 
+        # Detección inteligente de instrumentación: CT Monofásico en acometida Bifásica (relación ~2x rectificador vs red)
+        is_split_phase_ct = (grid_kw > 0.2 and rect_kw > 0.8 and gen_kw < 0.05 and solar_kw < 0.05 and 1.75 <= (rect_kw / grid_kw) <= 2.25)
+        grid_diagnostic = "CT_MONOFASICO_EN_BIFASICA" if is_split_phase_ct else "NORMAL"
+        grid_power_est_total_kw = round(grid_kw * 2.0, 3) if is_split_phase_ct else grid_kw
+
         # ── 7. CONDICIONES AMBIENTALES ──
         amb_temp = round(float(pt.get("ambientTemperature")), 1) if pt.get("ambientTemperature") is not None else None
         amb_hum = round(float(pt.get("ambientHumidity")), 1) if pt.get("ambientHumidity") is not None else None
@@ -582,6 +587,8 @@ def sincronizar_un_sitio(site_config, maestro_info):
             "generator_starts": gen_starts,
             # Red Comercial
             "grid_power_kw": grid_kw,
+            "grid_power_est_total_kw": grid_power_est_total_kw,
+            "grid_diagnostic": grid_diagnostic,
             "grid_voltage": grid_v,
             "grid_frequency": grid_hz,
             "grid_current": grid_curr,
