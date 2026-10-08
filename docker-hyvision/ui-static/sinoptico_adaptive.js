@@ -232,7 +232,15 @@ self.onDataUpdated = function() {
 
   // Corriente de carga BTS estimada/real (I = P / V)
   var loadAmps = vdc > 0 ? (loadKw * 1000 / vdc).toFixed(1) : '0.0';
-  var rectAmps = rectI > 0 ? Math.max(0, rectI).toFixed(1) : (vdc > 0 && rectKw > 0 ? (rectKw * 1000 / vdc).toFixed(1) : '0.0');
+  var expectedRectAmps = (vdc > 0 && rectKw > 0) ? (rectKw * 1000 / vdc) : 0;
+  var rectAmps = '0.0';
+  if (rectI > 0 && expectedRectAmps > 0 && rectI <= expectedRectAmps * 1.35) {
+    rectAmps = Math.max(0, rectI).toFixed(1);
+  } else if (expectedRectAmps > 0) {
+    rectAmps = expectedRectAmps.toFixed(1);
+  } else if (rectI > 0) {
+    rectAmps = Math.max(0, rectI).toFixed(1);
+  }
 
   // Filtrado Modbus 65535
   if (loadKwh >= 60000) loadKwh = Math.round((loadKwh % 65535) * 100) / 100;

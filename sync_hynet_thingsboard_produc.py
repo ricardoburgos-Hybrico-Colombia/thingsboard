@@ -222,6 +222,15 @@ def sincronizar_un_sitio(site_config, maestro_info):
     try:
         # 1. Consulta Instantánea (Últimos 20 minutos con resolución 1-min)
         r = requests.get(f"{STELLAR_BASE_URL}/ts/{ps_id}", headers=STELLAR_HEADERS, params=params, timeout=15)
+        # Resiliencia Stellar: Si la API de Stellar falla con HTTP 500 (ocurre cuando un parámetro como 'gridCurrent'
+        # fue deshabilitado o presenta inconsistencia en la base de datos de Stellar para ese sitio), reintentar automáticamente sin 'gridCurrent'.
+        if r.status_code == 500 and "gridCurrent" in params.get("params", ""):
+            params_fb = dict(params)
+            params_fb["params"] = params["params"].replace(",gridCurrent", "").replace("gridCurrent,", "").replace("gridCurrent", "")
+            r_fb = requests.get(f"{STELLAR_BASE_URL}/ts/{ps_id}", headers=STELLAR_HEADERS, params=params_fb, timeout=15)
+            if r_fb.status_code == 200:
+                r = r_fb
+
         if r.status_code != 200:
             return {"alias": alias, "status": "ERROR_STELLAR", "code": r.status_code}
         
@@ -230,11 +239,9 @@ def sincronizar_un_sitio(site_config, maestro_info):
         if not time_series:
             return {"alias": alias, "status": "SIN_DATOS_VENTANA"}
 
-        # 2. Consulta de Acumulados Diarios (Desde medianoche local 05:00 UTC) con cache de 3 minutos
-        midnight = now.replace(hour=5, minute=0, second=0, microsecond=0)
-        if now < midnight:
-            midnight -= timedelta(days=1)
-        start_day = midnight.strftime("%Y-%m-%dT%H:%M:%SZ")
+        # 2. Consulta de Acumulados Diarios (Blindaje multi-zona horaria LatAm UTC-6 a UTC-3) con cache de 3 minutos
+        # Ventana de 36 horas para asegurar cobertura de la medianoche local de cualquier país de Latinoamérica
+        start_day = (now - timedelta(hours=36)).strftime("%Y-%m-%dT00:00:00Z")
 
         cached_day = SITE_TELEMETRY_CACHE.get(alias, {}).get("daily_energy_data")
         last_day_ts = SITE_TELEMETRY_CACHE.get(alias, {}).get("daily_energy_ts", 0)
@@ -250,7 +257,8 @@ def sincronizar_un_sitio(site_config, maestro_info):
                 if r_day.status_code == 200:
                     day_ts = r_day.json().get("data", [])[0].get("timeSeries", [])
                     if day_ts:
-                        cached_day = day_ts[0]
+                        # BLINDAJE DINÁMICO MULTI-PAÍS: El último bin [-1] corresponde al día en curso acumulando en tiempo real
+                        cached_day = day_ts[-1]
                         if alias not in SITE_TELEMETRY_CACHE:
                             SITE_TELEMETRY_CACHE[alias] = {}
                         SITE_TELEMETRY_CACHE[alias]["daily_energy_data"] = cached_day
@@ -272,6 +280,9 @@ def sincronizar_un_sitio(site_config, maestro_info):
         # Acumulado diario real
         raw_sol_e = cached_day.get("solarEnergy") or cached_day.get("solarChargerEnergy") or pt.get("solarEnergy") or 0.0
         sol_energy_kwh = round(max(0.0, float(raw_sol_e)), 2)
+        # Regla de Veracidad: Si la energía diaria excede 500 kWh en sitio telecom (donde FV es <20 kWp), la fuente reportó en Wh. Convertir a kWh.
+        if sol_energy_kwh > 500.0:
+            sol_energy_kwh = round(sol_energy_kwh / 1000.0, 2)
         # Tensión y corriente del cargador solar MPPT
         sc_v = round(float(pt.get("solarChargerVoltage")), 2) if pt.get("solarChargerVoltage") is not None else None
         sc_i = round(float(pt.get("solarChargerCurrent")), 2) if pt.get("solarChargerCurrent") is not None else None
@@ -339,6 +350,9 @@ def sincronizar_un_sitio(site_config, maestro_info):
         raw_gen_e = cached_day.get("generatorEnergy") or pt.get("generatorEnergy") or 0.0
         gen_energy_kwh = round(max(0.0, float(raw_gen_e)), 2)
         gen_fuel = round(float(pt.get("generatorFuelLevel")), 1) if pt.get("generatorFuelLevel") is not None else None
+        # Filtrado de centinela modbus: -32768 o valores fuera de rango cuando no hay sensor de combustible
+        if gen_fuel is not None and (gen_fuel < 0.0 or gen_fuel > 100.0):
+            gen_fuel = None
         gen_starts = int(pt.get("generatorStarts") or 0)
 
         # ── 5. RED COMERCIAL (GRID) ──
@@ -351,6 +365,9 @@ def sincronizar_un_sitio(site_config, maestro_info):
         if grid_hz is not None and (grid_hz > 100 or grid_hz < 0):
             grid_hz = None
         grid_curr = round(max(0.0, float(pt.get("gridCurrent"))), 2) if pt.get("gridCurrent") is not None else None
+        # Cálculo físico derivado si gridCurrent no es provisto por la API de Stellar:
+        if grid_curr is None and grid_v is not None and grid_v > 50 and grid_kw is not None and grid_kw > 0.01:
+            grid_curr = round((grid_kw * 1000.0) / grid_v, 2)
         raw_grid_e = cached_day.get("gridEnergy") or pt.get("gridEnergy") or 0.0
         grid_energy_kwh = round(max(0.0, float(raw_grid_e)), 2)
 
@@ -362,6 +379,15 @@ def sincronizar_un_sitio(site_config, maestro_info):
         rect_kw = round(max(0.0, float(pt.get("rectifierPower") or 0.0)), 3)
         rect_v = round(float(pt.get("rectifierVoltage")), 1) if pt.get("rectifierVoltage") is not None else None
         rect_curr = round(max(0.0, float(pt.get("rectifierCurrent"))), 2) if pt.get("rectifierCurrent") is not None else None
+        # Sanitización física de corriente de rectificador (I = P / V):
+        v_rect_bus = rect_v or ld_v or (vbat if vbat else 53.5)
+        expected_rect_curr = round((rect_kw * 1000.0) / v_rect_bus, 2) if (rect_kw > 0.05 and v_rect_bus > 40.0) else 0.0
+        if rect_curr is not None and expected_rect_curr > 0:
+            if rect_curr > expected_rect_curr * 1.35:
+                # El registro Modbus está reportando capacidad total de módulos o shunt sin calibrar
+                rect_curr = expected_rect_curr
+        elif rect_curr is None and expected_rect_curr > 0:
+            rect_curr = expected_rect_curr
         rect_energy_kwh = round(max(0.0, float(pt.get("rectifierEnergy") or 0.0)), 3)
 
         # ── 7. CONDICIONES AMBIENTALES ──
