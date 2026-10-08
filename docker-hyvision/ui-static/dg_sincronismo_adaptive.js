@@ -40,11 +40,13 @@ self.onDataUpdated = function() {
     hasRealAc = true;
   }
 
+  var isIndustrial = hasRealAc && (vu > 80 || vv > 80 || vw > 80);
   var isEnergized = hasRealAc && (vu > 50 || dgKw > 0.1 || gridKw > 0.05);
   var container = self.ctx.$container ? self.ctx.$container[0] : null;
 
   if (container) {
     var elTitle = container.querySelector('#sync-title-text');
+    var elFreqSub = container.querySelector('#freq-sub-lbl');
     var elHz = container.querySelector('#hz-val') || container.querySelector('#dg-freq-val');
     var elPointer = container.querySelector('#freq-pointer');
     var elVu = container.querySelector('#vu-val');
@@ -54,12 +56,24 @@ self.onDataUpdated = function() {
     var elNominal = container.querySelector('#sync-nominal-foot');
 
     if (elTitle) {
-      if (!siteHasGrid && !hasDgInstalled) {
+      if (isIndustrial) {
+        elTitle.textContent = 'ESTABILIDAD AC (MICRORRED BESS)';
+      } else if (!siteHasGrid && !hasDgInstalled) {
         elTitle.textContent = 'ESTABILIDAD AC (NO APLICA - OFF-GRID)';
       } else if (siteHasGrid && !hasDgInstalled) {
         elTitle.textContent = 'ESTABILIDAD DE RED COMERCIAL';
       } else {
         elTitle.textContent = 'ESTABILIDAD DE TENSIÓN Y FRECUENCIA';
+      }
+    }
+
+    if (elFreqSub) {
+      if (isIndustrial) {
+        elFreqSub.textContent = 'FRECUENCIA MICRORRED';
+      } else if (siteHasGrid && !hasDgInstalled) {
+        elFreqSub.textContent = 'FRECUENCIA DE RED';
+      } else {
+        elFreqSub.textContent = 'FRECUENCIA DE RED / DG';
       }
     }
 
@@ -85,7 +99,7 @@ self.onDataUpdated = function() {
         var isOk = diff <= 0.5;
         elBadge.textContent = isOk ? 'SINCRONIZADO (60 Hz)' : 'DESVIACIÓN FREC.';
         elBadge.className = 'badge-sync ' + (isOk ? 'ok in-sync' : 'warn');
-      } else if (!siteHasGrid && !hasDgInstalled) {
+      } else if (!siteHasGrid && !hasDgInstalled && !isIndustrial) {
         elBadge.textContent = 'NO APLICA (100% OFF-GRID DC)';
         elBadge.className = 'badge-sync standby';
       } else if (siteHasGrid && !hasDgInstalled) {
@@ -98,7 +112,9 @@ self.onDataUpdated = function() {
     }
 
     if (elNominal) {
-      if (!siteHasGrid && !hasDgInstalled) {
+      if (isIndustrial) {
+        elNominal.innerHTML = 'Tensión Nominal: <strong>208 V / 220 V AC (±5%)</strong>';
+      } else if (!siteHasGrid && !hasDgInstalled) {
         elNominal.innerHTML = 'Topología: <strong>100% Solar DC</strong>';
       } else {
         elNominal.innerHTML = 'Tensión Nominal: <strong>220 V (±5%)</strong>';

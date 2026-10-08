@@ -28,9 +28,9 @@ self.drawChart = function() {
   var curT = self.latestT || 0;
   var isIndustrial = self.isIndustrialMode !== false;
 
-  var maxVal = isIndustrial ? 10.0 : 45.0;
+  var maxVal = isIndustrial ? 15.0 : 45.0;
   var minVal = isIndustrial ? 0.0 : 20.0;
-  var threshold = isIndustrial ? 3.0 : 35.0;
+  var threshold = isIndustrial ? 12.0 : 35.0;
 
   var padL = 36, padR = 20, padT = 10, padB = 20;
   var plotW = w - padL - padR;
@@ -170,7 +170,11 @@ self.onDataUpdated = function() {
 
   if (isIndustrial) {
     if (elTitle) elTitle.textContent = 'DISPERSIÓN TÉRMICA BESS (ΔT)';
-    var isAlert = dt > 3.0;
+    // En contenedores BESS industriales con aire acondicionado (HVAC),
+    // el aire frío inyectado (~17°C) crea un gradiente natural de 5-10°C frente
+    // a celdas centrales (28°C) durante ciclos de carga pesada (>500A).
+    // Se considera alarma real si la celda más caliente supera 35°C O si ΔT > 12°C.
+    var isAlert = (dt > 12.0) || (tMax >= 35.0);
     if (card) card.className = 'trend-card-container therm ' + (isAlert ? 'alert' : 'ok');
     if (elDt) elDt.textContent = dt.toFixed(1);
     if (elDtUnit) elDtUnit.textContent = '°C ΔT MÁX';
@@ -178,11 +182,17 @@ self.onDataUpdated = function() {
     if (elMin) elMin.textContent = tMin > 0 ? tMin.toFixed(1) : '--';
 
     if (elB) {
-      elB.textContent = isAlert ? 'ΔT > 3°C DISPERSIÓN' : 'ΔT < 3°C ÓPTIMO';
+      elB.textContent = isAlert ? 'ΔT > 12°C DESBALANCE' : 'ΔT CONTROLADO (HVAC)';
       elB.className = 'trend-badge ' + (isAlert ? 'alert' : 'ok');
     }
     if (elD) {
-      elD.innerHTML = 'Estado: <strong style="color:' + (isAlert ? '#ef4444' : '#64B856') + ';">' + (isAlert ? 'Desbalance Térmico Activo' : 'Gradiente Estable') + '</strong>';
+      var strMax = tMax > 0 ? (' (T.Máx ' + tMax.toFixed(0) + '°C)') : '';
+      elD.innerHTML = 'Estado: <strong style="color:' + (isAlert ? '#ef4444' : '#64B856') + ';">' + 
+                      (isAlert ? 'Desbalance Térmico Crítico' : ('Climatizado / Seguro' + strMax)) + '</strong>';
+    }
+    var elLimFoot = container.querySelector('#therm-limit-foot');
+    if (elLimFoot) {
+      elLimFoot.innerHTML = 'Límite de Control: <strong style="color:#f59e0b;">-- 12.0°C / 35.0°C</strong>';
     }
   } else {
     // Modo Telecom: Histórico Térmico Banco & Ambiente
