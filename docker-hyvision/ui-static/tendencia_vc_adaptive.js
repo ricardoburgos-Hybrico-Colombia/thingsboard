@@ -95,12 +95,58 @@ self.onDataUpdated = function() {
       elBadge.textContent = '750V DC BESS';
       elBadge.className = 'trend-badge';
     }
+
+    var elLblLoad = container.querySelector('#kpi-lbl-load');
+    var elUnitLoad = container.querySelector('#kpi-unit-load');
+    var elLblRect = container.querySelector('#kpi-lbl-rect');
+    var elUnitRect = container.querySelector('#kpi-unit-rect');
+    var elLblBat = container.querySelector('#kpi-lbl-bat');
+    var elUnitBat = container.querySelector('#kpi-unit-bat');
+    var elAxisFoot = container.querySelector('#trend-axis-foot');
+
+    if (elLblLoad) elLblLoad.textContent = 'DEMANDA AC';
+    if (elLblRect) elLblRect.textContent = 'POTENCIA BESS';
+    if (elLblBat) elLblBat.textContent = 'CORRIENTE BESS';
+
     if (elV) elV.textContent = curV.toFixed(1);
-    if (elIload) elIload.textContent = (loadKw * 1000 / curV).toFixed(1);
-    if (elIrect) elIrect.textContent = Math.abs(curIbat).toFixed(1);
-    if (elIbat) elIbat.textContent = curIbat.toFixed(1);
+
+    if (elIload) {
+      if (loadKw > 0) {
+        elIload.textContent = loadKw.toFixed(1);
+        if (elUnitLoad) elUnitLoad.textContent = 'kW';
+      } else {
+        elIload.textContent = (loadKw * 1000 / curV).toFixed(1);
+        if (elUnitLoad) elUnitLoad.textContent = 'A';
+      }
+    }
+
+    var pBessKw = (curV * Math.abs(curIbat) / 1000.0);
+    if (elIrect) elIrect.textContent = pBessKw.toFixed(1);
+    if (elUnitRect) elUnitRect.textContent = 'kW';
+
+    if (elIbat) elIbat.textContent = Math.abs(curIbat).toFixed(1);
+    if (elUnitBat) elUnitBat.textContent = 'A';
+
+    if (elAxisFoot) {
+      elAxisFoot.innerHTML = 'Eje Izq: <strong style="color:#38bdf8;">Tensión Bus (V)</strong> | Eje Der: <strong style="color:#f59e0b;">Corriente BESS (A)</strong>';
+    }
     if (elReg) elReg.textContent = 'Bus DC 750V Operativo';
   } else {
+    var elLblLoad = container.querySelector('#kpi-lbl-load');
+    var elUnitLoad = container.querySelector('#kpi-unit-load');
+    var elLblRect = container.querySelector('#kpi-lbl-rect');
+    var elUnitRect = container.querySelector('#kpi-unit-rect');
+    var elLblBat = container.querySelector('#kpi-lbl-bat');
+    var elUnitBat = container.querySelector('#kpi-unit-bat');
+    var elAxisFoot = container.querySelector('#trend-axis-foot');
+
+    if (elLblLoad) elLblLoad.textContent = 'CARGA BTS';
+    if (elUnitLoad) elUnitLoad.textContent = 'A';
+    if (elLblRect) elLblRect.textContent = 'RECTIFICADOR';
+    if (elUnitRect) elUnitRect.textContent = 'A';
+    if (elLblBat) elLblBat.textContent = 'BATERÍA DC';
+    if (elUnitBat) elUnitBat.textContent = 'A';
+
     if (elTitle) elTitle.textContent = 'DINÁMICA DE BUS DC Y CORRIENTES TELECOM';
     var bText = curV > 0 ? ('MODO FLOTACIÓN (' + curV.toFixed(1) + 'V)') : 'BUS DC ESTABILIZADO';
     if (curIbat > 0.5) bText = 'BATERÍA EN CARGA';
@@ -116,6 +162,9 @@ self.onDataUpdated = function() {
     if (elIrect) elIrect.textContent = curIrect.toFixed(1);
     var sIbat = curIbat > 0 ? '+' : '';
     if (elIbat) elIbat.textContent = sIbat + curIbat.toFixed(1);
+    if (elAxisFoot) {
+      elAxisFoot.innerHTML = 'Eje Izq: <strong style="color:#38bdf8;">Tensión Bus (V)</strong> | Eje Der: <strong style="color:#f8fafc;">Carga BTS (A)</strong> · <strong style="color:#64B856;">Rectif (A)</strong>';
+    }
     if (elReg) elReg.textContent = 'Bus DC -48V Telecom Estabilizado';
   }
 
@@ -202,7 +251,7 @@ self.drawChart = function() {
 
     // Etiquetas Eje Der (A)
     var iLbl = Math.round(maxI - ((maxI - minI) / 3) * r) + ' A';
-    ctx.fillStyle = '#64B856';
+    ctx.fillStyle = isIndustrial ? '#f59e0b' : '#64B856';
     ctx.textAlign = 'left';
     ctx.fillText(iLbl, w - padR + 5, y + 3);
   }
@@ -256,18 +305,23 @@ self.drawChart = function() {
   // 1. Tensión de Bus DC (Azul cielo nítido)
   plotCurve(sV, '#38bdf8', false, 2.5, true);
 
-  // 2. Corriente de Carga BTS (Blanco nítido)
-  ctx.save();
-  ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
-  ctx.shadowBlur = 3;
-  plotCurve(sLoad, '#ffffff', false, 2, false);
-  ctx.restore();
+  if (isIndustrial) {
+    // 2. Corriente de Batería (Ámbar nítido)
+    plotCurve(sBat, '#f59e0b', false, 2, false);
+  } else {
+    // 2. Corriente de Carga BTS (Blanco nítido)
+    ctx.save();
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+    ctx.shadowBlur = 3;
+    plotCurve(sLoad, '#ffffff', false, 2, false);
+    ctx.restore();
 
-  // 3. Corriente Rectificador (Verde esmeralda punteado)
-  plotCurve(sRect, '#64B856', true, 2, false);
+    // 3. Corriente Rectificador (Verde esmeralda punteado)
+    plotCurve(sRect, '#64B856', true, 2, false);
 
-  // 4. Corriente de Batería (Ámbar)
-  plotCurve(sBat, '#f59e0b', false, 1.5, false);
+    // 4. Corriente de Batería (Ámbar)
+    plotCurve(sBat, '#f59e0b', false, 1.5, false);
+  }
 };
 
 self.onDestroy = function() {};

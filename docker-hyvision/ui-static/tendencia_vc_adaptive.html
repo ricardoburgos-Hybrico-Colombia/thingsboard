@@ -9,7 +9,7 @@
 
   <div class="trend-kpi-bar">
     <div class="kpi-col">
-      <span class="kpi-lbl">TENSIÓN BUS DC</span>
+      <span id="kpi-lbl-v" class="kpi-lbl">TENSIÓN BUS DC</span>
       <div class="kpi-val-group">
         <span id="vbat-live-val" class="kpi-num" style="color: #38bdf8;">0.0</span>
         <span class="kpi-unit">V</span>
@@ -17,26 +17,26 @@
     </div>
     <div class="kpi-divider"></div>
     <div class="kpi-col">
-      <span class="kpi-lbl">CARGA BTS</span>
+      <span id="kpi-lbl-load" class="kpi-lbl">CARGA BTS</span>
       <div class="kpi-val-group">
         <span id="iload-live-val" class="kpi-num" style="color: #f8fafc;">0.0</span>
-        <span class="kpi-unit">A</span>
+        <span id="kpi-unit-load" class="kpi-unit">A</span>
       </div>
     </div>
     <div class="kpi-divider"></div>
     <div class="kpi-col">
-      <span class="kpi-lbl">RECTIFICADOR</span>
+      <span id="kpi-lbl-rect" class="kpi-lbl">RECTIFICADOR</span>
       <div class="kpi-val-group">
         <span id="irect-live-val" class="kpi-num" style="color: #64B856;">0.0</span>
-        <span class="kpi-unit">A</span>
+        <span id="kpi-unit-rect" class="kpi-unit">A</span>
       </div>
     </div>
     <div class="kpi-divider"></div>
     <div class="kpi-col">
-      <span class="kpi-lbl">BATERÍA DC</span>
+      <span id="kpi-lbl-bat" class="kpi-lbl">BATERÍA DC</span>
       <div class="kpi-val-group">
         <span id="ibat-live-val" class="kpi-num" style="color: #f59e0b;">0.0</span>
-        <span class="kpi-unit">A</span>
+        <span id="kpi-unit-bat" class="kpi-unit">A</span>
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@
   </div>
 
   <div class="trend-footer">
-    <span>Eje Izq: <strong style="color:#38bdf8;">Tensión Bus (V)</strong> | Eje Der: <strong style="color:#f8fafc;">Carga BTS (A)</strong> · <strong style="color:#64B856;">Rectif (A)</strong></span>
+    <span id="trend-axis-foot">Eje Izq: <strong style="color:#38bdf8;">Tensión Bus (V)</strong> | Eje Der: <strong style="color:#f8fafc;">Carga BTS (A)</strong> · <strong style="color:#64B856;">Rectif (A)</strong></span>
     <span>Régimen: <strong id="trend-regimen-text" style="color:#64B856;">Bus DC Estabilizado</strong></span>
   </div>
 </div>
