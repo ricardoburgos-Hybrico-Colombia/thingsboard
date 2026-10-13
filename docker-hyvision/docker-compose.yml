@@ -2,12 +2,17 @@
 # HyVision - Plataforma IoT para Monitoreo de Energía Solar
 # Infraestructura: ThingsBoard 4.3 LTS (Apache 2.0) + TimescaleDB
 # Compatible con Windows (Docker Desktop) y Ubuntu (Docker Engine)
+#
+# Varios entornos en el mismo host: copia .env desde .env.dev.example
+# (HYVISION_STACK, puertos y volúmenes distintos). Prod sin cambios usa defaults.
 # =================================================================
+
+name: ${COMPOSE_PROJECT_NAME:-docker-hyvision}
 
 services:
   hyvision-db:
     image: timescale/timescaledb:latest-pg16
-    container_name: hyvision-timescaledb
+    container_name: ${HYVISION_STACK:-hyvision}-timescaledb
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-hyvision}
@@ -31,7 +36,7 @@ services:
 
   hyvision-app:
     image: thingsboard/tb-node:${HYVISION_VERSION:-4.3.1.6}
-    container_name: hyvision-app
+    container_name: ${HYVISION_STACK:-hyvision}-app
     restart: always
     depends_on:
       hyvision-db:
@@ -58,7 +63,7 @@ services:
 
   hyvision-web:
     image: nginx:alpine
-    container_name: hyvision-web
+    container_name: ${HYVISION_STACK:-hyvision}-web
     restart: always
     depends_on:
       - hyvision-app
@@ -77,8 +82,8 @@ services:
 
 volumes:
   hyvision-db-data:
-    name: hyvision_timescaledb_data
+    name: ${HYVISION_STACK:-hyvision}_timescaledb_data
   hyvision-app-data:
-    name: hyvision_app_data
+    name: ${HYVISION_STACK:-hyvision}_app_data
   hyvision-app-logs:
-    name: hyvision_app_logs
+    name: ${HYVISION_STACK:-hyvision}_app_logs

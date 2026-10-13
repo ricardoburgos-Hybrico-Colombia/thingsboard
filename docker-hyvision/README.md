@@ -17,8 +17,43 @@ Ubícate en esta carpeta y ejecuta:
 
 ```bash
 cd docker-hyvision
+cp .env.example .env   # primera vez
 docker compose up -d
 ```
+
+### Primera instalación (esquema ThingsBoard en PostgreSQL)
+
+Si la UI responde **502** o la base está vacía, inicializa el esquema **una sola vez** (no repetir en actualizaciones):
+
+```bash
+docker compose up -d hyvision-db
+docker compose run --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=true hyvision-app
+docker compose up -d
+```
+
+### Desarrollo en VPS (rama `develop`, paralelo a producción)
+
+| | Producción | Desarrollo |
+|---|------------|------------|
+| Ruta | `/opt/hyvision-prod` | `/opt/hyvision-dev` |
+| Rama Git | `main` | `develop` |
+| HTTP | `8082` (`.env.example`) | `8083` (`.env.dev.example`) |
+| Contenedores | `hyvision-*` | `hyvision-dev-*` |
+
+```bash
+sudo mkdir -p /opt/hyvision-dev && sudo chown "$USER:$USER" /opt/hyvision-dev
+git clone -b develop git@github.com:ricardoburgos-Hybrico-Colombia/thingsboard.git /opt/hyvision-dev
+cd /opt/hyvision-dev/docker-hyvision
+cp .env.dev.example .env
+# Editar POSTGRES_PASSWORD si hace falta
+docker compose up -d hyvision-db
+docker compose run --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=true hyvision-app
+docker compose up -d
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8083
+```
+
+Abre **TCP 8083** en el firewall del panel (Hostinger), igual que hiciste con 8082.  
+Prod existente **no requiere** cambiar `.env` al hacer `git pull` si mantienes los defaults de `HYVISION_STACK=hyvision`.
 
 > **Nota para tu máquina actual en Windows:**
 > Si ya tienes contenedores previos usando los puertos `8080` o `1883`, puedes detenerlos primero con:
@@ -45,7 +80,7 @@ Una vez levantados los contenedores:
 * **Ver estado y consumo de recursos:**
   ```bash
   docker compose ps
-  docker stats hyvision-app hyvision-timescaledb
+  docker stats hyvision-app hyvision-timescaledb   # o hyvision-dev-app en dev
   ```
 * **Ver logs en tiempo real:**
   ```bash
