@@ -42,3 +42,6 @@ rebuild-docker.sh
 docs/superpowers/
 __pycache__/
 *.xlsx
+# PostgreSQL custom dumps (contain full DB; do not commit)
+*.dump
+hyvision_backup.dump

@@ -98,3 +98,14 @@ Una vez levantados los contenedores:
   ```bash
   docker exec -t hyvision-timescaledb pg_dump -U hyvision -d hyvision -Fc > hyvision_backup_$(date +%Y%m%d).dump
   ```
+  En **dev** en la misma VPS, usa el contenedor `hyvision-dev-timescaledb`.
+
+* **Restaurar un backup** (`pg_dump -Fc` → `pg_restore`). **Sobrescribe** la BD actual; para la app en caliente, para antes `hyvision-app` y `hyvision-web`:
+  ```bash
+  docker compose stop hyvision-app hyvision-web
+  docker exec -i hyvision-timescaledb pg_restore -U hyvision -d hyvision \
+    --clean --if-exists --disable-triggers --no-owner --role=hyvision \
+    < hyvision_backup.dump
+  docker compose up -d
+  ```
+  No hace falta `INSTALL_TB` después si el dump ya incluye esquema y datos. Los archivos `.dump` no van al repo Git (ver `.gitignore`).
