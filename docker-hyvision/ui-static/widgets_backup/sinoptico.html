@@ -1,0 +1,140 @@
+<div class="scada-view-container">
+  <div class="scada-header-bar">
+    <div class="header-left">
+      <span class="scada-logo-icon">⚡</span>
+      <div>
+        <div class="scada-title">DIAGRAMA UNIFILAR SINÓPTICO DE PLANTA</div>
+        <div class="scada-subtitle">Microrred Híbrida: Solar PV + BESS + Inversores PCS + Respaldo DG + Carga</div>
+      </div>
+    </div>
+    <div id="scada-mode-badge" class="scada-badge offgrid">MODO AUTÓNOMO (OFF-GRID)</div>
+  </div>
+
+  <div class="scada-canvas-wrapper">
+    <svg viewBox="0 0 1000 480" preserveAspectRatio="xMidYMid meet" class="scada-svg-canvas">
+      <defs>
+        <pattern id="scada-grid" width="25" height="25" patternUnits="userSpaceOnUse">
+          <path d="M 25 0 L 0 0 0 25" fill="none" stroke="rgba(100, 184, 86, 0.04)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      
+      <!-- Grilla de fondo -->
+      <rect width="1000" height="480" fill="#0b140d"/>
+      <rect width="1000" height="480" fill="url(#scada-grid)"/>
+
+      <!-- LÍNEAS DE FLUJO DE POTENCIA (ANIMADAS CON GEOMETRÍA ESPACIOSA) -->
+      <!-- Solar -> PCS -->
+      <path id="path-solar" class="flow-line flow-solar" d="M 200 105 L 325 105 L 325 205 L 405 205" fill="none"/>
+      <!-- BESS <-> PCS -->
+      <path id="path-bess" class="flow-line flow-bess-charging" d="M 200 375 L 325 375 L 325 275 L 405 275" fill="none"/>
+      <!-- PCS -> Bus AC -->
+      <path id="path-pcs-bus" class="flow-line flow-pcs" d="M 550 240 L 680 240" fill="none"/>
+      <!-- Bus AC -> Carga -->
+      <path id="path-load" class="flow-line flow-load" d="M 680 115 L 810 115" fill="none"/>
+      <!-- DG -> ATS -> Bus AC -->
+      <path id="path-dg" class="flow-line flow-dg-standby" d="M 810 375 L 745 375 L 745 290 L 680 290" fill="none"/>
+
+      <!-- BADGES DE POTENCIA INSTANTÁNEA EN LÍNEA (REDIMENSIONADOS Y CON ESPACIO DESAHOGADO) -->
+      <!-- Badge Línea Solar -->
+      <g id="badge-solar" transform="translate(262, 105)">
+        <rect x="-37" y="-11" width="74" height="22" rx="11" id="flow-bg-solar" class="flow-badge-bg" stroke="#f7d048" stroke-width="1.5"/>
+        <text x="0" y="4" text-anchor="middle" id="flow-val-solar" class="flow-badge-text" fill="#f7d048">94.0 kW</text>
+      </g>
+
+      <!-- Badge Línea BESS -->
+      <g id="badge-bess" transform="translate(262, 375)">
+        <rect x="-42" y="-11" width="84" height="22" rx="11" id="flow-bg-bess" class="flow-badge-bg" stroke="#64B856" stroke-width="1.5"/>
+        <text x="0" y="4" text-anchor="middle" id="flow-val-bess" class="flow-badge-text" fill="#64B856">▲ 213.4 kW</text>
+      </g>
+
+      <!-- Badge Línea Inversores PCS -> Bus AC -->
+      <g id="badge-pcs" transform="translate(615, 240)">
+        <rect x="-38" y="-11" width="76" height="22" rx="11" class="flow-badge-bg" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="0" y="4" text-anchor="middle" id="flow-val-pcs" class="flow-badge-text" fill="#38bdf8">295.1 kW</text>
+      </g>
+
+      <!-- Badge Línea Bus AC -> Carga -->
+      <g id="badge-load" transform="translate(745, 115)">
+        <rect x="-38" y="-11" width="76" height="22" rx="11" class="flow-badge-bg" stroke="#62c3f5" stroke-width="1.5"/>
+        <text x="0" y="4" text-anchor="middle" id="flow-val-load" class="flow-badge-text" fill="#62c3f5">295.1 kW</text>
+      </g>
+
+      <!-- Badge Línea Diésel DG -> ATS -->
+      <g id="badge-dg" transform="translate(745, 325)">
+        <rect x="-33" y="-11" width="66" height="22" rx="11" id="flow-bg-dg" class="flow-badge-bg" stroke="#64748b" stroke-width="1.5"/>
+        <text x="0" y="4" text-anchor="middle" id="flow-val-dg" class="flow-badge-text" fill="#94a3b8">0.0 kW</text>
+      </g>
+
+      <!-- BARRA PRINCIPAL AC (BUSBAR 220V) - Centrado en x=680 -->
+      <line x1="680" y1="75" x2="680" y2="410" class="ac-busbar"/>
+      <text x="680" y="48" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="800" letter-spacing="0.5">BUSBAR AC COLECTORA</text>
+      <text x="680" y="64" text-anchor="middle" id="svg-bus-telemetry" fill="#94a3b8" font-size="10" font-weight="600">220.0 V | 60.00 Hz</text>
+
+      <!-- NODO 1: PARQUE SOLAR PV (25 a 200) -->
+      <g transform="translate(25, 45)">
+        <rect width="175" height="120" rx="10" class="scada-node-box"/>
+        <line x1="0" y1="2" x2="175" y2="2" id="svg-solar-topline" stroke="#f7d048" stroke-width="3.5"/>
+        <text x="87.5" y="24" text-anchor="middle" class="n-header">☀️ GENERACIÓN SOLAR</text>
+        <text x="14" y="58" id="svg-solar-kw" class="n-value" fill="#f7d048">94.0 <tspan font-size="13" fill="#94a3b8">kW</tspan></text>
+        <text x="14" y="84" id="svg-solar-kwh" class="n-sub">Hoy: 2258.3 kWh</text>
+        <text x="14" y="102" id="svg-solar-status" class="n-status" fill="#22c55e">● Inyección Activa</text>
+      </g>
+
+      <!-- NODO 2: BANCO DE BATERÍAS (BESS) (25 a 200) -->
+      <g transform="translate(25, 315)">
+        <rect width="175" height="125" rx="10" class="scada-node-box"/>
+        <line x1="0" y1="2" x2="175" y2="2" id="svg-bess-topline" stroke="#64B856" stroke-width="3.5"/>
+        <text x="87.5" y="24" text-anchor="middle" class="n-header">🔋 ALMACENAMIENTO BESS</text>
+        <text x="14" y="58" id="svg-bess-soc" class="n-value" fill="#64B856">62 <tspan font-size="13" fill="#94a3b8">% SOC</tspan></text>
+        <text x="14" y="84" id="svg-bess-kw" class="n-sub-highlight" fill="#64B856">▲ 213.4 kW (CARGANDO)</text>
+        <text x="14" y="104" id="svg-bess-dc" class="n-sub">Bus DC: 779.1 V | +395.3 A</text>
+      </g>
+
+      <!-- NODO 3: INVERSORES PCS (405 a 550) -->
+      <g transform="translate(405, 155)">
+        <rect width="145" height="170" rx="10" class="scada-node-box"/>
+        <line x1="0" y1="2" x2="145" y2="2" stroke="#38bdf8" stroke-width="3.5"/>
+        <text x="72.5" y="24" text-anchor="middle" class="n-header">⚡ INVERSORES PCS</text>
+        <text x="72.5" y="46" text-anchor="middle" class="n-mini-tag">3 × PCS250 (750 kVA)</text>
+        <line x1="12" y1="56" x2="133" y2="56" stroke="rgba(255,255,255,0.08)"/>
+        <text x="14" y="78" class="n-pcs-item">PCS-1: <tspan id="svg-pcs1-kw" fill="#38bdf8" font-weight="700">102.9 kW</tspan></text>
+        <text x="14" y="100" class="n-pcs-item">PCS-2: <tspan id="svg-pcs2-kw" fill="#38bdf8" font-weight="700">96.5 kW</tspan></text>
+        <text x="14" y="122" class="n-pcs-item">PCS-3: <tspan id="svg-pcs3-kw" fill="#38bdf8" font-weight="700">95.7 kW</tspan></text>
+        <text x="14" y="150" class="n-status" fill="#64B856">● 3/3 SINCRONIZADOS</text>
+      </g>
+
+      <!-- NODO 4: DEMANDA DE CARGA (810 a 985) -->
+      <g transform="translate(810, 55)">
+        <rect width="175" height="120" rx="10" class="scada-node-box"/>
+        <line x1="0" y1="2" x2="175" y2="2" stroke="#62c3f5" stroke-width="3.5"/>
+        <text x="87.5" y="24" text-anchor="middle" class="n-header">🏭 DEMANDA DE CARGA</text>
+        <text x="14" y="58" id="svg-load-kw" class="n-value" fill="#62c3f5">295.1 <tspan font-size="13" fill="#94a3b8">kW</tspan></text>
+        <text x="14" y="84" id="svg-load-kwh" class="n-sub">Hoy: 508.0 kWh</text>
+        <text x="14" y="102" class="n-sub">Carga Crítica EPM-GAORI</text>
+      </g>
+
+      <!-- NODO 5: GRUPO ELECTRÓGENO DIÉSEL (DG) (810 a 985) -->
+      <g transform="translate(810, 315)">
+        <rect width="175" height="125" rx="10" class="scada-node-box" id="svg-dg-box"/>
+        <line x1="0" y1="2" x2="175" y2="2" id="svg-dg-topline" stroke="#64748b" stroke-width="3.5"/>
+        <text x="87.5" y="24" text-anchor="middle" class="n-header">⛽ RESPALDO (DG)</text>
+        <text x="14" y="58" id="svg-dg-kw" class="n-value" fill="#64748b">0.0 <tspan font-size="13" fill="#94a3b8">kW</tspan></text>
+        <text x="14" y="84" id="svg-ats-state" class="n-sub-bold" fill="#64748b">ATS: DESCONECTADO</text>
+        <text x="14" y="104" id="svg-dg-status" class="n-status" fill="#94a3b8">○ STANDBY AUTOMÁTICO</text>
+      </g>
+
+      <!-- ETIQUETA INTERRUPTOR ATS EN LÍNEA -->
+      <rect x="726" y="358" width="38" height="20" rx="4" fill="#101c13" stroke="rgba(100, 184, 86, 0.22)"/>
+      <text x="745" y="372" text-anchor="middle" id="svg-ats-switch" fill="#94a3b8" font-size="9" font-weight="800">ATS</text>
+    </svg>
+  </div>
+
+  <div class="scada-footer-bar">
+    <div class="footer-kpi-left">
+      <span>Balance de Planta: <strong id="footer-balance-text" style="color:#06b6d4;">AUTÓNOMO EN EQUILIBRIO (Déficit Solar -201.1 kW cubierto por BESS: 213.4 kW)</strong></span>
+    </div>
+    <div class="footer-kpi-right">
+      <span>Prioridad de Despacho: <strong style="color:#f59e0b;">1° Solar</strong> → <strong style="color:#10b981;">2° BESS</strong> → <strong style="color:#a855f7;">3° Diésel</strong></span>
+    </div>
+  </div>
+</div>

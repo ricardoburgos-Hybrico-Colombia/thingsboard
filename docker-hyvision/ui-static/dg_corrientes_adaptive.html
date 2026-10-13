@@ -1,0 +1,38 @@
+<div class="dg-trend-card">
+  <div class="card-header-dg">
+    <div class="title-dg">
+      <span class="icon-dg">⚡</span>
+      <span id="dg-cur-title">CORRIENTE DE GENERADOR POR FASE</span>
+    </div>
+    <div id="current-unbalance-badge" class="badge-dg ok">STANDBY (0.0 A)</div>
+  </div>
+
+  <div class="phases-kpi-bar">
+    <div class="phase-item phase-u">
+      <span class="p-tag">FASE U</span>
+      <span id="iu-val" class="p-val">0.0</span>
+      <span class="p-unit">A</span>
+    </div>
+    <div class="sep-kpi"></div>
+    <div class="phase-item phase-v">
+      <span class="p-tag">FASE V</span>
+      <span id="iv-val" class="p-val">0.0</span>
+      <span class="p-unit">A</span>
+    </div>
+    <div class="sep-kpi"></div>
+    <div class="phase-item phase-w">
+      <span class="p-tag">FASE W</span>
+      <span id="iw-val" class="p-val">0.0</span>
+      <span class="p-unit">A</span>
+    </div>
+  </div>
+
+  <div class="chart-container-dg">
+    <canvas id="chart-dg-currents"></canvas>
+  </div>
+
+  <div class="card-footer-dg">
+    <span>Corriente Promedio: <strong id="i-avg-text" style="color:#f59e0b;">0.0 A</strong></span>
+    <span id="cap-alt-footer">Capacidad Alternador: <strong>350 A / Fase</strong></span>
+  </div>
+</div>

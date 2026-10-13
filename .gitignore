@@ -40,3 +40,5 @@ rebuild-docker.sh
 .claude
 .planning
 docs/superpowers/
+__pycache__/
+*.xlsx
