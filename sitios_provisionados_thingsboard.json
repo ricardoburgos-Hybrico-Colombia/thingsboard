@@ -1,0 +1,152 @@
+[
+  {
+    "nombre_alias": "WEST_END_II",
+    "uid": "west_end2",
+    "ps_id": "hyb_west_end2",
+    "device_id": "4c671c30-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_WEST_END2",
+    "latitude": 16.30067122,
+    "longitude": -86.5918876,
+    "solar_topology": "solarChargerPower"
+  },
+  {
+    "nombre_alias": "DIXON_HILL",
+    "uid": "dixon_hill",
+    "ps_id": "hyb_dixon_hill",
+    "device_id": "4c821e40-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_DIXON_HILL",
+    "latitude": 16.334325,
+    "longitude": -86.5245694,
+    "solar_topology": "solarChargerPower"
+  },
+  {
+    "nombre_alias": "WEST_BAY",
+    "uid": "west_bay",
+    "ps_id": "hyb_west_bay",
+    "device_id": "4c988c70-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_WEST_BAY",
+    "latitude": 16.28167223,
+    "longitude": -86.5921528,
+    "solar_topology": "solarChargerPower"
+  },
+  {
+    "nombre_alias": "FRENCH_HARBOR_ESTE",
+    "uid": "french_harbor_este",
+    "ps_id": "hyb_french_harbor_este",
+    "device_id": "4ca86af0-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_FRENCH_HARBOR_ESTE",
+    "latitude": 17.35488889,
+    "longitude": -86.4630833,
+    "solar_topology": "solarChargerPower"
+  },
+  {
+    "nombre_alias": "PALACIOS",
+    "uid": "palacios",
+    "ps_id": "hyb_palacios",
+    "device_id": "4cc086d0-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_PALACIOS",
+    "latitude": 15.951257,
+    "longitude": -84.939986,
+    "solar_topology": "solarChargerPower"
+  },
+  {
+    "nombre_alias": "ARENAL - HN794",
+    "uid": "arenal_-_hn794",
+    "ps_id": "hyb_arenal_-_hn794",
+    "device_id": "4cd6a6e0-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_ARENAL___HN794",
+    "latitude": 15.36822348,
+    "longitude": -86.8297544,
+    "solar_topology": "solarChargerPower + inverterArrayPower"
+  },
+  {
+    "nombre_alias": "AGUA CALIENTE - HN801",
+    "uid": "agua_caliente_-_hn801",
+    "ps_id": "hyb_agua_caliente_-_hn801",
+    "device_id": "4cedb150-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_AGUA_CALIENTE___HN801",
+    "latitude": 14.5389679,
+    "longitude": -89.2739767,
+    "solar_topology": "solarChargerPower + inverterArrayPower"
+  },
+  {
+    "nombre_alias": "BUENOS AIRES II SPS - HN682",
+    "uid": "buenos_aires_ii_sps",
+    "ps_id": "hyb_buenos_aires_ii_sps",
+    "device_id": "4d04bbc0-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_BUENOS_AIRES_II_SPS",
+    "latitude": 15.45941667,
+    "longitude": -87.9424167,
+    "solar_topology": "inverterArrayPower"
+  },
+  {
+    "nombre_alias": "CAMPO LIMONES LOS ENCUENTROS - HN493",
+    "uid": "campo_limones_los_encuentros_-_hn493",
+    "ps_id": "hyb_campo_limones_los_encuentros_-_hn493",
+    "device_id": "4d1b9f20-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_CAMPO_LIMONES_LOS_ENCUENTROS___HN493",
+    "latitude": 15.36238889,
+    "longitude": -86.6915,
+    "solar_topology": "solarChargerPower + inverterArrayPower"
+  },
+  {
+    "nombre_alias": "CAMALOTE - HN2013",
+    "uid": "camalote_-_hn2013",
+    "ps_id": "hyb_camalote_-_hn2013",
+    "device_id": "4d320d50-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_CAMALOTE___HN2013",
+    "latitude": 14.87386111,
+    "longitude": -88.8693333,
+    "solar_topology": "solarChargerPower + inverterArrayPower"
+  },
+  {
+    "nombre_alias": "COR9007",
+    "uid": "cor9007",
+    "ps_id": "hyb_cor9007",
+    "device_id": "4d41c4c0-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_COR9007",
+    "latitude": 8.0895,
+    "longitude": -76.1131,
+    "solar_topology": "inverterArrayPower"
+  },
+  {
+    "nombre_alias": "CUN7016",
+    "uid": "cun7016",
+    "ps_id": "hyb_cun7016",
+    "device_id": "4d5b4030-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_CUN7016",
+    "latitude": 4.46032,
+    "longitude": -74.48129,
+    "solar_topology": "solarChargerPower"
+  },
+  {
+    "nombre_alias": "ANT7086",
+    "uid": "ant7086",
+    "ps_id": "hyb_ant7086",
+    "device_id": "4d709cf0-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_ANT7086",
+    "latitude": 6.716744,
+    "longitude": -75.030375,
+    "solar_topology": "solarChargerPower"
+  },
+  {
+    "nombre_alias": "CHO7151",
+    "uid": "cho7151",
+    "ps_id": "hyb_cho7151",
+    "device_id": "4d875940-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_CHO7151",
+    "latitude": 4.38636,
+    "longitude": -77.3095,
+    "solar_topology": "solarChargerPower"
+  },
+  {
+    "nombre_alias": "BOY7014",
+    "uid": "boy-7014",
+    "ps_id": "hyb_boy-7014",
+    "device_id": "4d9e63b0-c1a0-11f1-aed0-2d3b54e3e2bb",
+    "device_token": "STELLAR_BOY_7014",
+    "latitude": 5.16495,
+    "longitude": -73.35622,
+    "solar_topology": "solarChargerPower"
+  }
+]

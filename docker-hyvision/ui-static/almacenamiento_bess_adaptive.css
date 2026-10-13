@@ -1,0 +1,164 @@
+.bess-card-container {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, rgba(14, 25, 16, 0.95) 0%, rgba(8, 15, 9, 0.98) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(100, 184, 86, 0.22);
+  border-top: 3.5px solid #64B856;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  transition: border-top-color 0.4s ease;
+}
+
+.bess-card-container.discharging {
+  border-top-color: #f7d048;
+}
+
+.bess-card-container.standby {
+  border-top-color: #94a3b8;
+}
+
+.bess-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 24px;
+}
+
+.bess-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.bess-icon {
+  font-size: 16px;
+}
+
+.bess-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.bess-status-badge.charging {
+  color: #64B856;
+  border: 1.5px solid #64B856;
+  background: rgba(100, 184, 86, 0.08);
+}
+
+.bess-status-badge.discharging {
+  color: #f7d048;
+  border: 1.5px solid #f59e0b;
+  background: rgba(247, 208, 72, 0.08);
+}
+
+.bess-status-badge.standby {
+  color: #94a3b8;
+  border: 1.5px solid #94a3b8;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.bess-metric-body {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 6px 0;
+  min-height: 40px;
+}
+
+.metric-value {
+  font-size: 40px;
+  font-weight: 800;
+  color: #64B856;
+  line-height: 1;
+}
+
+.metric-unit {
+  font-size: 20px;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.bess-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.15);
+  margin: 8px 0 10px 0;
+}
+
+.bess-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  min-height: 38px;
+  gap: 8px;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 0;
+  flex: 1;
+}
+
+.footer-left .footer-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.footer-left .footer-subtext {
+  font-size: 11.5px;
+  color: #556987;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.footer-right {
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.footer-right .footer-value {
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.footer-right .footer-value.charging {
+  color: #64B856;
+}
+
+.footer-right .footer-value.discharging {
+  color: #f7d048;
+}
+
+.footer-right .footer-value.standby {
+  color: #94a3b8;
+}
