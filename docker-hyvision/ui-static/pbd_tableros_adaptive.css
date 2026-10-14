@@ -77,18 +77,19 @@
   color: #64B856;
 }
 
-/* Menu Flotante */
+/* Menu Flotante Contenido en Tarjeta */
 .pbd-menu {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 4px);
   left: 0;
-  width: 320px;
-  background: rgba(10, 18, 12, 0.98);
+  width: 295px;
+  max-height: 150px;
+  background: rgba(8, 15, 10, 0.98);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(100, 184, 86, 0.35);
-  border-radius: 8px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  border: 1px solid rgba(100, 184, 86, 0.38);
+  border-radius: 7px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.85);
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -102,16 +103,17 @@
 }
 
 .pbd-search-box {
-  padding: 8px 10px;
-  background: rgba(0, 0, 0, 0.35);
-  border-bottom: 1px solid rgba(100, 184, 86, 0.18);
+  padding: 5px 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border-bottom: 1px solid rgba(100, 184, 86, 0.2);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .search-icon {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.7;
 }
 
@@ -120,9 +122,9 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
-  padding: 5px 8px;
+  padding: 3px 7px;
   color: #f8fafc;
-  font-size: 11px;
+  font-size: 10.5px;
   outline: none;
   box-sizing: border-box;
   font-family: inherit;
@@ -131,7 +133,7 @@
 
 .pbd-search-input:focus {
   border-color: #64B856;
-  box-shadow: 0 0 6px rgba(100, 184, 86, 0.3);
+  box-shadow: 0 0 5px rgba(100, 184, 86, 0.3);
 }
 
 .pbd-search-input::placeholder {
@@ -139,9 +141,9 @@
 }
 
 .pbd-list-scroll {
-  max-height: 240px;
+  max-height: 112px;
   overflow-y: auto;
-  padding: 4px 0;
+  padding: 2px 0;
 }
 
 .pbd-list-scroll::-webkit-scrollbar {
@@ -149,17 +151,19 @@
 }
 
 .pbd-list-scroll::-webkit-scrollbar-thumb {
-  background: rgba(100, 184, 86, 0.3);
+  background: rgba(100, 184, 86, 0.35);
   border-radius: 3px;
 }
 
 .pbd-item {
-  padding: 7px 12px;
+  padding: 4px 10px;
+  height: 25px;
+  box-sizing: border-box;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 10.5px;
   color: #cbd5e1;
   transition: background 0.15s;
   border-bottom: 1px solid rgba(255, 255, 255, 0.02);
