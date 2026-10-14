@@ -1070,6 +1070,8 @@
   ];
   /** Alineado con ThingsBoard device profile (actividad ~10 min); no ampliar sin motivo. */
   var HYV_FRESHNESS_WINDOW_MS = 10 * 60 * 1000;
+  /** Poll REST del portafolio (dashboards + telemetría por device). */
+  var HYV_FLEET_REFRESH_MS = 3 * 60 * 1000;
 
   function hyvNormalizeSiteName(name) {
     return (name || '').toLowerCase().replace(/[\s\-_]+/g, ' ').trim();
@@ -1176,6 +1178,41 @@
       d += (i === 0 ? 'M' : ' L') + x + ',' + y;
     });
     return d;
+  }
+
+  /** Métricas de UI: offline no muestra 0.0 (evita confundir con lectura real). */
+  function hyvBuildSiteUiMetrics(opts) {
+    if (!opts.isOnline) {
+      var hint = opts.offlineHint || 'Sin telemetría en vivo';
+      return {
+        solarKw: '—',
+        loadKw: '—',
+        solarToday: 'Sin telemetría',
+        bessMain: '—',
+        bessSub: hint,
+        cycles: '—',
+        temp: '—',
+        powerProfile: 'Sin enlace'
+      };
+    }
+    var bessMain;
+    if (opts.hasSoc) {
+      bessMain = Math.round(opts.socVal) + '%';
+    } else if (opts.isRoatan) {
+      bessMain = 'Flotación';
+    } else {
+      bessMain = '—';
+    }
+    return {
+      solarKw: opts.solarKw.toFixed(1) + ' kW',
+      loadKw: opts.loadKw.toFixed(1) + ' kW',
+      solarToday: opts.solarTodayStr,
+      bessMain: bessMain,
+      bessSub: opts.bessVoltStr,
+      cycles: opts.cyclesVal !== null ? String(Math.round(opts.cyclesVal)) : '—',
+      temp: opts.tempStr,
+      powerProfile: 'Estable'
+    };
   }
 
   function hyvAssignDevicesToDashboards(dashList, telemetries) {
@@ -1315,6 +1352,12 @@
         // Coherente con Entidades → Dispositivos (active) + telemetría reciente en claves operativas
         var isOnline = !!matchedTelObj && tbDeviceActive && isFresh && hasHeartbeat && !isAllZero;
 
+        var offlineHint = 'Sin enlace';
+        if (!matchedTelObj) offlineHint = 'Sin dispositivo vinculado';
+        else if (!tbDeviceActive) offlineHint = 'Inactivo (ThingsBoard)';
+        else if (!isFresh && maxTs > 0) offlineHint = 'Telemetría expirada (' + Math.round(ageMs / 60000) + ' min)';
+        else if (isAllZero) offlineHint = 'Sin señal eléctrica';
+
         // Formato dinámico de energía solar
         var solarTodayStr = '0.0 kWh';
         if (solarKwh >= 1000) {
@@ -1337,6 +1380,20 @@
         var subtitleStr = isEpm ? "BESS Industrial Off-Grid • Vichada, Colombia" : (isRoatan ? "Microred Híbrida Telecom • Roatán, Honduras" : (isMosquitia ? "Microred Híbrida Off-Grid • Mosquitia, Honduras" : (isHn ? "Microred Híbrida Telecom • Honduras" : "Microred Híbrida Telecom • Colombia")));
         var typeStr = isEpm ? "BESS Off-Grid" : (isHn ? "Microred Híbrida" : "Microred Solar");
 
+        var uiMetrics = hyvBuildSiteUiMetrics({
+          isOnline: isOnline,
+          offlineHint: offlineHint,
+          solarKw: solarKw,
+          loadKw: loadKw,
+          solarTodayStr: solarTodayStr,
+          hasSoc: hasSoc,
+          socVal: socVal,
+          isRoatan: isRoatan,
+          bessVoltStr: bessVoltStr,
+          cyclesVal: cyclesVal,
+          tempStr: tempStr
+        });
+
         return {
           id: id,
           title: title,
@@ -1345,18 +1402,20 @@
           type: typeStr,
           status: isOnline ? "normal" : "alert",
           isOnline: isOnline,
+          offlineHint: offlineHint,
+          ui: uiMetrics,
           hasBess: (hasSoc || isEpm),
           solarKw: isOnline ? solarKw : 0.0,
-          solarTodayKwh: isOnline ? solarTodayStr : '0.0 kWh',
+          solarTodayKwh: isOnline ? solarTodayStr : 'Sin telemetría',
           solarTodayRawKwh: isOnline ? solarKwh : 0.0,
           bessSoc: (hasSoc && isOnline) ? socVal : null,
           bessSocDisplay: bessSocDisplay,
-          bessVolt: isOnline ? bessVoltStr : '-- V',
+          bessVolt: isOnline ? bessVoltStr : '—',
           bessCap: isEpm ? "750 V Bus" : (vbatVal > 0 ? (vbatVal.toFixed(0) + " V Bus") : "48V Bus"),
           loadKw: isOnline ? loadKw : 0.0,
-          uptime: isOnline ? (ageMs < 60000 ? 'En línea' : 'Reciente') : (matchedTelObj && !tbDeviceActive ? 'Inactivo (TB)' : 'Sin enlace'),
-          temp: isOnline ? tempStr : '-- °C',
-          cycles: cyclesVal !== null ? Math.round(cyclesVal).toString() : (isOnline ? '--' : '--'),
+          uptime: isOnline ? (ageMs < 60000 ? 'En línea' : 'Reciente') : offlineHint,
+          temp: uiMetrics.temp,
+          cycles: uiMetrics.cycles,
           matchedDeviceName: matchedDeviceName,
           telemetryAgeMin: maxTs > 0 ? Math.round(ageMs / 60000) : null,
           country: isHn ? 'HN' : 'CO',
@@ -1460,16 +1519,30 @@
 
     // 1. Potencia Activa Total Consolidada
     var valPower = hub.querySelector('#hyv-kpi-power');
-    if (valPower) valPower.innerHTML = (totalPower > 0 ? totalPower.toFixed(1) : '0.0') + '<span>kW</span>';
+    if (valPower) {
+      if (onlineCount === 0) {
+        valPower.innerHTML = '—<span>kW</span>';
+      } else {
+        valPower.innerHTML = (totalPower > 0 ? totalPower.toFixed(1) : '0.0') + '<span>kW</span>';
+      }
+    }
     var subPower = hub.querySelector('#hyv-kpi-power-sub');
     if (subPower) {
-      subPower.innerText = totalPower > 0 ? 'Demanda de carga activa consolidada' : 'Sin consumo activo registrado';
+      if (onlineCount === 0) {
+        subPower.innerText = 'Ningún sitio con telemetría en vivo';
+        subPower.className = 'hyv-kpi-sub danger';
+      } else {
+        subPower.className = 'hyv-kpi-sub positive';
+        subPower.innerText = totalPower > 0 ? 'Demanda de carga activa consolidada' : 'Sitios en línea sin carga medida';
+      }
     }
 
     // 2. Generación Solar Consolidada Hoy
     var valEnergy = hub.querySelector('#hyv-kpi-energy');
     if (valEnergy) {
-      if (totalEnergyKwh >= 1000) {
+      if (onlineCount === 0) {
+        valEnergy.innerHTML = '—<span>kWh</span>';
+      } else if (totalEnergyKwh >= 1000) {
         valEnergy.innerHTML = (totalEnergyKwh / 1000).toFixed(2) + '<span>MWh</span>';
       } else {
         valEnergy.innerHTML = totalEnergyKwh.toFixed(1) + '<span>kWh</span>';
@@ -1513,8 +1586,12 @@
     // 5. Disponibilidad SLA de Telemetría 24/7
     var valSla = hub.querySelector('#hyv-kpi-sla');
     if (valSla) {
-      var slaPct = totalSites > 0 ? ((onlineCount / totalSites) * 100).toFixed(1) : '100.0';
-      valSla.innerHTML = slaPct + '<span>%</span>';
+      if (onlineCount === 0 && totalSites > 0) {
+        valSla.innerHTML = '—<span>%</span>';
+      } else {
+        var slaPct = totalSites > 0 ? ((onlineCount / totalSites) * 100).toFixed(1) : '100.0';
+        valSla.innerHTML = slaPct + '<span>%</span>';
+      }
     }
     var subSla = hub.querySelector('#hyv-kpi-sla-sub');
     if (subSla) {
@@ -1569,8 +1646,9 @@
       } else {
         sites.forEach(function(s) {
           var targetUrl = '/dashboards/' + s.id;
+          var ui = s.ui || {};
           html += `
-            <div class="hyv-site-card">
+            <div class="hyv-site-card ${s.isOnline ? '' : 'hyv-site-card-offline'}">
               <div class="hyv-card-header">
                 <div class="hyv-card-title-wrap">
                   <a class="hyv-card-title" href="${targetUrl}">
@@ -1588,30 +1666,32 @@
                 </div>
               </div>
 
+              ${s.isOnline ? '' : `<div class="hyv-offline-banner" title="${s.offlineHint || ''}">📡 ${s.offlineHint || 'Sin telemetría en vivo'}</div>`}
+
               <!-- Power Triad: Solar, BESS, Load -->
-              <div class="hyv-power-triad">
+              <div class="hyv-power-triad ${s.isOnline ? '' : 'hyv-power-triad-muted'}">
                 <div class="hyv-triad-item">
                   <span class="hyv-triad-label">☀️ Solar</span>
-                  <span class="hyv-triad-val solar">${s.solarKw.toFixed(1)} <small style="font-size:10px;">kW</small></span>
+                  <span class="hyv-triad-val solar ${s.isOnline ? '' : 'hyv-no-data'}">${ui.solarKw || '—'}</span>
                   <span class="hyv-triad-extra">${s.solarTodayKwh}</span>
                 </div>
                 <div class="hyv-triad-item">
                   <span class="hyv-triad-label">🔋 BESS</span>
-                  <span class="hyv-triad-val bess">${s.bessSocDisplay === 'N/A' ? 'Flotación' : (s.bessSocDisplay !== '--' ? s.bessSocDisplay + '%' : '--')}</span>
-                  <span class="hyv-triad-extra">${s.bessVolt}</span>
+                  <span class="hyv-triad-val bess ${s.isOnline ? '' : 'hyv-no-data'}">${ui.bessMain || '—'}</span>
+                  <span class="hyv-triad-extra">${ui.bessSub || '—'}</span>
                 </div>
                 <div class="hyv-triad-item">
                   <span class="hyv-triad-label">💡 Carga</span>
-                  <span class="hyv-triad-val load">${s.loadKw.toFixed(1)} <small style="font-size:10px;">kW</small></span>
+                  <span class="hyv-triad-val load ${s.isOnline ? '' : 'hyv-no-data'}">${ui.loadKw || '—'}</span>
                   <span class="hyv-triad-extra">${s.isOnline ? 'Activa' : 'Sin señal'}</span>
                 </div>
               </div>
 
               <!-- Sparkline 24h Profile -->
-              <div class="hyv-card-sparkline-wrap">
+              <div class="hyv-card-sparkline-wrap ${s.isOnline ? '' : 'hyv-sparkline-offline'}">
                 <div class="hyv-sparkline-label">
                   <span>Perfil de Potencia (Últimas 24h)</span>
-                  <span style="color:${s.isOnline ? '#6be35b' : '#ef4444'};">${s.isOnline ? 'Estable' : 'Sin Enlace'}</span>
+                  <span style="color:${s.isOnline ? '#6be35b' : '#ef4444'};">${ui.powerProfile || 'Sin enlace'}</span>
                 </div>
                 <svg class="hyv-sparkline-svg" viewBox="0 0 270 44" preserveAspectRatio="none">
                   <defs>
@@ -1829,12 +1909,12 @@
               </div>
               <div class="hyv-float-sub">📍 ${selectedSite.region} • GPS: ${selectedSite.lat.toFixed(4)}°, ${selectedSite.lng.toFixed(4)}°</div>
               <div class="hyv-float-grid">
-                <div>☀️ Solar: <strong style="color:#f7d048;">${selectedSite.solarKw.toFixed(1)} kW</strong></div>
-                <div>🔋 BESS: <strong style="color:#6be35b;">${selectedSite.bessSocDisplay === 'N/A' ? 'Flotación' : selectedSite.bessSocDisplay + '%'}</strong></div>
-                <div>💡 Carga: <strong style="color:#62c3f5;">${selectedSite.loadKw.toFixed(1)} kW</strong></div>
+                <div>☀️ Solar: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#f7d048' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.solarKw) || '—'}</strong></div>
+                <div>🔋 BESS: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#6be35b' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.bessMain) || '—'}</strong></div>
+                <div>💡 Carga: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#62c3f5' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.loadKw) || '—'}</strong></div>
                 <div>⚡ SLA: <strong style="color:#ffffff;">${selectedSite.uptime}</strong></div>
               </div>
-              <a class="hyv-float-scada-btn" href="/dashboards/${selectedSite.id}">⚡ Abrir SCADA en Vivo</a>
+              <a class="hyv-float-scada-btn" href="/dashboards/${selectedSite.id}">${selectedSite.isOnline ? '⚡ Abrir SCADA en Vivo' : '📂 Abrir SCADA (histórico)'}</a>
             </div>
           </div>
         </div>
@@ -1892,34 +1972,39 @@
       } else {
         sites.forEach(function(s) {
           var targetUrl = '/dashboards/' + s.id;
+          var uiT = s.ui || {};
           tableHtml += `
-            <tr>
+            <tr class="${s.isOnline ? '' : 'hyv-table-row-offline'}">
               <td>
                 <span class="hyv-status-dot ${s.isOnline ? '' : 'offline'}"></span>
                 <span style="font-size:11px; font-weight:700; color:${s.isOnline ? '#8ce47e' : '#f87171'}; margin-left:6px;">${s.isOnline ? 'ONLINE' : 'OFFLINE'}</span>
               </td>
               <td>
                 <a href="${targetUrl}" style="color:#ffffff; font-weight:700; text-decoration:none;">${s.title}</a>
+                ${s.isOnline ? '' : `<div class="hyv-table-offline-hint">${s.offlineHint || 'Sin telemetría'}</div>`}
               </td>
               <td><span class="hyv-card-type-tag ${s.isOnline ? 'online' : 'offline'}">${s.type}</span></td>
               <td>${s.region}</td>
-              <td><strong style="color:#f7d048;">${s.solarKw.toFixed(1)} kW</strong></td>
+              <td><strong class="${s.isOnline ? '' : 'hyv-no-data'}" style="color:${s.isOnline ? '#f7d048' : '#64748b'};">${uiT.solarKw || '—'}</strong></td>
               <td>
                 <div class="hyv-table-bess-bar">
-                  ${s.bessSocDisplay === 'N/A'
-                    ? `<span style="color:#38bdf8; font-size:10.5px; font-weight:700; background:rgba(56,189,248,0.12); padding:2px 7px; border-radius:4px; border:1px solid rgba(56,189,248,0.25);">Flotación</span>`
-                    : (s.bessSocDisplay !== '--'
-                        ? `<span style="color:#6be35b; font-weight:700; min-width:38px;">${s.bessSocDisplay}%</span>
-                           <div class="hyv-progress-bg">
-                             <div class="hyv-progress-fill" style="width:${s.bessSocDisplay}%;"></div>
-                           </div>`
-                        : `<span style="color:#94a3b8; font-weight:600;">--</span>`
+                  ${!s.isOnline
+                    ? `<span class="hyv-no-data" style="font-weight:600;">—</span>`
+                    : (uiT.bessMain === 'Flotación'
+                        ? `<span style="color:#38bdf8; font-size:10.5px; font-weight:700; background:rgba(56,189,248,0.12); padding:2px 7px; border-radius:4px; border:1px solid rgba(56,189,248,0.25);">Flotación</span>`
+                        : (s.bessSoc !== null && s.bessSoc > 0
+                            ? `<span style="color:#6be35b; font-weight:700; min-width:38px;">${Math.round(s.bessSoc)}%</span>
+                               <div class="hyv-progress-bg">
+                                 <div class="hyv-progress-fill" style="width:${Math.round(s.bessSoc)}%;"></div>
+                               </div>`
+                            : `<span class="hyv-no-data" style="font-weight:600;">${uiT.bessMain || '—'}</span>`
+                          )
                       )
                   }
                 </div>
               </td>
-              <td><strong style="color:#62c3f5;">${s.loadKw.toFixed(1)} kW</strong></td>
-              <td><strong style="color:#ffffff;">${s.uptime}</strong></td>
+              <td><strong class="${s.isOnline ? '' : 'hyv-no-data'}" style="color:${s.isOnline ? '#62c3f5' : '#64748b'};">${uiT.loadKw || '—'}</strong></td>
+              <td><strong style="color:${s.isOnline ? '#ffffff' : '#94a3b8'};">${s.uptime}</strong></td>
               <td>
                 <div style="display:flex; gap:6px; align-items:center;">
                   <a class="hyv-btn-scada" style="padding:4px 8px; font-size:11px;" href="${targetUrl}">⚡ SCADA</a>
@@ -2032,8 +2117,7 @@
 
     if (existingHub) {
       existingHub.style.display = 'flex';
-      // Auto-refresh telemetry if older than 15s
-      if (Date.now() - fleetHubState.lastTelemetryFetch > 15000) {
+      if (Date.now() - fleetHubState.lastTelemetryFetch > HYV_FLEET_REFRESH_MS) {
         loadRealDashboards(function() {
           updateKpisAndHeader(existingHub);
           renderFleetHubContent(existingHub);
@@ -2218,7 +2302,6 @@
       renderFleetHubContent(hub);
     });
 
-    // Background interval: auto-refresh telemetry every 20 seconds while in fleet view
     if (fleetHubState.refreshIntervalId) clearInterval(fleetHubState.refreshIntervalId);
     fleetHubState.refreshIntervalId = setInterval(function() {
       if (isDashboardsListView() && !fleetHubState.isClassicMode) {
@@ -2230,7 +2313,7 @@
           }
         });
       }
-    }, 20000);
+    }, HYV_FLEET_REFRESH_MS);
   }
 
   // 11. Lifecycle & Clean Listeners (Zero Infinite Loops)

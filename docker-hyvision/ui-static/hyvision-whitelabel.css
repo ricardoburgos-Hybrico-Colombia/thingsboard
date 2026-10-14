@@ -853,6 +853,51 @@ tb-entities-table {
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), 0 0 24px rgba(67, 106, 60, 0.35);
 }
 
+.hyv-site-card-offline {
+  border-color: rgba(239, 68, 68, 0.28);
+  background: linear-gradient(165deg, rgba(28, 28, 32, 0.55) 0%, rgba(12, 14, 16, 0.9) 100%);
+}
+
+.hyv-site-card-offline:hover {
+  border-color: rgba(248, 113, 113, 0.45);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+.hyv-offline-banner {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  padding: 6px 10px;
+  line-height: 1.35;
+}
+
+.hyv-no-data {
+  color: #64748b !important;
+  font-weight: 600;
+}
+
+.hyv-power-triad-muted .hyv-triad-val {
+  color: #64748b !important;
+}
+
+.hyv-sparkline-offline {
+  opacity: 0.65;
+}
+
+.hyv-table-row-offline {
+  background: rgba(15, 18, 20, 0.45);
+}
+
+.hyv-table-offline-hint {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
 /* Card Header */
 .hyv-card-header {
   display: flex;
