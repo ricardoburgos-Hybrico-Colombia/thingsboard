@@ -1,0 +1,114 @@
+<div class="telecom-card-container">
+  <!-- Header -->
+  <div class="telecom-header">
+    <div class="telecom-title-group">
+      <span class="telecom-icon">⚡</span>
+      <span class="telecom-title-main" id="telecom-title-text">PLANTA DE FUERZA DC 48V</span>
+      <span class="telecom-subtag">BUS TELECOM</span>
+    </div>
+    <div class="telecom-header-right">
+      <div id="telecom-mode-badge" class="telecom-mode-badge">FLOTACIÓN</div>
+      <div id="telecom-status-badge" class="telecom-badge ok">BUS DC ACTIVO</div>
+    </div>
+  </div>
+
+  <!-- Métricas Principales (KPIs) -->
+  <div class="telecom-top-metrics">
+    <div class="telecom-kpi-block">
+      <span class="kpi-sub-lbl">TENSIÓN BUS DC</span>
+      <div class="kpi-val-group">
+        <span id="telecom-vbus-val" class="kpi-vbus">--</span>
+        <span class="kpi-unit-pbd">V</span>
+      </div>
+    </div>
+    <div class="telecom-sep"></div>
+    <div class="telecom-kpi-block">
+      <span class="kpi-sub-lbl">CORRIENTE SOLAR</span>
+      <div class="kpi-val-group">
+        <span id="telecom-isolar-val" class="kpi-isolar">0.0</span>
+        <span class="kpi-unit-pbd">A</span>
+      </div>
+    </div>
+    <div class="telecom-sep"></div>
+    <div class="telecom-kpi-block">
+      <span class="kpi-sub-lbl">POTENCIA SOLAR</span>
+      <div class="kpi-val-group">
+        <span id="telecom-psolar-val" class="kpi-psolar">0.0</span>
+        <span class="kpi-unit-pbd">kW</span>
+      </div>
+    </div>
+    <div class="telecom-sep"></div>
+    <div class="telecom-kpi-block">
+      <span class="kpi-sub-lbl">CORRIENTE RECTIF.</span>
+      <div class="kpi-val-group">
+        <span id="telecom-irect-val" class="kpi-irect">0.0</span>
+        <span class="kpi-unit-pbd">A</span>
+      </div>
+    </div>
+    <div class="telecom-sep"></div>
+    <div class="telecom-kpi-block">
+      <span class="kpi-sub-lbl">TEMP. GABINETE</span>
+      <div class="kpi-val-group">
+        <span id="telecom-temp-val" class="kpi-temp">--</span>
+        <span class="kpi-unit-pbd">°C</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canales Técnicos de Energía DC: Cargador Solar & Rectificadores -->
+  <div class="telecom-channels-grid">
+    <!-- Canal 1: Cargador Solar MPPT 48V -->
+    <div class="telecom-channel-card" id="card-solar-channel">
+      <div class="channel-hdr">
+        <div class="channel-title">
+          <span class="channel-dot" id="solar-dot">●</span>
+          <span>☀️ CARGADOR SOLAR MPPT</span>
+        </div>
+        <span id="solar-status-txt" class="channel-status-lbl ok">Activo</span>
+      </div>
+      <div class="channel-body">
+        <div class="channel-main-val">
+          <span id="channel-solar-i" class="val-num">0.0 A</span>
+          <span id="channel-solar-p" class="val-sub">0.00 kW</span>
+        </div>
+        <div class="channel-bar-wrap">
+          <div id="channel-solar-bar" class="channel-bar-fill solar" style="width: 0%;"></div>
+        </div>
+        <div class="channel-details">
+          <span>Tensión Salida: <strong id="channel-solar-v">-- V</strong></span>
+          <span>Régimen: <strong id="channel-solar-reg">Absorción</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canal 2: Módulos Rectificadores AC/DC (o Batería DC si Off-Grid) -->
+    <div class="telecom-channel-card" id="card-rect-channel">
+      <div class="channel-hdr">
+        <div class="channel-title">
+          <span class="channel-dot" id="rect-dot">●</span>
+          <span id="rect-title-txt">⚡ MÓDULOS RECTIFICADORES AC/DC</span>
+        </div>
+        <span id="rect-status-txt" class="channel-status-lbl ok">Suministrando</span>
+      </div>
+      <div class="channel-body">
+        <div class="channel-main-val">
+          <span id="channel-rect-i" class="val-num">0.0 A</span>
+          <span id="channel-rect-p" class="val-sub">0.00 kW</span>
+        </div>
+        <div class="channel-bar-wrap">
+          <div id="channel-rect-bar" class="channel-bar-fill rect" style="width: 0%;"></div>
+        </div>
+        <div class="channel-details">
+          <span>Tensión Bus: <strong id="channel-rect-v">-- V</strong></span>
+          <span id="channel-rect-source">Fuente: <strong id="channel-source-txt">Red Comercial</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie de Tarjeta -->
+  <div class="telecom-footer">
+    <span>Topología: <strong style="color:#64B856;">Planta de Fuerza Telecom 48V DC</strong> · Banco Baterías <span id="telecom-vbat-footer" style="color:#94a3b8;"></span></span>
+    <span>Monitoreo HyNet · <strong id="telecom-cap-txt" style="color:#38bdf8;">Bus 48V Estabilizado</strong></span>
+  </div>
+</div>
