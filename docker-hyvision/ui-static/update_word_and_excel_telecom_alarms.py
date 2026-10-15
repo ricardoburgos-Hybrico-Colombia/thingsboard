@@ -1,0 +1,618 @@
+# -*- coding: utf-8 -*-
+import os
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+import docx
+from docx.shared import Inches, Pt, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+
+DOC_DIR = r"C:\Users\PC\Documents\AI_Engineer\20.LEER_DATA_API_ENERCLO"
+EXCEL_PATH = os.path.join(DOC_DIR, "Mapeo_Telemetria_Variables_y_Formulas_GAORI.xlsx")
+WORD_PATH  = os.path.join(DOC_DIR, "Mapeo_Telemetria_Variables_y_Formulas_GAORI.docx")
+
+SITES_15_LIST = [
+    {"alias": "WEST_END_II", "pais": "Honduras", "ps_id": "hyb_west_end2", "topologia": "ON_GRID_SOLAR_BESS", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
+    {"alias": "DIXON_HILL", "pais": "Honduras", "ps_id": "hyb_dixon_hill", "topologia": "ON_GRID_SOLAR_BESS", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
+    {"alias": "WEST_BAY", "pais": "Honduras", "ps_id": "hyb_west_bay", "topologia": "ON_GRID_SOLAR_BESS", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
+    {"alias": "FRENCH_HARBOR_ESTE", "pais": "Honduras", "ps_id": "hyb_french_harbor_este", "topologia": "ON_GRID_SOLAR_BESS", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
+    {"alias": "PALACIOS", "pais": "Honduras", "ps_id": "hyb_palacios", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"},
+    {"alias": "ARENAL - HN794", "pais": "Honduras", "ps_id": "hyb_arenal_-_hn794", "topologia": "HIBRIDO_GRID_DG", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
+    {"alias": "AGUA CALIENTE - HN801", "pais": "Honduras", "ps_id": "hyb_agua_caliente_-_hn801", "topologia": "HIBRIDO_GRID_DG", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
+    {"alias": "BUENOS AIRES II SPS - HN682", "pais": "Honduras", "ps_id": "hyb_buenos_aires_ii_sps", "topologia": "ON_GRID_SOLAR_BESS", "solar": "inverterArrayPower", "red": "Presente", "dg": "No"},
+    {"alias": "CAMPO LIMONES LOS ENCUENTROS - HN493", "pais": "Honduras", "ps_id": "hyb_campo_limones_los_encuentros_-_hn493", "topologia": "HIBRIDO_GRID_DG", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
+    {"alias": "CAMALOTE - HN2013", "pais": "Honduras", "ps_id": "hyb_camalote_-_hn2013", "topologia": "HIBRIDO_GRID_DG", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
+    {"alias": "COR9007", "pais": "Colombia", "ps_id": "hyb_cor9007", "topologia": "ON_GRID_SOLAR_BESS", "solar": "inverterArrayPower", "red": "Presente", "dg": "No"},
+    {"alias": "CUN7016", "pais": "Colombia", "ps_id": "hyb_cun7016", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"},
+    {"alias": "ANT7086", "pais": "Colombia", "ps_id": "hyb_ant7086", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"},
+    {"alias": "CHO7151", "pais": "Colombia", "ps_id": "hyb_cho7151", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"},
+    {"alias": "BOY7014", "pais": "Colombia", "ps_id": "hyb_boy-7014", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"}
+]
+
+TELECOM_ALARMS = [
+    # 1. Gateway Edge HyNet
+    {
+        "id": "ALM-HNT-001",
+        "subsistema": "Gateway Edge HyNet",
+        "equipo": "Enlace de Telemetria Remota",
+        "variable": "edge_offline_alarm",
+        "disparo": "== 1 (Offline)",
+        "despeje": "== 0 (Online)",
+        "severidad": "Critica",
+        "origen": "Nativa HyNet (Stellar API) / Device Profile",
+        "descripcion": "Perdida de enlace de telemetria y comunicacion con el controlador Edge del sitio remoto.",
+        "accion": "Verificar enlace satelital/celular de telemetria y estado de alimentacion del gateway en sitio.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-HNT-002",
+        "subsistema": "Controlador Central",
+        "equipo": "HyNet System Controller",
+        "variable": "system_state_code",
+        "disparo": "!= 0 (Codigo anormal)",
+        "despeje": "== 0 (Normal)",
+        "severidad": "Advertencia",
+        "origen": "Nativa HyNet (Stellar API)",
+        "descripcion": "Estado anormal o modo de falla reportado por la logica de control del hardware local.",
+        "accion": "Auditar registros de estado del controlador y verificar condiciones de falla perifericas.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-HNT-003",
+        "subsistema": "Controlador de Baterias",
+        "equipo": "BMS / LVD Local",
+        "variable": "battery_low_alarm",
+        "disparo": "== 1 (Bateria baja)",
+        "despeje": "== 0 (Recuperada)",
+        "severidad": "Critica",
+        "origen": "Nativa HyNet (Stellar API)",
+        "descripcion": "Senal fisica de pre-desconexion de carga por bateria baja emitida por el hardware local.",
+        "accion": "Verificar de inmediato disponibilidad de generacion solar o forzar arranque de grupo electrogeno.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    # 2. Banco de Baterias Bus DC 48V
+    {
+        "id": "ALM-BAT-001",
+        "subsistema": "Banco Baterias 48V",
+        "equipo": "BESS Telecom (LiFePO4 / Plomo)",
+        "variable": "battery_soc / soc_promedio",
+        "disparo": "< 15.0 %",
+        "despeje": ">= 20.0 %",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "SOC por debajo del limite critico de seguridad. Riesgo inminente de desconexion por LVD y caida de la radiobase.",
+        "accion": "Despacho inmediato de contingencia. Arranque de motogenerador o envio de cuadrilla de soporte.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-BAT-002",
+        "subsistema": "Banco Baterias 48V",
+        "equipo": "BESS Telecom (LiFePO4 / Plomo)",
+        "variable": "battery_soc / soc_promedio",
+        "disparo": "< 25.0 %",
+        "despeje": ">= 30.0 %",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "SOC bajo preventivo. Reserva operativa de radiobase comprometida en ausencia de generacion solar.",
+        "accion": "Monitoreo continuo de curva de descarga y verificacion de pronostico solar / estado de red comercial.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-BAT-003",
+        "subsistema": "Bus DC 48V",
+        "equipo": "Barras Principales DC",
+        "variable": "battery_voltage / load_dc_voltage",
+        "disparo": "< 47.0 V",
+        "despeje": ">= 48.5 V",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Subtension severa en bornes de alimentacion DC (peligrosamente proxima al umbral de corte de cargas BTS ~46.5V).",
+        "accion": "Comprobar disyuntores de bateria, caidas de tension en cables y presencia de carga activa.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-BAT-004",
+        "subsistema": "Bus DC 48V",
+        "equipo": "Barras Principales DC",
+        "variable": "battery_voltage",
+        "disparo": "< 48.5 V",
+        "despeje": ">= 50.0 V",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Subtension preventiva en bus DC. Banco de baterias operando en zona de descarga profunda.",
+        "accion": "Supervisar balance neto de potencia del sitio y activar fuentes auxiliares si estan disponibles.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-BAT-005",
+        "subsistema": "Bus DC 48V",
+        "equipo": "Barras Principales DC",
+        "variable": "battery_voltage",
+        "disparo": "> 57.6 V",
+        "despeje": "<= 56.0 V",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Sobretension en bus DC de baterias. Falla en bucle de regulacion de rectificadores o cargador solar MPPT.",
+        "accion": "Intervencion remota o manual para apagar cargadores solares/rectificadores sobrevoltados y proteger radios.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-BAT-006",
+        "subsistema": "Climatizacion Gabinete",
+        "equipo": "Sensor Termico de Baterias",
+        "variable": "temp_bateria_max",
+        "disparo": "> 45.0 °C",
+        "despeje": "<= 40.0 °C",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Sobretemperatura critica en baterias. Riesgo de degradacion electroquimica acelerada o dano permanente.",
+        "accion": "Forzar extraccion de aire, apagar cargas no criticas y verificar ventilacion/AC del gabinete.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-BAT-007",
+        "subsistema": "Climatizacion Gabinete",
+        "equipo": "Sensor Termico de Baterias",
+        "variable": "temp_bateria_max",
+        "disparo": "> 38.0 °C",
+        "despeje": "<= 35.0 °C",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Temperatura elevada en baterias (por encima de la banda nominal de 15 °C a 35 °C).",
+        "accion": "Verificar filtros de aire de gabinete, funcionamiento de ventiladores DC y temperatura ambiental.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-BAT-008",
+        "subsistema": "Salud de Baterias",
+        "equipo": "Diagnostico de Capacidad BESS",
+        "variable": "battery_soh",
+        "disparo": "< 75.0 %",
+        "despeje": ">= 80.0 %",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Degradacion acusada del Estado de Salud (SoH). Capacidad residual por debajo del 75% del valor nominal.",
+        "accion": "Programar prueba de descarga controlada en sitio y reemplazo preventivo del modulo degradado.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-BAT-009",
+        "subsistema": "Autonomia de Sitio",
+        "equipo": "Estimador BESS / Carga",
+        "variable": "battery_autonomy_hours",
+        "disparo": "< 2.0 h (con red/diesel caido)",
+        "despeje": ">= 3.5 h",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Autonomia residual estimada critica. Quedan menos de 2 horas de respaldo a la tasa de descarga actual.",
+        "accion": "Escalar a NOC Telecom como incidente de alta prioridad para evitar corte de servicio de la estacion base.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    # 3. Cargas de Radiobase Telecom
+    {
+        "id": "ALM-LOD-001",
+        "subsistema": "Carga BTS Telecom",
+        "equipo": "Consumo Equipos Transmision DC",
+        "variable": "load_power_kw",
+        "disparo": "< 0.05 kW (en sitio activo)",
+        "despeje": ">= 0.10 kW",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Caida anomala de carga telecom a cero. Posible apagado de radios, microondas o disparo de disyuntor.",
+        "accion": "Notificar al centro de operaciones de red (NOC) para validar alarmas de celda caida o enlace caido.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-LOD-002",
+        "subsistema": "Carga BTS Telecom",
+        "equipo": "Consumo Equipos Transmision DC",
+        "variable": "load_power_kw",
+        "disparo": "> 1.25 * capacidad_carga_kw",
+        "despeje": "<= capacidad_carga_kw",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Sobrecarga en la estacion base. Consumo DC supera en 25% la capacidad maxima de diseno del sitio.",
+        "accion": "Verificar conexion de cargas no autorizadas o aumento imprevisto de transmisores RF en torre.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    # 4. Campo Solar y Cargadores MPPT
+    {
+        "id": "ALM-SOL-001",
+        "subsistema": "Campo Solar DC",
+        "equipo": "Cargador Solar MPPT",
+        "variable": "solar_power_kw",
+        "disparo": "< 0.1 kW (entre 10:00 y 14:00)",
+        "despeje": ">= 0.3 kW",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Ausencia de generacion solar en horas de radiacion pico. Posible falla de MPPT o sombra extrema.",
+        "accion": "Comprobar disyuntores solares DC, verificar fusible de entrada MPPT y estado de los modulos FV.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    {
+        "id": "ALM-SOL-002",
+        "subsistema": "Campo Solar DC",
+        "equipo": "Strings Fotovoltaicos",
+        "variable": "solar_charger_voltage",
+        "disparo": "< 25.0 V (en horario diurno)",
+        "despeje": ">= 35.0 V",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Tension DC anormal en circuito de paneles solares durante el dia (posible string desconectado).",
+        "accion": "Revisar cableado fotovoltaico, seccionadores bajo carga y cajas de empalme en torre/suelo.",
+        "sitios_aplica": "Todos los 15 sitios Telecom"
+    },
+    # 5. Rectificadores Telecom AC/DC
+    {
+        "id": "ALM-REC-001",
+        "subsistema": "Rectificadores AC/DC",
+        "equipo": "Planta de Fuerza Telecom",
+        "variable": "rectifier_power_kw",
+        "disparo": "== 0.0 kW (con Red/DG > 0.4 kW)",
+        "despeje": "> 0.1 kW",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Falla de modulos rectificadores con fuente AC presente (red o diesel activo sin conversion a DC).",
+        "accion": "Inspeccionar breakers de entrada AC a los rectificadores y alarmas LED en el bastidor de fuerza.",
+        "sitios_aplica": "Sitios con Red Comercial o Generador"
+    },
+    {
+        "id": "ALM-REC-002",
+        "subsistema": "Rectificadores AC/DC",
+        "equipo": "Planta de Fuerza Telecom",
+        "variable": "rectifier_voltage",
+        "disparo": "< 48.0 V o > 57.5 V (con rectificador activo)",
+        "despeje": "Entre 51.0 V y 55.0 V",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Tension de salida del bastidor de rectificadores fuera de la banda segura de flotacion.",
+        "accion": "Reajustar tension de flotacion/ecualizacion en el controlador de la planta de fuerza.",
+        "sitios_aplica": "Sitios con Red Comercial o Generador"
+    },
+    {
+        "id": "ALM-REC-003",
+        "subsistema": "Instrumentacion Red",
+        "equipo": "Sensor de Corriente CT",
+        "variable": "grid_diagnostic",
+        "disparo": "== 'CT_MONOFASICO_EN_BIFASICA'",
+        "despeje": "== 'NORMAL'",
+        "severidad": "Advertencia",
+        "origen": "Motor Analitico ThingsBoard",
+        "descripcion": "Discrepancia detectada en relacion de potencia rectificador vs red (~2x). CT monofasico en acometida bifasica.",
+        "accion": "Programar calibracion o instalacion del segundo transformador de corriente (CT) en fase restante.",
+        "sitios_aplica": "Sitios con conexion a red bifasica"
+    },
+    # 6. Red Comercial AC (Grid)
+    {
+        "id": "ALM-GRD-001",
+        "subsistema": "Red Comercial AC",
+        "equipo": "Acometida Electrica / Grid",
+        "variable": "grid_available",
+        "disparo": "== 0 (en sitios On-Grid/Hibridos)",
+        "despeje": "== 1 (Red recuperada)",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Corte de suministro electrico de red comercial. Sitio transfirio operacion a BESS y/o motogenerador.",
+        "accion": "Monitorear nivel de combustible y autonomia de baterias mientras se notifica a empresa de distribucion.",
+        "sitios_aplica": "Sitios ON_GRID_SOLAR_BESS y HIBRIDO_GRID_DG"
+    },
+    {
+        "id": "ALM-GRD-002",
+        "subsistema": "Red Comercial AC",
+        "equipo": "Acometida Electrica / Grid",
+        "variable": "grid_voltage",
+        "disparo": "> 250 V (en 220V) / > 135 V (en 120V)",
+        "despeje": "Nominal +- 5%",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Sobretension en acometida de red comercial. Riesgo de fatiga en supresores TVSS y rectificadores.",
+        "accion": "Comprobar varistores de proteccion contra rayos y estado del transformador de poste de media tension.",
+        "sitios_aplica": "Sitios ON_GRID_SOLAR_BESS y HIBRIDO_GRID_DG"
+    },
+    {
+        "id": "ALM-GRD-003",
+        "subsistema": "Red Comercial AC",
+        "equipo": "Acometida Electrica / Grid",
+        "variable": "grid_voltage",
+        "disparo": "< 190 V (en 220V) / < 95 V (en 120V)",
+        "despeje": "Nominal +- 5%",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Subtension severa de red comercial (Brownout). Rectificadores limitan corriente de carga.",
+        "accion": "Reportar fluctuacion de voltaje al distribuidor electrico local.",
+        "sitios_aplica": "Sitios ON_GRID_SOLAR_BESS y HIBRIDO_GRID_DG"
+    },
+    # 7. Motogenerador Diesel
+    {
+        "id": "ALM-GEN-001",
+        "subsistema": "Generador Diesel",
+        "equipo": "Tanque Combustible Diesel",
+        "variable": "generator_fuel_level",
+        "disparo": "< 15.0 % (con generador instalado)",
+        "despeje": ">= 25.0 %",
+        "severidad": "Critica",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Nivel critico de combustible en tanque diesel. Riesgo de descebado de bomba inyectora y apagado.",
+        "accion": "Despacho urgente de combustible diesel para garantizar continuidad operativa de la radiobase.",
+        "sitios_aplica": "Sitios con Motogenerador Diesel"
+    },
+    {
+        "id": "ALM-GEN-002",
+        "subsistema": "Generador Diesel",
+        "equipo": "Tanque Combustible Diesel",
+        "variable": "generator_fuel_level",
+        "disparo": "< 25.0 % (con generador instalado)",
+        "despeje": ">= 35.0 %",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Nivel bajo preventivo de combustible diesel. Autonomia de generacion reducida.",
+        "accion": "Programar ruta de reabastecimiento en la planificacion logistica semanal.",
+        "sitios_aplica": "Sitios con Motogenerador Diesel"
+    },
+    {
+        "id": "ALM-GEN-003",
+        "subsistema": "Generador Diesel",
+        "equipo": "Grupo Electrogeno Diesel",
+        "variable": "generator_runtime_hours",
+        "disparo": "> 12.0 h de corrida continua",
+        "despeje": "Al apagar generador",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Operacion continua prolongada del grupo electrogeno sin descanso termico.",
+        "accion": "Supervisar temperatura de refrigerante y presion de aceite; programar parada tecnica de descanso.",
+        "sitios_aplica": "Sitios con Motogenerador Diesel"
+    },
+    {
+        "id": "ALM-GEN-004",
+        "subsistema": "Generador Diesel",
+        "equipo": "Mantenimiento Preventivo",
+        "variable": "generator_runtime_hours",
+        "disparo": ">= 250.0 h acumuladas",
+        "despeje": "Reset posterior a servicio",
+        "severidad": "Advertencia",
+        "origen": "Device Profile HYBRICO_MICROGRID",
+        "descripcion": "Limite de horas de servicio alcanzado para mantenimiento preventivo periodico.",
+        "accion": "Ejecutar servicio de 250h: cambio de aceite, filtros de combustible, filtro de aire y revision de bateria.",
+        "sitios_aplica": "Sitios con Motogenerador Diesel"
+    }
+]
+
+# ==============================================================================
+# 1. ACTUALIZAR ARCHIVO EXCEL (.XLSX)
+# ==============================================================================
+print("[1/2] Actualizando archivo Excel con la Matriz de Alarmas Telecom...")
+wb = openpyxl.load_workbook(EXCEL_PATH)
+
+sheet_name = "Alarmas_Telecom_15_Sitios"
+if sheet_name in wb.sheetnames:
+    ws = wb[sheet_name]
+    wb.remove(ws)
+
+ws = wb.create_sheet(title=sheet_name)
+ws.views.sheetView[0].showGridLines = True
+
+# Paleta de colores
+fill_dark = PatternFill(start_color="0B1A10", end_color="0B1A10", fill_type="solid")
+fill_header = PatternFill(start_color="1B4332", end_color="1B4332", fill_type="solid")
+fill_sub = PatternFill(start_color="2D6A4F", end_color="2D6A4F", fill_type="solid")
+fill_alt = PatternFill(start_color="F4FBF7", end_color="F4FBF7", fill_type="solid")
+fill_crit = PatternFill(start_color="FDE8E8", end_color="FDE8E8", fill_type="solid")
+fill_warn = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+
+font_title = Font(name="Calibri", size=15, bold=True, color="FFFFFF")
+font_subtitle = Font(name="Calibri", size=10, italic=True, color="E2E8F0")
+font_head = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+font_data = Font(name="Calibri", size=10, color="1E293B")
+font_data_bold = Font(name="Calibri", size=10, bold=True, color="0F172A")
+font_crit = Font(name="Calibri", size=10, bold=True, color="991B1B")
+font_warn = Font(name="Calibri", size=10, bold=True, color="92400E")
+
+border_thin = Border(
+    left=Side(style='thin', color='CBD5E1'),
+    right=Side(style='thin', color='CBD5E1'),
+    top=Side(style='thin', color='CBD5E1'),
+    bottom=Side(style='thin', color='CBD5E1')
+)
+
+# Banner principal
+ws.merge_cells("A1:J1")
+ws["A1"] = "MATRIZ DE 24 ALARMAS SCADA Y PROTECCIONES OPERATIVAS - 15 SITIOS TELECOM"
+ws["A1"].font = font_title
+ws["A1"].fill = fill_dark
+ws["A1"].alignment = Alignment(horizontal="center", vertical="center")
+ws.row_dimensions[1].height = 36
+
+ws.merge_cells("A2:J2")
+ws["A2"] = "Ecosistema HyVision • Integracion Nativa Device Profile 'HYBRICO_MICROGRID' en ThingsBoard & API HyNet (Stellar by NSR)"
+ws["A2"].font = font_subtitle
+ws["A2"].fill = fill_dark
+ws["A2"].alignment = Alignment(horizontal="center", vertical="center")
+ws.row_dimensions[2].height = 20
+
+# Encabezados de columnas
+headers = [
+    "ID Alarma", "Subsistema", "Equipo / Elemento", "Variable Telemetria",
+    "Condicion Disparo", "Condicion Despeje", "Severidad",
+    "Nivel de Implementacion", "Descripcion Tecnica", "Accion Operativa / Protocolo"
+]
+
+ws.row_dimensions[4].height = 28
+for col_idx, h in enumerate(headers, 1):
+    cell = ws.cell(row=4, column=col_idx, value=h)
+    cell.font = font_head
+    cell.fill = fill_header
+    cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    cell.border = border_thin
+
+row_curr = 5
+for idx, a in enumerate(TELECOM_ALARMS):
+    ws.row_dimensions[row_curr].height = 32
+    is_crit = a["severidad"].lower() == "critica"
+    fill_row = fill_crit if is_crit else (fill_warn if a["severidad"].lower() == "advertencia" else (fill_alt if idx % 2 == 1 else PatternFill(fill_type=None)))
+
+    values = [
+        a["id"], a["subsistema"], a["equipo"], a["variable"],
+        a["disparo"], a["despeje"], a["severidad"],
+        a["origen"], a["descripcion"], a["accion"]
+    ]
+
+    for col_idx, val in enumerate(values, 1):
+        cell = ws.cell(row=row_curr, column=col_idx)
+        cell.value = str(val) if val is not None else ""
+        cell.data_type = 's'
+        cell.border = border_thin
+        
+        if col_idx == 7: # Severidad
+            cell.font = font_crit if is_crit else font_warn
+            cell.fill = fill_crit if is_crit else fill_warn
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+        elif col_idx in [1, 5, 6]:
+            cell.font = font_data_bold
+            cell.alignment = Alignment(horizontal="center", vertical="center")
+            if idx % 2 == 1: cell.fill = fill_alt
+        else:
+            cell.font = font_data
+            cell.alignment = Alignment(horizontal="left", vertical="center", wrap_text=True)
+            if idx % 2 == 1: cell.fill = fill_alt
+
+    row_curr += 1
+
+# Auto-ancho de columnas
+col_widths = {1: 15, 2: 24, 3: 26, 4: 28, 5: 22, 6: 22, 7: 15, 8: 30, 9: 45, 10: 45}
+for col_idx, w_val in col_widths.items():
+    ws.column_dimensions[get_column_letter(col_idx)].width = w_val
+
+wb.save(EXCEL_PATH)
+print("-> Archivo Excel actualizado exitosamente con la hoja 'Alarmas_Telecom_15_Sitios'.")
+
+# ==============================================================================
+# 2. ACTUALIZAR ARCHIVO WORD (.DOCX)
+# ==============================================================================
+def update_word():
+    print("[2/2] Actualizando archivo Word con la Matriz de Alarmas Telecom...")
+    doc = docx.Document(WORD_PATH)
+
+    # Verificar si la seccion 6 ya existe para no duplicar
+    sec6_exists = any("6. Matriz de Alarmas SCADA para los 15 Sitios Telecom" in p.text for p in doc.paragraphs)
+    if sec6_exists:
+        print("-> La seccion 6 ya se encuentra presente en el documento Word. Validada sin duplicaciones.")
+        return
+
+    # Helper para formato de celdas Word
+    def style_cell(cell, fill_hex=None, bold=False, font_size=9, color_rgb=(0,0,0), align=WD_ALIGN_PARAGRAPH.LEFT):
+        tcPr = cell._tc.get_or_add_tcPr()
+        if fill_hex:
+            shd = OxmlElement('w:shd')
+            shd.set(qn('w:val'), 'clear')
+            shd.set(qn('w:color'), 'auto')
+            shd.set(qn('w:fill'), fill_hex)
+            tcPr.append(shd)
+        cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+        for p in cell.paragraphs:
+            p.alignment = align
+            for r in p.runs:
+                r.font.name = "Calibri"
+                r.font.size = Pt(font_size)
+                r.font.bold = bold
+                r.font.color.rgb = RGBColor(*color_rgb)
+
+    # Agregar separador de página
+    doc.add_page_break()
+
+    # Título de sección 6
+    h1 = doc.add_heading("6. Matriz de Alarmas SCADA para los 15 Sitios Telecom (HyNet - Stellar & ThingsBoard)", level=1)
+    h1.paragraph_format.space_before = Pt(12)
+    h1.paragraph_format.space_after = Pt(8)
+
+    p_intro = doc.add_paragraph()
+    p_intro.add_run(
+        "Esta sección establece la arquitectura de protecciones operativas y supervisión automática implementada para los 15 sitios telecom "
+        "(Honduras y Colombia) monitoreados a través de la integración en tiempo real de HyNet (Stellar by New Sun Road) con ThingsBoard. "
+        "A diferencia de las plantas industriales de almacenamiento centralizado (GAORI), estos sitios operan con buses de corriente continua "
+        "de 48V estabilizado, cargadores solares fotovoltaicos MPPT, plantas de fuerza rectificadoras AC/DC, motogeneradores diésel de respaldo "
+        "y/o acometidas de red comercial."
+    )
+
+    p_arch = doc.add_paragraph()
+    r_arch_title = p_arch.add_run("Arquitectura Basada en Perfil de Dispositivo (Device Profile 'HYBRICO_MICROGRID'):\n")
+    r_arch_title.bold = True
+    p_arch.add_run(
+        "Siguiendo las mejores prácticas de ThingsBoard, las reglas de disparo y despeje se encuentran desacopladas e integradas nativamente "
+        "en el Perfil de Dispositivo 'HYBRICO_MICROGRID'. Esto permite que el motor de reglas (Rule Engine) de ThingsBoard genere entidades de alarma "
+        "reales (ALARM) con severidades Crítica y Advertencia tan pronto como la telemetría ingresa desde el pipeline de sincronización de HyNet, "
+        "garantizando cero datos simulados y trazabilidad histórica auditada."
+    )
+
+    # 6.1 Topología de los 15 Sitios Telecom
+    h2_top = doc.add_heading("6.1 Clasificación Topológica de los 15 Sitios Telecom", level=2)
+    h2_top.paragraph_format.space_before = Pt(10)
+    h2_top.paragraph_format.space_after = Pt(6)
+
+    t_top = doc.add_table(rows=1, cols=7)
+    t_top.alignment = WD_TABLE_ALIGNMENT.CENTER
+    t_top.autofit = False
+
+    headers_top = ["Radiobase / Sitio", "País", "ID Gateway (ps_id)", "Clasificación Topológica", "Arreglo Solar", "Red Comercial", "Diésel"]
+    for c_idx, h_text in enumerate(headers_top):
+        c = t_top.rows[0].cells[c_idx]
+        c.paragraphs[0].text = h_text
+        style_cell(c, fill_hex="1B4332", bold=True, font_size=8.5, color_rgb=(255,255,255), align=WD_ALIGN_PARAGRAPH.CENTER)
+
+    for row_data in SITES_15_LIST:
+        row = t_top.add_row()
+        vals = [row_data["alias"], row_data["pais"], row_data["ps_id"], row_data["topologia"], row_data["solar"], row_data["red"], row_data["dg"]]
+        for c_idx, val in enumerate(vals):
+            c = row.cells[c_idx]
+            c.paragraphs[0].text = str(val)
+            style_cell(c, fill_hex="F8FAFC" if c_idx == 0 else None, bold=(c_idx == 0), font_size=8, color_rgb=(30,41,59), align=WD_ALIGN_PARAGRAPH.CENTER if c_idx in [1, 5, 6] else WD_ALIGN_PARAGRAPH.LEFT)
+
+    # 6.2 Matriz de 24 Alarmas Telecom
+    h2_mat = doc.add_heading("6.2 Matriz Integral de 24 Alarmas Telecom (HyNet + ThingsBoard)", level=2)
+    h2_mat.paragraph_format.space_before = Pt(14)
+    h2_mat.paragraph_format.space_after = Pt(6)
+
+    t_alm = doc.add_table(rows=1, cols=7)
+    t_alm.alignment = WD_TABLE_ALIGNMENT.CENTER
+    t_alm.autofit = False
+
+    headers_alm = ["Código", "Subsistema", "Variable", "Disparo / Despeje", "Severidad", "Origen / Capa", "Descripción y Acción Operativa"]
+    for c_idx, h_text in enumerate(headers_alm):
+        c = t_alm.rows[0].cells[c_idx]
+        c.paragraphs[0].text = h_text
+        style_cell(c, fill_hex="0B1A10", bold=True, font_size=8.5, color_rgb=(255,255,255), align=WD_ALIGN_PARAGRAPH.CENTER)
+
+    for idx, a in enumerate(TELECOM_ALARMS):
+        row = t_alm.add_row()
+        is_crit = a["severidad"].lower() == "critica"
+        cond_str = f"ON: {a['disparo']}\nOFF: {a['despeje']}"
+        desc_accion = f"Detalle: {a['descripcion']}\nAcción: {a['accion']}"
+
+        vals = [
+            a["id"], a["subsistema"], a["variable"],
+            cond_str, a["severidad"].upper(), a["origen"], desc_accion
+        ]
+
+        for c_idx, val in enumerate(vals):
+            c = row.cells[c_idx]
+            c.paragraphs[0].text = str(val)
+            if c_idx == 4: # Severidad
+                style_cell(c, fill_hex="FDE8E8" if is_crit else "FEF3C7", bold=True, font_size=8, color_rgb=(153,27,27) if is_crit else (146,64,14), align=WD_ALIGN_PARAGRAPH.CENTER)
+            elif c_idx == 0:
+                style_cell(c, fill_hex="F1F5F9", bold=True, font_size=8, color_rgb=(15,23,42), align=WD_ALIGN_PARAGRAPH.CENTER)
+            else:
+                style_cell(c, fill_hex="F8FAFC" if idx % 2 == 1 else "FFFFFF", bold=(c_idx == 1), font_size=8, color_rgb=(51,65,85), align=WD_ALIGN_PARAGRAPH.LEFT)
+
+    # Anchos de columna en Word
+    alm_col_widths = [Inches(1.0), Inches(1.3), Inches(1.4), Inches(1.3), Inches(0.9), Inches(1.4), Inches(2.7)]
+    for row in t_alm.rows:
+        for idx, width in enumerate(alm_col_widths):
+            row.cells[idx].width = width
+
+    doc.save(WORD_PATH)
+    print("-> Archivo Word actualizado exitosamente con la seccion 6 completa.")
+
+update_word()
+print(">>> DOCUMENTACION EXCEL Y WORD ACTUALIZADA AL 100% <<<")
