@@ -299,13 +299,19 @@
 
   // 7. Ocultar "Inicio" (/home) y usar portafolio como landing
   function applyHomeNavigationPolicy() {
-    if (isLoginPage() || !isLoggedIn()) return;
+    if (isLoginPage()) return;
 
     var path = window.location.pathname || '';
     if (path === '/home' || path === '/home/') {
-      window.location.replace('/dashboards');
-      return;
+      if (window.hyvisionTryRedirectFromHome) {
+        window.hyvisionTryRedirectFromHome();
+      } else if (isLoggedIn()) {
+        window.location.replace('/dashboards');
+      }
+      if (isLoggedIn()) return;
     }
+
+    if (!isLoggedIn()) return;
 
     var sideMenu = document.querySelector('ul.tb-side-menu, mat-sidenav .tb-side-menu, tb-side-menu ul');
     if (!sideMenu) return;
@@ -2409,7 +2415,10 @@
   function installHyvisionRouteListener() {
     if (window.__hyvisionFleetRouteListener) return;
     window.__hyvisionFleetRouteListener = true;
-    window.addEventListener('hyvision:route', scheduleFleetInject);
+    window.addEventListener('hyvision:route', function() {
+      applyHomeNavigationPolicy();
+      scheduleFleetInject();
+    });
   }
 
   function startFleetHubDomObserver() {

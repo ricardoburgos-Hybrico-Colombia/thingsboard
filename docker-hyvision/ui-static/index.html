@@ -138,6 +138,13 @@
   </style>
 <link rel="stylesheet" href="styles-WUQVJSVC.css">
 <style id="hyvision-critical-shell">
+  /* /home deshabilitado: no mostrar panel Inicio un frame antes del redirect a /dashboards */
+  html.hyvision-route-home mat-sidenav-content .tb-main-content,
+  html.hyvision-route-home tb-home-links {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
   /* Solo lista /dashboards (Sistemas de energía): fondo SCADA + sin flash de grilla TB */
   html.hyvision-route-dashboards .tb-main-content {
     background: radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%) !important;
@@ -152,6 +159,9 @@
 </style>
 <script>
   (function() {
+    function hyvisionIsHomePath(path) {
+      return path === '/home' || path === '/home/';
+    }
     function hyvisionIsDashboardsListPath(path) {
       if (!path) return false;
       if (path === '/dashboards' || path === '/dashboards/' || path === '/dashboards/groups') return true;
@@ -161,26 +171,39 @@
       }
       return false;
     }
-    function hyvisionSyncDashboardsRouteClass() {
+    function hyvisionTryRedirectFromHome() {
+      if (!hyvisionIsHomePath(window.location.pathname || '')) return;
+      try {
+        if (localStorage.getItem('jwt_token')) {
+          window.location.replace('/dashboards');
+        }
+      } catch (e) {}
+    }
+    function hyvisionSyncRouteClasses() {
+      var path = window.location.pathname || '';
+      document.documentElement.classList.toggle('hyvision-route-home', hyvisionIsHomePath(path));
       document.documentElement.classList.toggle(
         'hyvision-route-dashboards',
-        hyvisionIsDashboardsListPath(window.location.pathname || '')
+        hyvisionIsDashboardsListPath(path)
       );
+      hyvisionTryRedirectFromHome();
       window.dispatchEvent(new Event('hyvision:route'));
     }
-    hyvisionSyncDashboardsRouteClass();
+    hyvisionSyncRouteClasses();
     var pushState = history.pushState;
     var replaceState = history.replaceState;
     history.pushState = function() {
       pushState.apply(history, arguments);
-      hyvisionSyncDashboardsRouteClass();
+      hyvisionSyncRouteClasses();
     };
     history.replaceState = function() {
       replaceState.apply(history, arguments);
-      hyvisionSyncDashboardsRouteClass();
+      hyvisionSyncRouteClasses();
     };
-    window.addEventListener('popstate', hyvisionSyncDashboardsRouteClass);
-    window.hyvisionSyncDashboardsRouteClass = hyvisionSyncDashboardsRouteClass;
+    window.addEventListener('popstate', hyvisionSyncRouteClasses);
+    window.hyvisionSyncRouteClasses = hyvisionSyncRouteClasses;
+    window.hyvisionSyncDashboardsRouteClass = hyvisionSyncRouteClasses;
+    window.hyvisionTryRedirectFromHome = hyvisionTryRedirectFromHome;
   })();
 </script>
 <link rel="stylesheet" href="dynamic-branding.css" id="hyvision-dynamic-styles">
