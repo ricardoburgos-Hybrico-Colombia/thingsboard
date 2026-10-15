@@ -1486,7 +1486,7 @@
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; font-size:11.5px; margin-bottom:12px;">
               <div>Solar: <strong style="color:#f7d048;">${firstSite.solarKw.toFixed(1)} kW</strong></div>
               <div>BESS: <strong style="color:#6be35b;">${firstSite.bessSocDisplay}% SOC</strong></div>
-              <div>Carga: <strong style="color:#62c3f5;">${firstSite.loadKw.toFixed(1)} kW</strong></div>
+              <div>Carga: <strong style="color:#ffffff;">${firstSite.loadKw.toFixed(1)} kW</strong></div>
               <div>Uptime: <strong style="color:#ffffff;">${firstSite.uptime || '99.9%'}</strong></div>
             </div>
             <a class="hyv-btn-scada" style="padding:6px 12px; font-size:11.5px;" href="/dashboards/${firstSite.id}">⚡ Abrir SCADA en Vivo</a>
@@ -1539,7 +1539,7 @@
                   </div>
                 </div>
               </td>
-              <td><strong style="color:#62c3f5;">${s.loadKw.toFixed(1)} kW</strong></td>
+              <td><strong style="color:#ffffff;">${s.loadKw.toFixed(1)} kW</strong></td>
               <td><strong style="color:#ffffff;">${s.uptime}</strong></td>
               <td>
                 <div style="display:flex; gap:6px; align-items:center;">

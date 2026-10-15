@@ -143,7 +143,7 @@ tb-login,
 .tb-login-content input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0 1000px #132511 inset !important;
   -webkit-text-fill-color: #ffffff !important;
-  caret-color: #64B856 !important;
+  caret-color: #436A3C !important;
   transition: background-color 5000s ease-in-out 0s !important;
 }
 
@@ -161,14 +161,14 @@ tb-login,
 .tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
 .tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
 .tb-login-content .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
-  border-color: #64B856 !important;
+  border-color: #436A3C !important;
   border-width: 2px !important;
 }
 
 /* Input text and labels */
 .tb-login-content input.mat-mdc-input-element {
   color: #ffffff !important;
-  caret-color: #64B856 !important;
+  caret-color: #436A3C !important;
 }
 
 .tb-login-content .mat-mdc-floating-label,
