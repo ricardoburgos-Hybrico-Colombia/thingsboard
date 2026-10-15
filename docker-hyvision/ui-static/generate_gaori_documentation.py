@@ -858,6 +858,143 @@ ALARMS_MATRIX_DATA = [
 ]
 
 # ==============================================================================
+# 2.B. FALLAS NATIVAS DE HARDWARE: INVERSORES ATESS PCS250 (ENERCLO OPENAPI)
+# ==============================================================================
+
+ATESS_HARDWARE_FAULTS_DATA = [
+    {
+        "code": "7-D3",
+        "raw_desc": "Parallel_Uneven_Flow_Warning",
+        "desc_es": "Desbalance de Reparto de Corriente en Paralelo (Aviso)",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Desbalance o circulación de corriente reactiva/activa entre inversores acoplados en bus AC",
+        "severidad": "Advertencia",
+        "accion": "Verificar lazos de droop control en los PCS, impedancia de cables de enlace AC e inductancias de acople."
+    },
+    {
+        "code": "7-D15",
+        "raw_desc": "AC_UnderFreq_Rmt_Warning",
+        "desc_es": "Subfrecuencia Remota en Barra AC (Aviso)",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Frecuencia medida en barra AC inferior al umbral de seguridad configurado en el firmware (< 59.5 Hz)",
+        "severidad": "Advertencia",
+        "accion": "Validar balance de potencia activa de la microrred y soporte droop P/f del BESS o generador diésel."
+    },
+    {
+        "code": "7-D14",
+        "raw_desc": "AC_OverFreq_Rmt_Warning",
+        "desc_es": "Sobrefrecuencia Remota en Barra AC (Aviso)",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Frecuencia en barra AC superior al límite superior de operación (> 60.5 Hz)",
+        "severidad": "Advertencia",
+        "accion": "Reducción de inyección de potencia activa por sobrefrecuencia y verificar limitación de potencia solar fotovoltaica."
+    },
+    {
+        "code": "8-D11",
+        "raw_desc": "CANb_Communication_Fault (PCS)",
+        "desc_es": "Falla de Comunicación en Bus CANb Interno",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Pérdida de tramas de comunicación en el bus serie CANb interno entre tarjetas de control del PCS",
+        "severidad": "Crítica",
+        "accion": "Inspeccionar cableado de bus CAN, terminadores resistivos de 120 ohms y conectores de placa de control."
+    },
+    {
+        "code": "6-D13",
+        "raw_desc": "Batt_UnderVolt_Fault",
+        "desc_es": "Falla por Subtensión en Banco de Baterías",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Tensión del bus de continua de baterías cae por debajo del umbral mínimo de corte por hardware del inversor",
+        "severidad": "Crítica",
+        "accion": "Apertura de contactor DC, inhibir descarga de baterías e iniciar recarga inmediata mediante campo solar o generador."
+    },
+    {
+        "code": "2-D3",
+        "raw_desc": "BMS_Communication_Fault",
+        "desc_es": "Pérdida de Comunicación con Sistema BMS",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Timeout o pérdida de enlace de datos RS485/CAN entre el inversor PCS y el controlador de baterías BMS",
+        "severidad": "Crítica",
+        "accion": "Verificar alimentación del gateway BMS, cable de par trenzado apantallado y parámetros de baudrate."
+    },
+    {
+        "code": "2-D9",
+        "raw_desc": "PBD_Communication_Fault (PCS)",
+        "desc_es": "Falla de Comunicación con Tableros Solares PBD",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Pérdida de polling de datos Modbus con los tableros convertidores DC/DC solar PBD250",
+        "severidad": "Advertencia",
+        "accion": "Revisar bus serial RS485 colector de campo solar y estado de encendido de los 12 tableros PBD."
+    },
+    {
+        "code": "3-D0",
+        "raw_desc": "AC_NoUtility_Fault",
+        "desc_es": "Falla de Tensión en Barra AC / Ausencia de Red",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Tensión nula o fuera de rango en la barra AC externa conectada al inversor",
+        "severidad": "Crítica",
+        "accion": "Verificar conmutación a modo isla (islanding/off-grid) o sincronización con motogenerador diésel."
+    },
+    {
+        "code": "3-D1",
+        "raw_desc": "AC_GridPhaseSeque_Fault",
+        "desc_es": "Secuencia de Fase Incorrecta en Barra AC",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Rotación de fases trifásicas invertida (CBA en lugar de ABC) detectada en bornes AC del inversor",
+        "severidad": "Crítica",
+        "accion": "Verificar conexión de conductores de fases R-S-T en interruptor principal y corregir rotación física."
+    },
+    {
+        "code": "5-D2",
+        "raw_desc": "LcdEmergencyStop",
+        "desc_es": "Parada de Emergencia Manual por Pantalla LCD",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Accionamiento manual del comando de parada de emergencia desde el botón táctil del panel LCD frontal",
+        "severidad": "Crítica",
+        "accion": "Confirmar causa de intervención del operador en sitio y realizar rearme seguro desde el menú del inversor."
+    },
+    {
+        "code": "6-D12",
+        "raw_desc": "Batt_OverVolt_Fault",
+        "desc_es": "Falla por Sobretensión en Banco de Baterías",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Tensión DC del banco de baterías supera el límite máximo absoluto permitido por el inversor (> 850 V)",
+        "severidad": "Crítica",
+        "accion": "Cese inmediato de inyección de carga solar, verificar estado de reguladores MPPT y calibración de BMS."
+    },
+    {
+        "code": "8-D14",
+        "raw_desc": "Paraller_PLL_Signal_Fault",
+        "desc_es": "Falla de Sincronismo PLL para Operación en Paralelo",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "Pérdida de bloqueo de fase en el lazo PLL (Phase-Locked Loop) que coordina los inversores en paralelo",
+        "severidad": "Crítica",
+        "accion": "Verificar calidad de onda de tensión en la barra de sincronismo e integridad del cableado de sincronismo inter-PCS."
+    },
+    {
+        "code": "9-D8",
+        "raw_desc": "Alarm of Fault No>Redundancy No",
+        "desc_es": "Fallas Acumuladas Superan Redundancia N+1",
+        "equipo": "Inversores Centrales ATESS PCS250",
+        "origen": "DSP Inversor PCS / Enerclo OpenAPI (/api/v1/fault/list)",
+        "condicion": "El número de inversores o módulos de potencia fuera de servicio excede la capacidad de redundancia disponible",
+        "severidad": "Crítica",
+        "accion": "Alerta prioritaria al centro de control; deslastre programado de carga para evitar sobrecarga del equipo remanente."
+    }
+]
+
+# ==============================================================================
 # 3. GENERACIÓN DEL LIBRO EXCEL (.XLSX)
 # ==============================================================================
 
@@ -1119,12 +1256,76 @@ def generar_excel():
     ws4.freeze_panes = "A2"
     ws4.auto_filter.ref = f"A1:{get_column_letter(len(headers4))}{len(ALARMS_MATRIX_DATA) + 1}"
 
+    # --------------------------------------------------------------------------
+    # HOJA 5: Fallas_Hardware_ATESS_PCS (13 EVENTOS NATIVOS DE FABRICANTE)
+    # --------------------------------------------------------------------------
+    ws5 = wb.create_sheet(title="Fallas_Hardware_ATESS_PCS")
+    headers5 = [
+        "Código Evento (eventSn)",
+        "Descripción Firmware ATESS (EN)",
+        "Descripción / Traducción Técnica (ES)",
+        "Subsistema / Equipo Afectado",
+        "Origen / Canal de Datos",
+        "Condición Física de Disparo en Inversor",
+        "Severidad",
+        "Protocolo de Acción Recomendado"
+    ]
+    ws5.append(headers5)
+    for col_idx in range(1, len(headers5) + 1):
+        cell = ws5.cell(row=1, column=col_idx)
+        cell.fill = header_fill
+        cell.font = font_header
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    ws5.row_dimensions[1].height = 32
+
+    for r_idx, flt in enumerate(ATESS_HARDWARE_FAULTS_DATA, start=2):
+        row_vals = [
+            flt["code"],
+            flt["raw_desc"],
+            flt["desc_es"],
+            flt["equipo"],
+            flt["origen"],
+            flt["condicion"],
+            flt["severidad"],
+            flt["accion"]
+        ]
+        ws5.append(row_vals)
+        is_crit = flt["severidad"] == "Crítica"
+        r_fill = crit_fill if is_crit else warn_fill
+
+        for c_idx in range(1, len(row_vals) + 1):
+            c = ws5.cell(row=r_idx, column=c_idx)
+            c.fill = r_fill if (c_idx == 7) else (zebra_fill if (r_idx % 2 == 0) else white_fill)
+            c.border = thin_border
+            if c_idx == 1:
+                c.font = font_bold
+                c.alignment = Alignment(horizontal="center", vertical="center")
+            elif c_idx == 2:
+                c.font = font_code
+                c.alignment = Alignment(vertical="center", wrap_text=True)
+            elif c_idx == 3:
+                c.font = font_bold
+                c.alignment = Alignment(vertical="center", wrap_text=True)
+            elif c_idx == 7:
+                c.font = font_crit if is_crit else font_warn
+                c.alignment = Alignment(horizontal="center", vertical="center")
+            else:
+                c.font = font_body
+                c.alignment = Alignment(vertical="center", wrap_text=True)
+        ws5.row_dimensions[r_idx].height = 34
+
+    col_widths5 = [20, 32, 38, 28, 35, 45, 18, 55]
+    for i, w in enumerate(col_widths5, start=1):
+        ws5.column_dimensions[get_column_letter(i)].width = w
+    ws5.freeze_panes = "A2"
+    ws5.auto_filter.ref = f"A1:{get_column_letter(len(headers5))}{len(ATESS_HARDWARE_FAULTS_DATA) + 1}"
+
     # Eliminar hoja default vacía
     if default_sheet in wb.worksheets:
         wb.remove(default_sheet)
 
     wb.save(EXCEL_PATH)
-    print(f"Excel generado exitosamente con 4 hojas en: {EXCEL_PATH}")
+    print(f"Excel generado exitosamente con 5 hojas en: {EXCEL_PATH}")
 
 # ==============================================================================
 # 4. GENERACIÓN DEL DOCUMENTO WORD (.DOCX)
@@ -1265,14 +1466,18 @@ def generar_word():
 
     # 4. MATRIZ DE ALARMAS SCADA Y PROTECCIONES OPERATIVAS
     h4 = doc.add_heading(level=1)
-    r_h4 = h4.add_run("4. Matriz Integral de 33 Alarmas SCADA y Protecciones Operativas")
+    r_h4 = h4.add_run("4. Matriz Integral de 33 Alarmas SCADA y 13 Fallas Nativas de Hardware ATESS PCS250 (46 Protecciones Totales)")
     r_h4.font.name = "Segoe UI"
     r_h4.font.color.rgb = c_primary
 
     p_alm_intro = doc.add_paragraph()
-    p_alm_intro.add_run("La matriz de alarmas de GAORI implementa un esquema de supervisión continua basado en las normas ")
+    p_alm_intro.add_run("La matriz de supervisión y alarmas de GAORI implementa un esquema de doble capa basado en las normas ")
     p_alm_intro.add_run("IEEE 1547, IEC 62933 (Sistemas BESS) e IEC 60364").bold = True
-    p_alm_intro.add_run(". Cada alarma define un código unívoco, la variable física monitoreada, el umbral de disparo, la persistencia mínima temporal requerida para filtrado de transitorios, la severidad (Crítica, Advertencia o Informativa) y el protocolo de acción automática o manual correspondiente.")
+    p_alm_intro.add_run(": (1) Una capa lógica de ")
+    p_alm_intro.add_run("33 reglas de monitoreo en tiempo real").bold = True
+    p_alm_intro.add_run(" evaluadas por ThingsBoard sobre la telemetría operativa de celdas, strings, bus AC y generadores; y (2) Una capa física de ")
+    p_alm_intro.add_run("13 fallas y avisos nativos de hardware").bold = True
+    p_alm_intro.add_run(" reportados directamente por las tarjetas DSP de los inversores centrales ATESS PCS250 mediante la API de Enerclo. Cada alarma define su código unívoco, umbral o condición física, severidad y protocolo de contingencia.")
 
     # Agrupar por categoría
     categorias = []
@@ -1337,6 +1542,74 @@ def generar_word():
                             r.font.color.rgb = RGBColor(185, 28, 28) if is_crit else RGBColor(180, 83, 9)
 
         doc.add_paragraph()
+
+    # 4.6. Catálogo de Fallas y Eventos Nativos de Hardware ATESS PCS250 (Enerclo OpenAPI)
+    h_nat = doc.add_heading(level=2)
+    r_hnat = h_nat.add_run("Catálogo Complementario: Fallas y Eventos Nativos de Hardware Inversores ATESS PCS250 (Enerclo OpenAPI)")
+    r_hnat.font.name = "Segoe UI"
+    r_hnat.font.color.rgb = RGBColor(15, 23, 42)
+
+    p_nat = doc.add_paragraph()
+    p_nat.add_run("Además de las 33 reglas de monitoreo SCADA calculadas dinámicamente en ThingsBoard, la plataforma integra la bitácora nativa de hardware proveniente de las tarjetas DSP de control de los 3 inversores centrales ATESS PCS250 (")
+    p_nat.add_run("PCS-01 TQG0F12136, PCS-02 TQG0F12135, PCS-03 TQG0F12134").font.name = "Consolas"
+    p_nat.add_run(") a través del endpoint ")
+    p_nat.add_run("/api/v1/fault/list").font.name = "Consolas"
+    p_nat.add_run(" de Enerclo OpenAPI. Los eventos activos no despejados en el hardware físico se elevan automáticamente a la vista de alarmas críticas/activas de la consola SCADA:")
+
+    t_nat = doc.add_table(rows=1, cols=6)
+    t_nat.alignment = WD_TABLE_ALIGNMENT.CENTER
+    t_nat.autofit = False
+
+    headers_nat = ["Código (eventSn)", "Firmware (EN)", "Traducción Técnica (ES)", "Condición Física en Hardware", "Severidad", "Acción de Contingencia"]
+    widths_nat = [Inches(1.1), Inches(1.3), Inches(1.4), Inches(1.5), Inches(0.9), Inches(1.6)]
+
+    hdr_cells = t_nat.rows[0].cells
+    for idx, title in enumerate(headers_nat):
+        hdr_cells[idx].text = title
+        hdr_cells[idx].width = widths_nat[idx]
+        shd = OxmlElement('w:shd')
+        shd.set(qn('w:val'), 'clear')
+        shd.set(qn('w:color'), 'auto')
+        shd.set(qn('w:fill'), '1B4D2E')
+        hdr_cells[idx]._tc.get_or_add_tcPr().append(shd)
+        for p in hdr_cells[idx].paragraphs:
+            p.runs[0].font.name = "Segoe UI"
+            p.runs[0].font.size = Pt(8.5)
+            p.runs[0].font.bold = True
+            p.runs[0].font.color.rgb = RGBColor(255, 255, 255)
+
+    for flt in ATESS_HARDWARE_FAULTS_DATA:
+        r_cells = t_nat.add_row().cells
+        r_cells[0].text = flt["code"]
+        r_cells[1].text = flt["raw_desc"]
+        r_cells[2].text = flt["desc_es"]
+        r_cells[3].text = flt["condicion"]
+        r_cells[4].text = flt["severidad"]
+        r_cells[5].text = flt["accion"]
+
+        is_crit = flt["severidad"] == "Crítica"
+
+        for idx, c in enumerate(r_cells):
+            c.width = widths_nat[idx]
+            for p in c.paragraphs:
+                p.paragraph_format.space_before = Pt(2)
+                p.paragraph_format.space_after = Pt(2)
+                for r in p.runs:
+                    r.font.name = "Segoe UI"
+                    r.font.size = Pt(8)
+                    if idx == 0:
+                        r.font.bold = True
+                        r.font.name = "Consolas"
+                    elif idx == 1:
+                        r.font.name = "Consolas"
+                        r.font.color.rgb = c_code
+                    elif idx == 2:
+                        r.font.bold = True
+                    elif idx == 4:
+                        r.font.bold = True
+                        r.font.color.rgb = RGBColor(185, 28, 28) if is_crit else RGBColor(180, 83, 9)
+
+    doc.add_paragraph()
 
     # 5. Sistema de Sonido y Web Audio API
     h5 = doc.add_heading(level=1)
