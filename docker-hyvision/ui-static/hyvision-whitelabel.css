@@ -537,26 +537,72 @@ body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
    HyVision Fleet Control Hub (Portafolio de Sistemas de Energía)
    ============================================================ */
 
-/* Full Bleed SCADA Canvas: Unify background and eliminate white borders */
-mat-sidenav-content,
-.mat-drawer-content,
-tb-dashboards-table,
-tb-entities-table,
-.tb-dashboards-table-container,
-.tb-default-dashboard,
-.mat-drawer-container {
+/* Fondo SCADA solo en portafolio /dashboards (no en Dispositivos, Alarmas, SCADA individual, etc.) */
+html.hyvision-route-dashboards .tb-main-content,
+body.hyvision-fleet-list-mode .tb-main-content {
   background: radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 
-tb-dashboards-table,
-tb-entities-table {
-  padding: 0 !important;
-  margin: 0 !important;
+/*
+ * Fleet Hub montado DENTRO de tb-entities-table (mat-drawer-content).
+ * Mismo contenedor que la lista nativa → respeta margen del sidenav TB.
+ */
+tb-entities-table.hyvision-fleet-host,
+tb-dashboards-table.hyvision-fleet-host {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100% !important;
+}
+
+tb-entities-table.hyvision-fleet-host mat-drawer-container,
+tb-dashboards-table.hyvision-fleet-host mat-drawer-container {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100% !important;
+}
+
+tb-entities-table.hyvision-fleet-host mat-drawer,
+tb-dashboards-table.hyvision-fleet-host mat-drawer {
+  display: none !important;
+}
+
+tb-entities-table.hyvision-fleet-host .tb-entity-table,
+tb-dashboards-table.hyvision-fleet-host .tb-entity-table {
+  display: none !important;
+}
+
+tb-entities-table.hyvision-fleet-host mat-drawer-content,
+tb-dashboards-table.hyvision-fleet-host mat-drawer-content {
+  position: relative !important;
+  inset: auto !important;
+  overflow: visible !important;
+  height: auto !important;
+  min-height: 100% !important;
+  background: transparent !important;
+}
+
+#hyvision-fleet-hub {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow-x: clip;
 }
 
 .hyv-fleet-hub {
   position: relative;
   width: 100%;
+  max-width: 100%;
   min-height: calc(100vh - 64px);
   box-sizing: border-box;
   background: radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%);
@@ -571,6 +617,22 @@ tb-entities-table {
   box-shadow: none !important;
   margin: 0 !important;
   z-index: 10;
+}
+
+@media (max-width: 959px) {
+  .hyv-fleet-hub {
+    padding: 16px 14px 48px 14px;
+  }
+
+  .hyv-fleet-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hyv-fleet-title-group h1 {
+    font-size: 17px;
+    flex-wrap: wrap;
+  }
 }
 
 /* Header & Top Bar */
