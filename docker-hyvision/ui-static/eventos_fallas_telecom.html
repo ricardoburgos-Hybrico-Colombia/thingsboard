@@ -1,0 +1,79 @@
+<div id="alarm-card" class="alarm-card-container healthy" onclick="window.hybricoOpenAlarmConsole && window.hybricoOpenAlarmConsole('all', event)">
+  <!-- Header -->
+  <div class="alarm-header">
+    <div class="alarm-title-group">
+      <div class="alarm-icon-box">
+        <span class="alarm-icon">🛡️</span>
+        <span id="alarm-icon-beacon" class="beacon-dot"></span>
+      </div>
+      <div class="alarm-title-text">
+        <span id="alarm-main-title" class="alarm-main-title">REGISTRO DE EVENTOS Y FALLAS</span>
+        <span id="alarm-sub-title" class="alarm-sub-title">SUPERVISIÓN SCADA TELECOM • Bus DC 48V</span>
+      </div>
+    </div>
+
+    <div class="alarm-header-actions">
+      <!-- Botón de Audio Mute/Unmute -->
+      <button id="btn-audio-toggle" class="scada-icon-btn" title="Activar/Silenciar Alerta Sonora" type="button" onclick="event.stopPropagation(); window.hybricoToggleAlarmAudio && window.hybricoToggleAlarmAudio(event);">
+        <span id="audio-icon">🔊</span>
+      </button>
+      <!-- Badge de Estado General -->
+      <div id="alarm-status-badge" class="alarm-badge healthy">
+        <span class="badge-dot">●</span>
+        <span class="badge-text">SISTEMA SALUDABLE</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Tiles Grid -->
+  <div class="alarm-tiles-grid">
+    <div class="alarm-tile active-tile" id="tile-activas" title="Click para ver alarmas activas" onclick="event.stopPropagation(); window.hybricoOpenAlarmConsole && window.hybricoOpenAlarmConsole('critical', event);">
+      <span class="tile-kpi-label">ACTIVAS AHORA</span>
+      <div class="tile-num-row">
+        <span id="val-active-alarms" class="tile-kpi-num healthy">0</span>
+        <span class="tile-unit">fallas</span>
+      </div>
+      <span id="lbl-active-sub" class="tile-kpi-status">Sin disparos críticos</span>
+    </div>
+
+    <div class="alarm-tile warn-tile" id="tile-warnings" title="Click para ver advertencias" onclick="event.stopPropagation(); window.hybricoOpenAlarmConsole && window.hybricoOpenAlarmConsole('warning', event);">
+      <span class="tile-kpi-label">ADVERTENCIAS</span>
+      <div class="tile-num-row">
+        <span id="val-warnings-now" class="tile-kpi-num normal">0</span>
+        <span class="tile-unit">alertas</span>
+      </div>
+      <span id="lbl-warn-sub" class="tile-kpi-status">Límites preventivos OK</span>
+    </div>
+
+    <div class="alarm-tile history-tile" id="tile-history" title="Click para ver historial de 30 días" onclick="event.stopPropagation(); window.hybricoOpenAlarmConsole && window.hybricoOpenAlarmConsole('history', event);">
+      <span class="tile-kpi-label">EVENTOS (30D)</span>
+      <div class="tile-num-row">
+        <span id="val-faults-30d" class="tile-kpi-num muted">0</span>
+        <span class="tile-unit">hist</span>
+      </div>
+      <span class="tile-kpi-status">Bitácora registrada</span>
+    </div>
+  </div>
+
+  <!-- Live Mini Feed / Ticker -->
+  <div class="alarm-live-ticker" id="alarm-live-ticker" title="Último evento detectado en la radiobase" onclick="event.stopPropagation(); window.hybricoOpenAlarmConsole && window.hybricoOpenAlarmConsole('all', event);">
+    <div class="ticker-indicator">
+      <span class="ticker-pulse"></span>
+      <span class="ticker-tag">ÚLTIMO ESTADO:</span>
+    </div>
+    <span id="ticker-message" class="ticker-text">Parámetros dentro de tolerancia nominal. Batería 48V, Solar y Cargas estables.</span>
+    <span id="ticker-timestamp" class="ticker-time">En vivo</span>
+  </div>
+
+  <!-- Footer con Botón Interactivo de Consola -->
+  <div class="alarm-footer">
+    <div class="footer-left">
+      <span class="disp-label">Disponibilidad Telecom: <strong class="disp-val">99.8%</strong></span>
+      <span class="rules-badge" title="24 reglas de supervisión automáticas para microrredes telecom">24 Reglas Activas</span>
+    </div>
+    <button id="btn-open-console" class="btn-scada-console" type="button" title="Abrir consola SCADA con detalle de alarmas, fechas y horas" onclick="event.stopPropagation(); window.hybricoOpenAlarmConsole && window.hybricoOpenAlarmConsole('all', event);">
+      <span>CONSULTAR CONSOLA</span>
+      <span class="btn-arrow">↗</span>
+    </button>
+  </div>
+</div>
