@@ -60,7 +60,7 @@ if widget_instance_id in dash.get("configuration", {}).get("widgets", {}):
     
     # Lista integral de llaves de telemetría para alimentar las 33 reglas en vivo
     keys_needed = [
-        "alarmas_activas_total", "faults_30d_total", "warnings_30d_total",
+        "alarmas_activas_total", "faults_30d_total", "warnings_30d_total", "fault_history_json",
         "bess_soc", "delta_v_celdas_mv", "max_volt_celda_mv", "min_volt_celda_mv",
         "temp_bateria_max", "temp_bateria_min", "delta_temp_bateria", "temp_igbt_max",
         "pbd_bus_voltage", "potencia_bess", "demanda_carga_kw", "generacion_solar_kw",

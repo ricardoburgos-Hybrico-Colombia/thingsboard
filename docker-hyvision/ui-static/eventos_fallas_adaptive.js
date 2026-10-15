@@ -686,53 +686,31 @@ self.onDataUpdated = function() {
     });
   }
 
-  // Bitácora histórica de eventos (30 días)
-  var historyEvents = [
-    {
-      id: 'EVT-HIST-001',
-      time: '2026-10-14 16:42:10',
-      subsystem: 'BESS - Banco de Baterías',
-      tag: 'BMS Rack 01',
-      code: 'EVT-BMS-012',
-      desc: 'Ciclo de ecualización pasiva de celdas completado con éxito (ΔV final: 8 mV)',
-      metrics: 'ΔV inicial: 22 mV → ΔV final: 8 mV',
-      severity: 'OK',
-      status: 'RESUELTA'
-    },
-    {
-      id: 'EVT-HIST-002',
-      time: '2026-10-14 12:15:00',
-      subsystem: 'Campo Solar PBD250',
-      tag: 'PBD-01 a PBD-12',
-      code: 'EVT-PBD-001',
-      desc: 'Pico de generación solar máxima alcanzado (12 tableros en operación simultánea)',
-      metrics: 'Potencia DC Solar: 1,842 kW',
-      severity: 'OK',
-      status: 'INFORMATIVO'
-    },
-    {
-      id: 'EVT-HIST-003',
-      time: '2026-10-13 09:30:22',
-      subsystem: 'Respaldo Generador Diésel',
-      tag: 'ATS / ComAp Inteligen',
-      code: 'EVT-DG-004',
-      desc: 'Prueba de arranque programado semanal en vacío satisfactoria',
-      metrics: 'Tiempo de arranque: 8.2 s | Frec: 60.01 Hz',
-      severity: 'OK',
-      status: 'RESUELTA'
-    },
-    {
-      id: 'EVT-HIST-004',
-      time: '2026-10-11 18:05:40',
-      subsystem: 'Microrred GAORI',
-      tag: 'Control Central SCADA',
-      code: 'EVT-SYS-002',
-      desc: 'Transición suave a modo 100% BESS por caída de irradiancia crepuscular',
-      metrics: 'Solar: 0.0 kW | BESS Descarga: 278 kW',
-      severity: 'OK',
-      status: 'INFORMATIVO'
+  // Bitacora historica de eventos (30 dias) - 100% REAL DE ENERCLO OPENAPI
+  var historyEvents = [];
+  if (telemetry['fault_history_json']) {
+    try {
+      historyEvents = typeof telemetry['fault_history_json'] === 'string' ? JSON.parse(telemetry['fault_history_json']) : telemetry['fault_history_json'];
+    } catch(e) {
+      console.warn('[SCADA] Error parseando fault_history_json:', e);
     }
-  ];
+  }
+
+  // Si existen fallas reales con estado ACTIVA en el historial reciente, vincularlas a activeAlarms
+  if (Array.isArray(historyEvents)) {
+    for (var h = 0; h < historyEvents.length; h++) {
+      var evt = historyEvents[h];
+      if (evt && (evt.status === 'ACTIVA' || (evt.severity === 'CRITICAL' && (!evt.metrics || evt.metrics.indexOf('Despejada') === -1)))) {
+        var already = false;
+        for (var a = 0; a < activeAlarms.length; a++) {
+          if (activeAlarms[a].id === evt.id) { already = true; break; }
+        }
+        if (!already) {
+          activeAlarms.push(evt);
+        }
+      }
+    }
+  }
 
   self.activeAlarms = activeAlarms;
   self.warningAlarms = warningAlarms;
@@ -786,8 +764,9 @@ self.onDataUpdated = function() {
     elLblWarn.textContent = hasWarn ? (numWarn + ' Alerta' + (numWarn > 1 ? 's' : '') + ' preventiva') : 'Límites preventivos OK';
   }
 
+  var totalHistoricalFaults = parseInt(telemetry['faults_30d_total'] || historyEvents.length || 0, 10);
   var elF = container.querySelector('#val-faults-30d');
-  if (elF) elF.textContent = historyEvents.length;
+  if (elF) elF.textContent = totalHistoricalFaults;
 
   var elTicker = container.querySelector('#ticker-message');
   var elTickerTime = container.querySelector('#ticker-timestamp');
@@ -1019,11 +998,14 @@ self.renderModalTable = function() {
   }
 
   if (rows.length === 0) {
+    var isHist = self.activeTab === 'history';
+    var emptyTitle = isHist ? 'Sin eventos en la bitácora histórica' : 'Sin alarmas activas en esta vista';
+    var emptySub = isHist ? 'No se han registrado fallas operativas en el período de los últimos 30 días.' : 'Todos los subsistemas de GAORI operan dentro de los umbrales nominales de seguridad.';
     container.innerHTML = '' +
       '<div class="table-empty-state">' +
       '  <div class="empty-icon">🛡️</div>' +
-      '  <div class="empty-title">Sin alarmas activas en esta vista</div>' +
-      '  <div class="empty-sub">Todos los subsistemas de GAORI operan dentro de los umbrales nominales de seguridad.</div>' +
+      '  <div class="empty-title">' + emptyTitle + '</div>' +
+      '  <div class="empty-sub">' + emptySub + '</div>' +
       '</div>';
     return;
   }
