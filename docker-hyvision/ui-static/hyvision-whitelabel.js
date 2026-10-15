@@ -626,6 +626,15 @@
                   </label>
                 </div>
 
+                <div class="hyvision-wl-field hyvision-wl-form-full" style="background:rgba(20,40,18,0.6); border:1px solid rgba(100,184,86,0.3); border-radius:6px; padding:10px 14px; font-size:12px; line-height:1.5; color:#cde3cb;">
+                  <div style="font-weight:700; color:#85db76; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                    <span>🛡️</span> Política de Despacho Multi-Zona LatAm (24/7)
+                  </div>
+                  <div>• <strong style="color:#ff6b6b;">Filtro Estricto:</strong> Se despachan <strong>ÚNICAMENTE alertas CRÍTICAS</strong> (bloqueo automático de advertencias y spam).</div>
+                  <div>• <strong style="color:#64B856;">Zonas Horarias Automáticas:</strong> Reporta la hora local del sitio (<strong>Colombia/Perú UTC-5</strong> o <strong>Honduras/Guatemala UTC-6</strong>) con referencia regional cruzada.</div>
+                  <div>• <strong style="color:#a3e099;">Enfriamiento Anti-Spam:</strong> Cooldown de 10 minutos por sitio y tipo de alarma para evitar saturación de chats.</div>
+                </div>
+
                 <div class="hyvision-wl-field">
                   <label class="hyvision-wl-label">Bot Token de Telegram</label>
                   <input type="text" id="wl-telegramBotToken" class="hyvision-wl-input" placeholder="ej: 7123456789:AAFl...">

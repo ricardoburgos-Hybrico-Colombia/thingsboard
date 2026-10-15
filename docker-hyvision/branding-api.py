@@ -7,7 +7,7 @@ import time
 import io
 import urllib.request
 import urllib.error
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import threading
@@ -49,8 +49,66 @@ DEFAULT_CONFIG = {
     }
 }
 
-# Cooldown memory store for anti-spam (5 minutes per device+alarm)
+# Cooldown memory store for anti-spam (10 minutes per device+alarm)
 alert_cooldown = {}
+
+def format_multizone_time(dt_or_ts=None, site_country=None):
+    """
+    Convierte una estampa de tiempo a formato multi-zona para operaciones LatAm:
+    - UTC-5: Colombia (COT), Perú (PET), Ecuador (ECT)
+    - UTC-6: Honduras (CST), Guatemala (CST), El Salvador, Nicaragua, Costa Rica
+    """
+    if dt_or_ts is None:
+        dt_utc = datetime.now(timezone.utc)
+    elif isinstance(dt_or_ts, (int, float)):
+        if dt_or_ts > 1e11:  # Epoch en milisegundos
+            dt_utc = datetime.fromtimestamp(dt_or_ts / 1000.0, tz=timezone.utc)
+        else:
+            dt_utc = datetime.fromtimestamp(dt_or_ts, tz=timezone.utc)
+    elif isinstance(dt_or_ts, datetime):
+        if dt_or_ts.tzinfo is None:
+            dt_utc = dt_or_ts.replace(tzinfo=timezone.utc)
+        else:
+            dt_utc = dt_or_ts.astimezone(timezone.utc)
+    elif isinstance(dt_or_ts, str):
+        try:
+            clean_str = dt_or_ts.replace("Z", "+00:00")
+            parsed_dt = datetime.fromisoformat(clean_str)
+            if parsed_dt.tzinfo is None:
+                dt_utc = parsed_dt.replace(tzinfo=timezone.utc)
+            else:
+                dt_utc = parsed_dt.astimezone(timezone.utc)
+        except Exception:
+            dt_utc = datetime.now(timezone.utc)
+    else:
+        dt_utc = datetime.now(timezone.utc)
+
+    tz_cot = timezone(timedelta(hours=-5))
+    tz_cst = timezone(timedelta(hours=-6))
+
+    str_cot = dt_utc.astimezone(tz_cot).strftime("%Y-%m-%d %H:%M:%S")
+    str_cst = dt_utc.astimezone(tz_cst).strftime("%Y-%m-%d %H:%M:%S")
+
+    c_upper = (site_country or "").strip().upper()
+    is_cst_site = c_upper in ("HN", "GT", "HONDURAS", "GUATEMALA", "CENTROAMERICA", "CENTRAL_AMERICA")
+
+    if is_cst_site:
+        time_block = (
+            f"🕒 *Hora Sitio (HN/GT UTC-6):* `{str_cst}`\n"
+            f"🌐 *Ref. Colombia/Perú (UTC-5):* `{str_cot}`"
+        )
+    else:
+        time_block = (
+            f"🕒 *Hora Sitio (CO UTC-5):* `{str_cot}`\n"
+            f"🌐 *Ref. Centroamérica (UTC-6):* `{str_cst}`"
+        )
+
+    return {
+        "time_block": time_block,
+        "cot": str_cot,
+        "cst": str_cst,
+        "utc": dt_utc.strftime("%Y-%m-%d %H:%M:%S")
+    }
 
 def load_config():
     if os.path.exists(CONFIG_PATH):
@@ -1133,12 +1191,16 @@ def send_telegram_report(report_data, config):
     if not bot_token or not chat_id:
         return False, "Bot token o Chat ID de Telegram no configurados"
 
+    tz_info = format_multizone_time()
+
     text = (
         "📑 *REPORTE EJECUTIVO HYVISION — PARQUE GAORI*\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         f"📍 *Instalación:* `{report_data['plant_name']}`\n"
         f"📅 *Período:* `{report_data['start_date']} al {report_data['end_date']}` ({report_data['period_days']} Días)\n"
-        f"🕒 *Generado:* `{report_data['generated_at']}`\n"
+        "🕒 *Hora de Generación Multi-Zona:*\n"
+        f"🇨🇴 *Colombia / Perú (UTC-5):* `{tz_info['cot']}`\n"
+        f"🇭🇳🇬🇹 *Centroamérica (UTC-6):* `{tz_info['cst']}`\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         f"☀️ *Generación Solar:* *{report_data['total_solar_mwh']} MWh* ({report_data['total_solar_kwh']:,.0f} kWh)\n"
         f"⚡ *Potencia Solar Pico:* `{report_data['peak_solar_kw']} kW`\n"
@@ -1152,6 +1214,92 @@ def send_telegram_report(report_data, config):
     )
 
     return send_telegram_message(bot_token, chat_id, text)
+
+# Demonio de monitoreo continuo de alarmas estrictamente CRÍTICAS (Multi-Zona)
+def critical_alarms_monitor_worker():
+    """
+    Demonio en segundo plano que monitorea activamente ThingsBoard 24/7.
+    Filtro estricto: Despacha ÚNICAMENTE alertas de severidad CRITICAL a Telegram.
+    Soporte Multi-Zona LatAm (UTC-5 Colombia/Perú y UTC-6 Honduras/Guatemala).
+    Cooldown de enfriamiento anti-spam: 10 minutos (600s) por evento.
+    """
+    print("[Telegram Monitor] Demonio de alarmas CRÍTICAS (Multi-Zona LatAm) iniciado...")
+    while True:
+        try:
+            time.sleep(20)
+            config = load_config()
+            if not config.get("telegramEnabled"):
+                continue
+
+            bot_token = config.get("telegramBotToken", "")
+            chat_id = config.get("telegramChatId", "")
+            if not bot_token or not chat_id:
+                continue
+
+            token = get_tb_token()
+            if not token:
+                continue
+
+            now_ts = time.time()
+
+            # Consultar alarmas activas en ThingsBoard
+            try:
+                url_tb = "http://hyvision-app:8080/api/alarms?pageSize=50&page=0&searchStatus=ACTIVE"
+                req_tb = urllib.request.Request(url_tb, headers={"X-Authorization": f"Bearer {token}"})
+                with urllib.request.urlopen(req_tb, timeout=8) as resp_tb:
+                    alarms_resp = json.loads(resp_tb.read().decode("utf-8"))
+                    for a in alarms_resp.get("data", []):
+                        sev = (a.get("severity") or "").strip().upper()
+                        # FILTRO ESTRICTO: SOLO CRITICAS
+                        if sev != "CRITICAL":
+                            continue
+
+                        orig_name = a.get("originatorName") or "Dispositivo HyVision"
+                        alarm_type = a.get("type", "Alarma Crítica")
+                        created_time = a.get("createdTime", int(now_ts * 1000))
+                        cooldown_key = f"tb_crit:{orig_name}:{alarm_type}"
+
+                        if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 600:
+                            continue
+
+                        is_hn = ("HN" in orig_name.upper()) or ("ROATAN" in orig_name.upper()) or ("HONDURAS" in orig_name.upper())
+                        site_country = "HN" if is_hn else "CO"
+                        country_label = "Honduras" if is_hn else "Colombia"
+                        country_flag = "🇭🇳" if is_hn else "🇨🇴"
+
+                        tz_info = format_multizone_time(created_time, site_country=site_country)
+
+                        details = a.get("details", {})
+                        detail_str = ""
+                        if isinstance(details, dict):
+                            detail_str = details.get("data") or json.dumps(details, ensure_ascii=False)
+                        elif isinstance(details, str):
+                            detail_str = details
+
+                        msg_text = (
+                            "🚨 *ALERTA CRÍTICA — HYVISION SCADA*\n"
+                            "━━━━━━━━━━━━━━━━━━━━━━\n"
+                            f"📍 *Sitio:* `{orig_name}` ({country_label} {country_flag})\n"
+                            f"⚠️ *Alarma:* *{alarm_type}*\n"
+                            f"🔴 *Severidad:* `CRITICAL`\n"
+                            f"{tz_info['time_block']}\n"
+                        )
+                        if detail_str:
+                            msg_text += f"📝 *Detalle:* {detail_str}\n"
+                        msg_text += (
+                            "━━━━━━━━━━━━━━━━━━━━━━\n"
+                            "👉 [Abrir SCADA HyVision en Vivo](http://localhost:8082)\n"
+                        )
+
+                        ok, send_res = send_telegram_message(bot_token, chat_id, msg_text)
+                        if ok:
+                            alert_cooldown[cooldown_key] = now_ts
+                            print(f"[Telegram Dispatch] Alarma CRÍTICA despachada: {orig_name} - {alarm_type}")
+            except Exception:
+                pass
+
+        except Exception as e_loop:
+            print(f"Error en monitor de alarmas críticas: {e_loop}")
 
 # Background scheduler thread for automated recurring reports
 def scheduler_worker():
@@ -1340,16 +1488,43 @@ class BrandingHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(res).encode("utf-8"))
                 return
 
-            device_name = alert_data.get("deviceName", "Dispositivo BESS")
+            severity = (alert_data.get("severity") or "CRITICAL").strip().upper()
+            
+            # FILTRO ESTRICTO: Despachar ÚNICAMENTE alarmas CRÍTICAS a Telegram
+            if severity != "CRITICAL":
+                res = {
+                    "status": "ignored",
+                    "message": f"Alerta con severidad '{severity}' descartada: HyVision está configurado para despachar ÚNICAMENTE alertas de nivel CRITICAL a Telegram."
+                }
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self._send_cors()
+                self.end_headers()
+                self.wfile.write(json.dumps(res).encode("utf-8"))
+                return
+
+            device_name = alert_data.get("deviceName", "Dispositivo HyVision")
             alarm_type = alert_data.get("alarmType", "Alerta Crítica")
-            severity = alert_data.get("severity", "CRITICAL")
             details = alert_data.get("details", "")
-            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # Detección Multi-Zona del Sitio
+            raw_country = alert_data.get("country", "")
+            if not raw_country:
+                is_hn = ("HN" in device_name.upper()) or ("ROATAN" in device_name.upper()) or ("HONDURAS" in device_name.upper())
+                site_country = "HN" if is_hn else "CO"
+            else:
+                site_country = raw_country
+
+            country_label = "Honduras" if site_country.upper() == "HN" else "Colombia"
+            country_flag = "🇭🇳" if site_country.upper() == "HN" else "🇨🇴"
+
+            event_time = alert_data.get("timestamp") or alert_data.get("ts")
+            tz_info = format_multizone_time(event_time, site_country=site_country)
 
             cooldown_key = f"{device_name}:{alarm_type}"
             now_ts = time.time()
-            if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 300:
-                res = {"status": "throttled", "message": "Alerta suprimida por enfriamiento anti-spam (5 min)"}
+            if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 600:
+                res = {"status": "throttled", "message": "Alerta suprimida por enfriamiento anti-spam (10 min)"}
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self._send_cors()
@@ -1366,12 +1541,12 @@ class BrandingHandler(BaseHTTPRequestHandler):
                     telemetry_lines += f"• *{k}:* `{v}`\n"
 
             msg_text = (
-                "🚨 *ALERTA CRÍTICA — HYVISION SOLAR*\n"
+                "🚨 *ALERTA CRÍTICA — HYVISION SCADA*\n"
                 "━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"📍 *Dispositivo:* `{device_name}`\n"
+                f"📍 *Sitio:* `{device_name}` ({country_label} {country_flag})\n"
                 f"⚠️ *Alarma:* *{alarm_type}*\n"
-                f"🔴 *Severidad:* `{severity}`\n"
-                f"🕒 *Hora:* `{now_str}`\n"
+                f"🔴 *Severidad:* `CRITICAL`\n"
+                f"{tz_info['time_block']}\n"
             )
             if details:
                 msg_text += f"📝 *Detalle:* {details}\n"
@@ -1476,20 +1651,23 @@ class BrandingHandler(BaseHTTPRequestHandler):
             bot_token = data.get("botToken") or current.get("telegramBotToken", "")
             chat_id = data.get("chatId") or current.get("telegramChatId", "")
 
-            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            tz_info = format_multizone_time()
             test_msg = (
                 "☀️ *HYVISION IOT — NOTIFICACIÓN DE PRUEBA*\n"
                 "━━━━━━━━━━━━━━━━━━━━━━\n"
                 "✅ *Conexión con Telegram Exitosa*\n"
                 "🤖 *Bot:* Vinculado y operativo 24/7\n"
-                "🏢 *Instalación:* Hybrico Solar / Parque BESS\n"
-                f"🕒 *Fecha y Hora:* `{now_str}`\n"
+                "🏢 *Plataforma:* HyVision SCADA Suite Multi-Región\n"
                 "━━━━━━━━━━━━━━━━━━━━━━\n"
-                "🔔 *A partir de ahora, las alertas críticas de telemetría y fallas de planta se notificarán de forma inmediata en este chat.*"
+                "🕒 *Horarios de Operación LatAm:*\n"
+                f"🇨🇴 *Colombia / Perú (UTC-5):* `{tz_info['cot']}`\n"
+                f"🇭🇳🇬🇹 *Honduras / Guatemala (UTC-6):* `{tz_info['cst']}`\n"
+                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                "🔔 *A partir de ahora, ÚNICAMENTE las alertas CRÍTICAS de telemetría y fallas de planta se notificarán de forma inmediata en este chat.*"
             )
             success, msg = send_telegram_message(bot_token, chat_id, test_msg)
             if success:
-                res = {"status": "ok", "message": "¡Mensaje de prueba enviado con éxito a Telegram!"}
+                res = {"status": "ok", "message": "¡Mensaje de prueba multi-zona enviado con éxito a Telegram!"}
                 self.send_response(200)
             else:
                 res = {"status": "error", "message": f"Error de Telegram: {msg}"}
@@ -1550,6 +1728,10 @@ def run():
     # Start background scheduler
     sched_thread = threading.Thread(target=scheduler_worker, daemon=True)
     sched_thread.start()
+
+    # Start background critical alarms monitor
+    alarm_thread = threading.Thread(target=critical_alarms_monitor_worker, daemon=True)
+    alarm_thread.start()
 
     try:
         httpd.serve_forever()

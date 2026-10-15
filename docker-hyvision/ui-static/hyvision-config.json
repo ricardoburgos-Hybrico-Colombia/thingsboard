@@ -10,9 +10,9 @@
   "logoToolbarUrl": "assets/logo_title_white.png",
   "faviconUrl": "thingsboard.ico",
   "customCss": "",
-  "telegramEnabled": false,
-  "telegramBotToken": "",
-  "telegramChatId": "",
+  "telegramEnabled": true,
+  "telegramBotToken": "8705026290:AAF24pHQ4Ve7CEfh_il0OrQ_Zv_a-xSA6qU",
+  "telegramChatId": "8688336384",
   "telegramAlertSeverity": "CRITICAL",
   "reportSchedule": {
     "enabled": true,
