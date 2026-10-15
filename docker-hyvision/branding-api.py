@@ -1218,12 +1218,36 @@ def send_telegram_report(report_data, config):
 # Demonio de monitoreo continuo de alarmas estrictamente CRÍTICAS (Multi-Zona)
 def critical_alarms_monitor_worker():
     """
-    Demonio en segundo plano que monitorea activamente ThingsBoard 24/7.
+    Demonio en segundo plano que monitorea activamente 24/7:
+    1. Alarmas activas nativas en ThingsBoard (/api/alarms?searchStatus=ACTIVE)
+    2. Matriz completa de Telecom (15 sitios): Software y Hardware
+       - ALM-HNT-001: Controlador Edge Offline
+       - ALM-HNT-003: BMS / LVD Local Batería Baja
+       - ALM-BAT-001: SOC Crítico Telecom (< 15%)
+       - ALM-BAT-003: Subtensión Bus DC 48V (< 47.0V)
+       - ALM-BAT-005: Sobretensión Bus DC 48V (> 57.6V)
+       - ALM-BAT-006: Sobretemperatura Batería Telecom (> 45°C)
+       - ALM-BAT-009: Autonomía Restante Crítica (< 2.0h sin red/DG)
+       - ALM-LOD-001: Caída Carga Telecom (< 0.05 kW)
+       - ALM-REC-001: Falla Rectificadores con Fuente AC Presente (Red/DG > 0.4 kW y Rect == 0 kW)
+       - ALM-REC-002: Tensión Rectificadores Fuera de Rango (< 48V o > 57.5V con Rect > 0.1 kW)
+       - ALM-GEN-001: Nivel Crítico Combustible Diésel (0 < fuel < 15%)
+    3. Matriz completa de Gaori (BESS & Solar): Software y Hardware
+       - ALM-BMS-001: SOC Crítico BESS (< 15%)
+       - ALM-BMS-003: Desbalance Severo Celdas (> 60 mV)
+       - ALM-BMS-005: Sobretemperatura Baterías BESS (> 45°C)
+       - ALM-PCS-001: Sobretemperatura IGBTs PCS (> 85°C)
+       - ALM-GRD-001: Desviación Frecuencia AC (< 58.5 Hz o > 61.5 Hz)
+       - Hardware ATESS: Fallas activas en inversores PCS-01, PCS-02, PCS-03 (fault_history_json)
+    
     Filtro estricto: Despacha ÚNICAMENTE alertas de severidad CRITICAL a Telegram.
     Soporte Multi-Zona LatAm (UTC-5 Colombia/Perú y UTC-6 Honduras/Guatemala).
     Cooldown de enfriamiento anti-spam: 10 minutos (600s) por evento.
     """
-    print("[Telegram Monitor] Demonio de alarmas CRÍTICAS (Multi-Zona LatAm) iniciado...")
+    print("[Telegram Monitor] Demonio de alarmas CRÍTICAS (Multi-Zona LatAm - Matrices Gaori & Telco) iniciado...", flush=True)
+    cached_devices = []
+    last_device_fetch = 0
+
     while True:
         try:
             time.sleep(20)
@@ -1242,7 +1266,9 @@ def critical_alarms_monitor_worker():
 
             now_ts = time.time()
 
-            # Consultar alarmas activas en ThingsBoard
+            # -------------------------------------------------------------
+            # FUENTE 1: Alarmas registradas en ThingsBoard
+            # -------------------------------------------------------------
             try:
                 url_tb = "http://hyvision-app:8080/api/alarms?pageSize=50&page=0&searchStatus=ACTIVE"
                 req_tb = urllib.request.Request(url_tb, headers={"X-Authorization": f"Bearer {token}"})
@@ -1250,7 +1276,6 @@ def critical_alarms_monitor_worker():
                     alarms_resp = json.loads(resp_tb.read().decode("utf-8"))
                     for a in alarms_resp.get("data", []):
                         sev = (a.get("severity") or "").strip().upper()
-                        # FILTRO ESTRICTO: SOLO CRITICAS
                         if sev != "CRITICAL":
                             continue
 
@@ -1294,9 +1319,279 @@ def critical_alarms_monitor_worker():
                         ok, send_res = send_telegram_message(bot_token, chat_id, msg_text)
                         if ok:
                             alert_cooldown[cooldown_key] = now_ts
-                            print(f"[Telegram Dispatch] Alarma CRÍTICA despachada: {orig_name} - {alarm_type}")
+                            print(f"[Telegram Dispatch] Alarma CRÍTICA (ThingsBoard) despachada: {orig_name} - {alarm_type}")
             except Exception:
                 pass
+
+            # -------------------------------------------------------------
+            # FUENTE 2: Evaluación en tiempo real de Matrices Telco y Gaori
+            # -------------------------------------------------------------
+            if (now_ts - last_device_fetch) > 300 or not cached_devices:
+                try:
+                    url_devs = "http://hyvision-app:8080/api/tenant/devices?pageSize=50&page=0"
+                    req_d = urllib.request.Request(url_devs, headers={"X-Authorization": f"Bearer {token}"})
+                    with urllib.request.urlopen(req_d, timeout=8) as resp_d:
+                        cached_devices = json.loads(resp_d.read().decode("utf-8")).get("data", [])
+                        last_device_fetch = now_ts
+                except Exception:
+                    pass
+
+            for dev in cached_devices:
+                d_id = dev.get("id", {}).get("id")
+                d_name = dev.get("name", "")
+                d_type = dev.get("type", "")
+
+                is_hn = ("HN" in d_name.upper()) or ("ROATAN" in d_name.upper()) or ("HONDURAS" in d_name.upper())
+                site_country = "HN" if is_hn else "CO"
+                country_label = "Honduras" if is_hn else "Colombia"
+                country_flag = "🇭🇳" if is_hn else "🇨🇴"
+
+                url_t = f"http://hyvision-app:8080/api/plugins/telemetry/DEVICE/{d_id}/values/timeseries"
+                req_t = urllib.request.Request(url_t, headers={"X-Authorization": f"Bearer {token}"})
+                try:
+                    with urllib.request.urlopen(req_t, timeout=5) as resp_t:
+                        raw_data = json.loads(resp_t.read().decode("utf-8"))
+                        t = {}
+                        max_ts = 0
+                        for k, pts in raw_data.items():
+                            if pts and len(pts) > 0:
+                                t[k] = pts[0]["value"]
+                                ts_pt = pts[0].get("ts", 0)
+                                if ts_pt > max_ts:
+                                    max_ts = ts_pt
+
+                        detected_events = []
+
+                        # ================= SITIOS TELCO (15 SITIOS) =================
+                        if d_type != "BESS":
+                            offline = int(t.get("edge_offline_alarm", 0) or 0)
+                            bat_low = int(t.get("battery_low_alarm", 0) or 0)
+                            soc = float(t.get("battery_soc") or t.get("soc_promedio") or 0.0)
+                            vbat = float(t.get("battery_voltage") or t.get("load_dc_voltage") or 0.0)
+                            temp = float(t.get("temp_bateria_max") or 0.0)
+                            load_kw = float(t.get("load_power_kw") or 0.0)
+                            grid_kw = float(t.get("grid_power_kw") or 0.0)
+                            dg_kw = float(t.get("dg_potencia_activa_kw") or t.get("generator_power_kw") or 0.0)
+                            rect_kw = float(t.get("rectifier_power_kw") or 0.0)
+                            rect_volt = float(t.get("rectifier_voltage") or 0.0)
+                            aut_h = float(t.get("battery_autonomy_hours") or 0.0)
+                            grid_avail = int(t.get("grid_available", 1) or 1)
+                            raw_fuel = t.get("generator_fuel_level")
+                            fuel = float(raw_fuel) if raw_fuel not in (None, "", "None") else None
+
+                            # 1. Gateway Edge HyNet
+                            if offline == 1:
+                                detected_events.append({
+                                    "code": "ALM-HNT-001",
+                                    "title": "Controlador Edge Offline",
+                                    "subsystem": "Enlace HyNet Gateway",
+                                    "detail": "Pérdida de enlace y comunicación remota con el controlador del sitio",
+                                    "metrics": {"edge_offline_alarm": "1 (OFFLINE)"}
+                                })
+                            if bat_low == 1:
+                                detected_events.append({
+                                    "code": "ALM-HNT-003",
+                                    "title": "BMS / LVD Local Batería Baja",
+                                    "subsystem": "Controlador de Baterías BMS",
+                                    "detail": "Señal física de pre-desconexión de carga por batería baja emitida en sitio",
+                                    "metrics": {"battery_low_alarm": "1 (ACTIVA)"}
+                                })
+
+                            # 2. Banco de Baterías 48V
+                            if 0 < soc < 15.0:
+                                detected_events.append({
+                                    "code": "ALM-BAT-001",
+                                    "title": "SOC Crítico Telecom",
+                                    "subsystem": "Banco Baterías 48V Telecom",
+                                    "detail": f"Nivel de carga por debajo del límite crítico: {soc:.1f}% (Umbral: < 15%)",
+                                    "metrics": {"battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.1f} V"}
+                                })
+                            if 20.0 < vbat < 47.0:
+                                detected_events.append({
+                                    "code": "ALM-BAT-003",
+                                    "title": "Subtensión Severa Bus DC 48V",
+                                    "subsystem": "Bus DC 48V",
+                                    "detail": f"Subtensión en bus DC: {vbat:.2f} V (Límite crítico: < 47.0 V)",
+                                    "metrics": {"battery_voltage": f"{vbat:.2f} V", "battery_soc": f"{soc:.1f}%"}
+                                })
+                            if vbat > 57.6:
+                                detected_events.append({
+                                    "code": "ALM-BAT-005",
+                                    "title": "Sobretensión Bus DC 48V",
+                                    "subsystem": "Bus DC 48V",
+                                    "detail": f"Sobretensión en bus DC: {vbat:.2f} V (Límite crítico: > 57.6 V)",
+                                    "metrics": {"battery_voltage": f"{vbat:.2f} V"}
+                                })
+                            if temp > 45.0:
+                                detected_events.append({
+                                    "code": "ALM-BAT-006",
+                                    "title": "Sobretemperatura Crítica en Baterías",
+                                    "subsystem": "Climatización Gabinete",
+                                    "detail": f"Temperatura de baterías: {temp:.1f} °C (Límite crítico: > 45.0 °C)",
+                                    "metrics": {"temp_bateria_max": f"{temp:.1f} °C"}
+                                })
+                            if 0 < aut_h < 2.0 and grid_avail == 0 and dg_kw < 0.1:
+                                detected_events.append({
+                                    "code": "ALM-BAT-009",
+                                    "title": "Autonomía Restante Crítica",
+                                    "subsystem": "Autonomía de Sitio",
+                                    "detail": f"Autonomía estimada: {aut_h:.1f} h (Límite: < 2.0 h sin red ni diésel)",
+                                    "metrics": {"battery_autonomy_hours": f"{aut_h:.1f} h", "battery_soc": f"{soc:.1f}%"}
+                                })
+
+                            # 3. Carga BTS Telecom
+                            if 0 < load_kw < 0.05:
+                                detected_events.append({
+                                    "code": "ALM-LOD-001",
+                                    "title": "Caída Anómala de Carga Telecom",
+                                    "subsystem": "Carga BTS Telecom",
+                                    "detail": f"Consumo de carga en {load_kw:.3f} kW (Posible apagado de radios o corte LVD)",
+                                    "metrics": {"load_power_kw": f"{load_kw:.3f} kW"}
+                                })
+
+                            # 4. Rectificadores AC/DC
+                            ac_power = max(grid_kw, dg_kw)
+                            if ac_power > 0.4 and rect_kw == 0.0:
+                                detected_events.append({
+                                    "code": "ALM-REC-001",
+                                    "title": "Falla de Rectificadores con Fuente AC Presente",
+                                    "subsystem": "Rectificadores AC/DC (Planta de Fuerza)",
+                                    "detail": f"Fuente AC activa ({ac_power:.2f} kW) pero rectificadores entregan 0.0 kW al bus DC",
+                                    "metrics": {"grid_or_dg_power": f"{ac_power:.2f} kW", "rectifier_power_kw": "0.0 kW", "battery_soc": f"{soc:.1f}%"}
+                                })
+                            if rect_kw > 0.1 and (rect_volt < 48.0 or rect_volt > 57.5):
+                                detected_events.append({
+                                    "code": "ALM-REC-002",
+                                    "title": "Tensión Rectificadores Fuera de Rango",
+                                    "subsystem": "Rectificadores AC/DC",
+                                    "detail": f"Tensión de flotación anormal en bastidor: {rect_volt:.1f} V (Rango seguro: 48.0V - 57.5V)",
+                                    "metrics": {"rectifier_voltage": f"{rect_volt:.1f} V", "rectifier_power_kw": f"{rect_kw:.2f} kW"}
+                                })
+
+                            # 5. Generador Diésel
+                            if fuel is not None and 0.0 < fuel < 15.0:
+                                detected_events.append({
+                                    "code": "ALM-GEN-001",
+                                    "title": "Nivel Crítico de Combustible Diésel",
+                                    "subsystem": "Generador Diésel",
+                                    "detail": f"Nivel de combustible en tanque: {fuel:.1f}% (Límite crítico: < 15.0%)",
+                                    "metrics": {"generator_fuel_level": f"{fuel:.1f}%"}
+                                })
+
+                        # ================= SITIO GAORI (BESS & SOLAR) =================
+                        else:
+                            soc = float(t.get("bess_soc") or t.get("soc_promedio") or 0.0)
+                            delta_v = float(t.get("delta_v_celdas_mv") or 0.0)
+                            temp = float(t.get("temp_bateria_max") or t.get("temp1") or 0.0)
+                            freq = float(t.get("frecuencia_red_hz") or 0.0)
+                            temp_igbt = float(t.get("temp_igbt") or 0.0)
+
+                            if 0 < soc < 15.0:
+                                detected_events.append({
+                                    "code": "ALM-BMS-001",
+                                    "title": "SOC Crítico BESS Gaori",
+                                    "subsystem": "Banco BESS Central",
+                                    "detail": f"Nivel de carga del contenedor BESS crítico: {soc:.1f}% (Umbral: < 15%)",
+                                    "metrics": {"bess_soc": f"{soc:.1f}%"}
+                                })
+                            if delta_v > 60.0:
+                                detected_events.append({
+                                    "code": "ALM-BMS-003",
+                                    "title": "Desbalance Severo Celdas BESS",
+                                    "subsystem": "Sistema BMS Gaori",
+                                    "detail": f"Diferencia de tensión entre celdas: {delta_v:.1f} mV (Límite: > 60 mV)",
+                                    "metrics": {"delta_v_celdas_mv": f"{delta_v:.1f} mV"}
+                                })
+                            if temp > 45.0:
+                                detected_events.append({
+                                    "code": "ALM-BMS-005",
+                                    "title": "Sobretemperatura Baterías BESS",
+                                    "subsystem": "Contenedor BESS Gaori",
+                                    "detail": f"Temperatura en racks de baterías: {temp:.1f} °C (Límite: > 45.0 °C)",
+                                    "metrics": {"temp_bateria_max": f"{temp:.1f} °C"}
+                                })
+                            if temp_igbt > 85.0:
+                                detected_events.append({
+                                    "code": "ALM-PCS-001",
+                                    "title": "Sobretemperatura IGBTs PCS",
+                                    "subsystem": "Inversores Centrales PCS",
+                                    "detail": f"Temperatura en semiconductores IGBT: {temp_igbt:.1f} °C (Límite: > 85.0 °C)",
+                                    "metrics": {"temp_igbt": f"{temp_igbt:.1f} °C"}
+                                })
+                            if freq > 0 and (freq < 58.5 or freq > 61.5):
+                                detected_events.append({
+                                    "code": "ALM-GRD-001",
+                                    "title": "Desviación Frecuencia AC",
+                                    "subsystem": "Barra AC Gaori",
+                                    "detail": f"Frecuencia de red fuera de banda normativa: {freq:.2f} Hz",
+                                    "metrics": {"frecuencia_red_hz": f"{freq:.2f} Hz"}
+                                })
+
+                            # Hardware ATESS Inversores Centrales (PCS-01, PCS-02, PCS-03)
+                            raw_faults = t.get("fault_history_json", "")
+                            if raw_faults:
+                                try:
+                                    f_list = json.loads(raw_faults)
+                                    for f in f_list:
+                                        if f.get("status") == "ACTIVA" and f.get("severity") in ("CRITICA", "CRITICAL"):
+                                            f_code = f.get("code", "HW-FLT")
+                                            f_desc = f.get("desc", "Falla de hardware ATESS")
+                                            f_sub = f.get("subsystem", "Inversor PCS ATESS")
+                                            detected_events.append({
+                                                "code": f"ALM-ATESS-{f_code}",
+                                                "title": f"Falla Inversor ATESS ({f_code})",
+                                                "subsystem": f_sub,
+                                                "detail": f"{f_desc} en {f_sub}",
+                                                "metrics": {"fault_code": f_code, "subsystem": f_sub}
+                                            })
+                                except Exception:
+                                    pass
+
+                        # Despachar eventos críticos detectados (con cooldown anti-spam de 10 min)
+                        for ev in detected_events:
+                            ev_code = ev["code"]
+                            ev_title = ev["title"]
+                            ev_sub = ev["subsystem"]
+                            ev_detail = ev["detail"]
+                            ev_metrics = ev.get("metrics", {})
+
+                            cooldown_key = f"matrix_crit:{d_name}:{ev_code}"
+                            if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 600:
+                                continue
+
+                            event_time = max_ts if max_ts > 0 else int(now_ts * 1000)
+                            tz_info = format_multizone_time(event_time, site_country=site_country)
+
+                            metrics_lines = ""
+                            for mk, mv in ev_metrics.items():
+                                metrics_lines += f"• *{mk}:* `{mv}`\n"
+
+                            msg_text = (
+                                "🚨 *ALERTA CRÍTICA — HYVISION SCADA*\n"
+                                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                                f"📍 *Sitio:* `{d_name}` ({country_label} {country_flag})\n"
+                                f"⚙️ *Subsistema:* `{ev_sub}`\n"
+                                f"⚠️ *Alarma:* *{ev_code} — {ev_title}*\n"
+                                f"🔴 *Severidad:* `CRITICAL`\n"
+                                f"{tz_info['time_block']}\n"
+                                f"📝 *Detalle:* {ev_detail}\n"
+                            )
+                            if metrics_lines:
+                                msg_text += f"\n📊 *Telemetría:*\n{metrics_lines}"
+                            msg_text += (
+                                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                                "👉 [Abrir SCADA HyVision en Vivo](http://localhost:8082)\n"
+                            )
+
+                            ok, send_res = send_telegram_message(bot_token, chat_id, msg_text)
+                            if ok:
+                                alert_cooldown[cooldown_key] = now_ts
+                                print(f"[Telegram Dispatch] Alerta Crítica (Matriz {d_type}) despachada: {d_name} - {ev_code}", flush=True)
+                            else:
+                                print(f"[Telegram Error] Falla al despachar: {send_res}", flush=True)
+
+                except Exception as e_dev:
+                    pass
 
         except Exception as e_loop:
             print(f"Error en monitor de alarmas críticas: {e_loop}")
