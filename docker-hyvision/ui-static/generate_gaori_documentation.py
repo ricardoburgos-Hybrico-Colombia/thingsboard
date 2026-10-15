@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 r"""
-Generador Maestro de Documentacion Tecnica: Mapeo de Variables, Formulas y Telemetria GAORI
+Generador Maestro de Documentacion Tecnica: Mapeo de Variables, Formulas, Telemetria y Matriz de Alarmas GAORI
 Genera:
-1. Archivo Excel (.xlsx) con tablas estructuradas, hojas por subsistema, filtros y formulas.
-2. Archivo Word (.docx) con informe tecnico ejecutivo.
+1. Archivo Excel (.xlsx) con tablas estructuradas, hojas por subsistema, filtros, formulas y Matriz de 33 Alarmas.
+2. Archivo Word (.docx) con informe tecnico ejecutivo, topologia, formulas y matriz completa de protecciones y audio.
 Ubicacion: C:\Users\PC\Documents\AI_Engineer\20.LEER_DATA_API_ENERCLO\
 """
 
@@ -100,203 +100,159 @@ WIDGETS_DATA = [
         "parametro_ui": "Strings 1 a 5 (Tensiones)",
         "unidad": "V",
         "key_thingsboard": "string_1..5_tension_v / pbd_matrix_json[sel].voltages",
-        "origen_api": "vpv, vpv2, vpv3, vpv4, vpv5",
+        "origen_api": "vpv, vpv2dc, vpv3, vpv4, vpv5",
         "endpoint_api": "/api/v1/pbd/data-last",
-        "formula_logica": "Tensión de circuito abierto o MPPT por canal individual: round(float(vpv_i), 1)",
-        "ejemplo_valor": "Str 1: 552 V | Str 2: 530 V"
+        "formula_logica": "Tensión en circuito abierto/operación MPPT por string: max(0.0, round(float(vpv_i), 1))",
+        "ejemplo_valor": "620.0 V a 750.0 V"
     },
     {
         "subsistema": "Solar Fotovoltaico DC",
         "widget_nombre": "TABLERO SOLAR PBD-01..12 (STRINGS DC)",
         "parametro_ui": "Estado Seccionador DC",
-        "unidad": "Estado Texto",
-        "key_thingsboard": "pbd_disconnect_status / pbd_status",
+        "unidad": "Texto (Badge)",
+        "key_thingsboard": "pbd_disconnect_status / pbd_matrix_json[sel].status",
         "origen_api": "status",
         "endpoint_api": "/api/v1/pbd/data-last",
-        "formula_logica": "status == 2 ? 'CERRADO (Normal)' : (status == 1 ? 'STANDBY' : 'ABIERTO')",
-        "ejemplo_valor": "SECCIONADOR CERRADO"
+        "formula_logica": "status == 2 ? 'CERRADO' : 'ABIERTO'",
+        "ejemplo_valor": "CERRADO (Conectado y Normal)"
     },
 
-    # 2. BALANCE DE PLANTA
+    # 2. GENERACIÓN SOLAR GLOBAL
     {
-        "subsistema": "Gestión Energética Microrred",
-        "widget_nombre": "BALANCE DE PLANTA",
-        "parametro_ui": "Balance Neto Instantáneo",
-        "unidad": "kW NETO",
-        "key_thingsboard": "Calculado en UI desde: generacion_solar_kw, demanda_carga_kw, potencia_bess, generador_kw",
-        "origen_api": "API OpenAPI Enerclo (PBDs + PCSs + PlantInfo)",
-        "endpoint_api": "/api/v1/pbd/data-last & /api/v1/pcs/data-last",
-        "formula_logica": "GenPrimaria = Solar + Red + DG. Si GenPrimaria >= Carga: Net = GenPrimaria - Carga (SUPERÁVIT). Si GenPrimaria < Carga y BESS_Descarga >= Déficit: Net = (GenPrimaria + BESS_Descarga) - Carga -> ±0.0 kW (EQUILIBRIO). Si BESS no alcanza: DÉFICIT.",
-        "ejemplo_valor": "±0.0 kW NETO (Equilibrio BESS)"
-    },
-    {
-        "subsistema": "Gestión Energética Microrred",
-        "widget_nombre": "BALANCE DE PLANTA",
-        "parametro_ui": "Badge de Estado de Balance",
-        "unidad": "Texto (Badge)",
-        "key_thingsboard": "Calculado en UI",
-        "origen_api": "Variables de potencia combinadas",
-        "endpoint_api": "/api/v1/pcs/plant-running-info-last",
-        "formula_logica": "EQUILIBRIO (si Net == 0 o BESS cubre carga), SUPERÁVIT (si Solar/Primaria excede carga), DÉFICIT (si falta potencia en la microrred)",
-        "ejemplo_valor": "EQUILIBRIO (verde)"
-    },
-
-    # 3. GENERACIÓN SOLAR TOTAL
-    {
-        "subsistema": "Generación Solar Global",
-        "widget_nombre": "GENERACIÓN SOLAR",
-        "parametro_ui": "Potencia Solar Total",
+        "subsistema": "Solar Fotovoltaico DC",
+        "widget_nombre": "GENERACIÓN SOLAR (PLANTA)",
+        "parametro_ui": "Potencia Solar Instantánea",
         "unidad": "kW",
         "key_thingsboard": "generacion_solar_kw / potencia_solar",
-        "origen_api": "outPower de los 12 PBD250",
-        "endpoint_api": "/api/v1/pbd/data-last (x12)",
-        "formula_logica": "Si hora >= 18.25 o <= 5.75: pv_est = 0.0 (evita ruido crepuscular). Si día: pv_est = max(0.0, round(Sum(PBD_i.outPower), 1))",
-        "ejemplo_valor": "0.0 kW (Noche) / 850.5 kW (Pico día)"
+        "origen_api": "epv_d / pvActivePower",
+        "endpoint_api": "/api/v1/pcs/plant-running-info-last",
+        "formula_logica": "Potencia fotovoltaica global del parque: round(float(pvActivePower), 1)",
+        "ejemplo_valor": "0.0 kW (Noche) / 1,842.0 kW (Mediodía)"
     },
     {
-        "subsistema": "Generación Solar Global",
-        "widget_nombre": "GENERACIÓN SOLAR",
+        "subsistema": "Solar Fotovoltaico DC",
+        "widget_nombre": "GENERACIÓN SOLAR (PLANTA)",
         "parametro_ui": "Energía Solar Acumulada Hoy",
         "unidad": "kWh",
         "key_thingsboard": "epv_hoy_kwh / energia_solar_hoy",
-        "origen_api": "epvToday",
+        "origen_api": "epv_d",
         "endpoint_api": "/api/v1/pcs/plant-running-info-last",
-        "formula_logica": "Integración de energía solar diaria medida directamente por el controlador de planta: round(float(epvToday), 1)",
-        "ejemplo_valor": "3612.0 kWh"
+        "formula_logica": "Energía diaria inyectada por campo solar: round(float(epv_d), 1)",
+        "ejemplo_valor": "3,612.0 kWh"
+    },
+
+    # 3. ALMACENAMIENTO BESS
+    {
+        "subsistema": "BESS (Almacenamiento por Baterías)",
+        "widget_nombre": "ALMACENAMIENTO BESS",
+        "parametro_ui": "Estado de Carga (SOC Promedio)",
+        "unidad": "%",
+        "key_thingsboard": "bess_soc / soc_promedio / soc",
+        "origen_api": "capacity / batCapTotal",
+        "endpoint_api": "/api/v1/pcs/plant-running-info-last",
+        "formula_logica": "Promedio ponderado del SOC de los 3 racks BESS: round(Sum(PCS_i.capacity) / 3, 1)",
+        "ejemplo_valor": "47.3% (o 47%)"
+    },
+    {
+        "subsistema": "BESS (Almacenamiento por Baterías)",
+        "widget_nombre": "ALMACENAMIENTO BESS",
+        "parametro_ui": "Potencia de Batería BESS",
+        "unidad": "kW",
+        "key_thingsboard": "potencia_bess / potencia_bess_kw",
+        "origen_api": "batActivePower / pac",
+        "endpoint_api": "/api/v1/pcs/plant-running-info-last",
+        "formula_logica": "Si pot < 0: BESS en descarga (aporta energía a la microrred). Si pot > 0: BESS en carga. Flecha indicadora ▲/▼.",
+        "ejemplo_valor": "-291.1 kW (Descarga)"
+    },
+    {
+        "subsistema": "BESS (Almacenamiento por Baterías)",
+        "widget_nombre": "ALMACENAMIENTO BESS",
+        "parametro_ui": "Modo Operativo BESS",
+        "unidad": "Texto (Badge)",
+        "key_thingsboard": "estado_bess",
+        "origen_api": "potencia_bess y delta_soc",
+        "endpoint_api": "/api/v1/pcs/plant-running-info-last",
+        "formula_logica": "pot < -0.1: 'DESCARGANDO' | pot > 0.1: 'CARGANDO' | |pot| <= 0.1: 'STANDBY'",
+        "ejemplo_valor": "DESCARGANDO"
     },
 
     # 4. DEMANDA DE CARGA
     {
-        "subsistema": "Demanda Eléctrica Microrred",
+        "subsistema": "Carga Eléctrica (Consumo)",
         "widget_nombre": "DEMANDA DE CARGA",
-        "parametro_ui": "Demanda Activa de la Microrred",
+        "parametro_ui": "Potencia Activa de Carga",
         "unidad": "kW",
-        "key_thingsboard": "demanda_carga_kw / demanda_carga",
-        "origen_api": "dgActivePower, pac (PCS 1..3), pv_est",
-        "endpoint_api": "/api/v1/pcs/plant-running-info-last & /api/v1/pcs/data-last",
-        "formula_logica": "Si DG > 1kW: Carga = DG + pac_total. Si BESS cargando (pac_total < -2kW): Carga = max(0, pv_est - |pac_total|). Si BESS descargando (pac_total > 2kW): Carga = pv_est + pac_total. En flotación: Carga = pv_est.",
-        "ejemplo_valor": "282.9 kW"
+        "key_thingsboard": "demanda_carga_kw / potencia_demanda",
+        "origen_api": "loadActivePower",
+        "endpoint_api": "/api/v1/pcs/plant-running-info-last",
+        "formula_logica": "Consumo de la demanda de GAORI: round(float(loadActivePower), 1)",
+        "ejemplo_valor": "278.7 kW"
     },
     {
-        "subsistema": "Demanda Eléctrica Microrred",
+        "subsistema": "Carga Eléctrica (Consumo)",
         "widget_nombre": "DEMANDA DE CARGA",
         "parametro_ui": "Energía Consumida Hoy",
         "unidad": "kWh",
-        "key_thingsboard": "eload_hoy_kwh",
-        "origen_api": "eloadToday",
+        "key_thingsboard": "eload_hoy_kwh / energia_carga_hoy",
+        "origen_api": "eload_d",
         "endpoint_api": "/api/v1/pcs/plant-running-info-last",
-        "formula_logica": "Consumo de energía acumulado diario del pueblo/sitio: round(float(eloadToday), 1)",
-        "ejemplo_valor": "2970.0 kWh"
+        "formula_logica": "Energía total suministrada a la carga hoy: round(float(eload_d), 1)",
+        "ejemplo_valor": "3,481.0 kWh"
     },
 
-    # 5. ALMACENAMIENTO BESS
+    # 5. BALANCE DE PLANTA
     {
-        "subsistema": "Sistema BESS (Almacenamiento)",
-        "widget_nombre": "ALMACENAMIENTO BESS",
-        "parametro_ui": "Estado Operativo BESS",
-        "unidad": "Texto (Badge)",
-        "key_thingsboard": "estado_bess",
-        "origen_api": "pac (PCS 1..3), pcsDcPower, pv_est, load_tot",
-        "endpoint_api": "/api/v1/pcs/data-last",
-        "formula_logica": "Si pac_total < -3.0 kW o (pv_est > load + 5 y bess_p_dc > 2): 'CARGANDO'. Si pac_total > 3.0 kW o (es_noche y bess_p_dc > 2) o (load > pv_est + 5): 'DESCARGANDO'. Si no: 'FLOTACION'",
-        "ejemplo_valor": "DESCARGANDO"
-    },
-    {
-        "subsistema": "Sistema BESS (Almacenamiento)",
-        "widget_nombre": "ALMACENAMIENTO BESS",
-        "parametro_ui": "Potencia Activa BESS",
+        "subsistema": "Balance Energético",
+        "widget_nombre": "BALANCE DE PLANTA",
+        "parametro_ui": "Balance Neto de Potencia",
         "unidad": "kW",
-        "key_thingsboard": "potencia_bess_kw / potencia_bess",
-        "origen_api": "pcsDcPower (o vbat * ibat / 1000) de los 3 PCS",
-        "endpoint_api": "/api/v1/pcs/data-last (x3)",
-        "formula_logica": "bess_p_dc = Sum(PCS_i.pcsDcPower). Si DESCARGANDO: potencia = -|bess_p_dc|; Si CARGANDO: potencia = +|bess_p_dc|; Si FLOTACION: 0.0",
-        "ejemplo_valor": "-295.3 kW"
+        "key_thingsboard": "Calculado en tiempo real en UI",
+        "origen_api": "Solar, BESS, Carga, DG",
+        "endpoint_api": "/api/v1/pcs/plant-running-info-last",
+        "formula_logica": "Balance = (Solar + Gen_BESS + DG) - (Carga + Carga_BESS). En microrred autónoma equilibrada: ±0.0 kW (AUTÓNOMO).",
+        "ejemplo_valor": "±0.0 kW (Autónomo en Equilibrio)"
     },
     {
-        "subsistema": "Sistema BESS (Almacenamiento)",
-        "widget_nombre": "ALMACENAMIENTO BESS",
-        "parametro_ui": "SOC Promedio del Banco",
-        "unidad": "%",
-        "key_thingsboard": "soc_promedio / soc / bess_soc",
-        "origen_api": "capacity de los 3 PCS250",
-        "endpoint_api": "/api/v1/pcs/data-last",
-        "formula_logica": "Promedio ponderado de los 3 bancos de baterías: round((PCS1.capacity + PCS2.capacity + PCS3.capacity) / 3, 1)",
-        "ejemplo_valor": "59.3 %"
-    },
-    {
-        "subsistema": "Sistema BESS (Almacenamiento)",
-        "widget_nombre": "ALMACENAMIENTO BESS",
-        "parametro_ui": "Tensión Bus Batería Promedio",
-        "unidad": "V",
-        "key_thingsboard": "vbat_promedio / vbat",
-        "origen_api": "vbat de los 3 PCS250",
-        "endpoint_api": "/api/v1/pcs/data-last",
-        "formula_logica": "Tensión DC media en los terminales de batería: round((PCS1.vbat + PCS2.vbat + PCS3.vbat) / 3, 1)",
-        "ejemplo_valor": "758.5 V"
-    },
-    {
-        "subsistema": "Sistema BESS (Almacenamiento)",
-        "widget_nombre": "ALMACENAMIENTO BESS",
-        "parametro_ui": "Corriente Total Banco Batería",
-        "unidad": "A",
-        "key_thingsboard": "ibat_total",
-        "origen_api": "ibat de los 3 PCS250",
-        "endpoint_api": "/api/v1/pcs/data-last",
-        "formula_logica": "Corriente DC consolidada de los 3 racks: round(PCS1.ibat + PCS2.ibat + PCS3.ibat, 1)",
-        "ejemplo_valor": "389.2 A"
+        "subsistema": "Balance Energético",
+        "widget_nombre": "BALANCE DE PLANTA",
+        "parametro_ui": "Estado de Balance",
+        "unidad": "Texto (Badge)",
+        "key_thingsboard": "Calculado en tiempo real en UI",
+        "origen_api": "netBalance",
+        "endpoint_api": "UI Widget",
+        "formula_logica": "|net| <= 20 kW: 'AUTÓNOMO' | net > 20 kW: 'SUPERÁVIT' | net < -20 kW: 'DÉFICIT'",
+        "ejemplo_valor": "AUTÓNOMO"
     },
 
-    # 6. POTENCIA ACTIVA INVERSORES
+    # 6. POTENCIA ACTIVA PCS
     {
         "subsistema": "Inversores PCS250 (AC)",
-        "widget_nombre": "POTENCIA ACTIVA INVERSORES",
-        "parametro_ui": "Potencia Activa Total Inversores",
+        "widget_nombre": "POTENCIA ACTIVA PCS",
+        "parametro_ui": "Potencia Total AC Inversores",
         "unidad": "kW",
         "key_thingsboard": "pac_total_kw",
-        "origen_api": "pac de los 3 PCS250",
+        "origen_api": "pac_pcs1 + pac_pcs2 + pac_pcs3",
         "endpoint_api": "/api/v1/pcs/data-last",
-        "formula_logica": "Suma de potencia AC de los 3 inversores: round(PCS1.pac + PCS2.pac + PCS3.pac, 1)",
-        "ejemplo_valor": "282.9 kW"
+        "formula_logica": "Suma vectorial de potencia activa de los 3 inversores centrales: round(P1 + P2 + P3, 1)",
+        "ejemplo_valor": "284.6 kW"
     },
     {
         "subsistema": "Inversores PCS250 (AC)",
-        "widget_nombre": "POTENCIA ACTIVA INVERSORES",
-        "parametro_ui": "Potencia PCS-1 (SN: TQG0F12136)",
+        "widget_nombre": "POTENCIA ACTIVA PCS",
+        "parametro_ui": "Potencia por Inversor (PCS 1, 2, 3)",
         "unidad": "kW",
-        "key_thingsboard": "pac_pcs1",
-        "origen_api": "pac (PCS 1)",
+        "key_thingsboard": "carga_pcs1, carga_pcs2, carga_pcs3",
+        "origen_api": "pac de cada PCS",
         "endpoint_api": "/api/v1/pcs/data-last",
-        "formula_logica": "Potencia AC del inversor PCS 1: float(pac)",
-        "ejemplo_valor": "94.3 kW"
-    },
-    {
-        "subsistema": "Inversores PCS250 (AC)",
-        "widget_nombre": "POTENCIA ACTIVA INVERSORES",
-        "parametro_ui": "Potencia PCS-2 (SN: TQG0F12135)",
-        "unidad": "kW",
-        "key_thingsboard": "pac_pcs2",
-        "origen_api": "pac (PCS 2)",
-        "endpoint_api": "/api/v1/pcs/data-last",
-        "formula_logica": "Potencia AC del inversor PCS 2: float(pac)",
-        "ejemplo_valor": "94.1 kW"
-    },
-    {
-        "subsistema": "Inversores PCS250 (AC)",
-        "widget_nombre": "POTENCIA ACTIVA INVERSORES",
-        "parametro_ui": "Potencia PCS-3 (SN: TQG0F12134)",
-        "unidad": "kW",
-        "key_thingsboard": "pac_pcs3",
-        "origen_api": "pac (PCS 3)",
-        "endpoint_api": "/api/v1/pcs/data-last",
-        "formula_logica": "Potencia AC del inversor PCS 3: float(pac)",
-        "ejemplo_valor": "94.5 kW"
+        "formula_logica": "Potencia activa individual: round(abs(pac_i), 1). Barra: min(100%, (P / 250 kW) * 100)",
+        "ejemplo_valor": "PCS1: 93.0 kW | PCS2: 88.3 kW | PCS3: 97.4 kW"
     },
 
     # 7. POTENCIA REACTIVA
     {
         "subsistema": "Inversores PCS250 (AC)",
         "widget_nombre": "POTENCIA REACTIVA (VAR)",
-        "parametro_ui": "Potencia Reactiva Total (Q)",
+        "parametro_ui": "Potencia Reactiva Total",
         "unidad": "kVAR",
         "key_thingsboard": "q_total_kvar",
         "origen_api": "outReactivePower / loadReactivePower",
@@ -451,26 +407,26 @@ WIDGETS_DATA = [
     {
         "subsistema": "Parámetros Eléctricos Red AC",
         "widget_nombre": "ESTABILIDAD SINCRONISMO DG",
-        "parametro_ui": "Tensiones de Fase (U, V, W)",
+        "parametro_ui": "Tensión de Línea / Fase",
         "unidad": "V",
-        "key_thingsboard": "tension_fase_u, tension_fase_v, tension_fase_w",
+        "key_thingsboard": "vacu, vacv, vacw / tension_red",
         "origen_api": "vacu, vacv, vacw",
-        "endpoint_api": "/api/v1/pcs/plant-running-info-last",
-        "formula_logica": "Tensiones fase-neutro en barra colectora AC: round(float(vac_i), 1)",
-        "ejemplo_valor": "U: 144.6 V | V: 153.3 V | W: 145.0 V"
+        "endpoint_api": "/api/v1/pcs/data-last",
+        "formula_logica": "Tensiones de fase medidas por inversor: round(float(vac_i), 1)",
+        "ejemplo_valor": "220.4 V (Fase) / 380 V (Línea)"
     },
 
     # 14. REGISTRO DE EVENTOS Y FALLAS
     {
-        "subsistema": "Supervisión y Alarmas",
+        "subsistema": "Supervisión SCADA y Alarmas",
         "widget_nombre": "REGISTRO DE EVENTOS Y FALLAS",
-        "parametro_ui": "Alarmas Activas y Fallas 30d",
-        "unidad": "Cantidad (Num)",
-        "key_thingsboard": "alarmas_activas_total, warnings_30d_total, faults_30d_total",
-        "origen_api": "warn/last-list y fault/last-list",
+        "parametro_ui": "Alarmas Activas / Advertencias",
+        "unidad": "Conteo Entero",
+        "key_thingsboard": "alarmas_activas_total, faults_30d_total, warnings_30d_total",
+        "origen_api": "Evaluación viva de 33 reglas SCADA + API de Alarmas",
         "endpoint_api": "/api/v1/warn/last-list & /api/v1/fault/last-list",
-        "formula_logica": "Conteo total de listas de eventos activos y acumulados en últimos 30 días",
-        "ejemplo_valor": "0 Activas | 0 Fallas (Sistema Saludable)"
+        "formula_logica": "Evaluación matricial en tiempo real con Web Audio API y consola interactiva desplegable",
+        "ejemplo_valor": "0 Críticas | 0 Advertencias | 4 Historial (Sistema Saludable)"
     }
 ]
 
@@ -490,25 +446,439 @@ PBD_LIST_DATA = [
 ]
 
 # ==============================================================================
-# 2. GENERACIÓN DEL LIBRO EXCEL (.XLSX)
+# 2. MATRIZ INTEGRAL DE 33 ALARMAS SCADA: GAORI
+# ==============================================================================
+
+ALARMS_MATRIX_DATA = [
+    # --- 1. BESS & BMS (11 Alarmas) ---
+    {
+        "id": "ALM-BMS-001",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Banco de Baterías",
+        "variable": "bess_soc / soc_promedio",
+        "umbral": "SOC < 25.0%",
+        "retardo": "30 seg",
+        "severidad": "Advertencia",
+        "descripcion": "SOC bajo preventivo. El banco de baterías entra en reserva operativa.",
+        "accion": "Notificación preventiva al operador. Preparación de fuente auxiliar o reducción de cargas no críticas.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-BMS-002",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Banco de Baterías",
+        "variable": "bess_soc / soc_promedio",
+        "umbral": "SOC < 15.0%",
+        "retardo": "10 seg",
+        "severidad": "Crítica",
+        "descripcion": "SOC crítico por debajo de profundidad de descarga (DoD) máxima permitida.",
+        "accion": "Inhibición forzada de descarga del BESS. Disparo automático de arranque de grupo electrógeno diésel.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-BMS-003",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Banco de Baterías",
+        "variable": "bess_soc / soc_promedio",
+        "umbral": "SOC > 98.0%",
+        "retardo": "15 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Banco de baterías cercano a saturación de carga completa.",
+        "accion": "Reducción automática de potencia en convertidores solares PBD250 (Curtailment solar).",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-BMS-004",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Celdas LFP",
+        "variable": "delta_v_celdas_mv",
+        "umbral": "ΔV > 30.0 mV",
+        "retardo": "60 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Desbalance de tensión entre celdas LFP supera límite preventivo.",
+        "accion": "BMS inicia algoritmo de ecualización pasiva por resistencias de sangrado en celdas altas.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-BMS-005",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Celdas LFP",
+        "variable": "delta_v_celdas_mv",
+        "umbral": "ΔV > 60.0 mV",
+        "retardo": "15 seg",
+        "severidad": "Crítica",
+        "descripcion": "Desbalance severo entre celdas individuales (riesgo de degradación acelerada).",
+        "accion": "Limitación de corriente de carga y descarga al 50%. Generación de orden de mantenimiento técnico.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-BMS-006",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Celdas LFP",
+        "variable": "min_volt_celda_mv",
+        "umbral": "V_celda < 2800 mV (2.80 V)",
+        "retardo": "5 seg",
+        "severidad": "Crítica",
+        "descripcion": "Tensión mínima de celda en umbral de sub-tensión profunda.",
+        "accion": "Corte de contactor DC principal del rack afectado para evitar daño químico irreversible.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-BMS-007",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Celdas LFP",
+        "variable": "max_volt_celda_mv",
+        "umbral": "V_celda > 3650 mV (3.65 V)",
+        "retardo": "5 seg",
+        "severidad": "Crítica",
+        "descripcion": "Tensión de celda máxima supera el límite de sobrecarga electroquímica.",
+        "accion": "Interrupción inmediata de corriente de carga solar/red en el rack afectado.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-BMS-008",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Climatización y Racks",
+        "variable": "temp_bateria_max",
+        "umbral": "T_bat > 38.0 °C",
+        "retardo": "30 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Temperatura de celdas por encima de temperatura óptima de operación (15-35°C).",
+        "accion": "Arranque forzado al 100% de los sistemas de aire acondicionado HVAC del contenedor BESS.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-BMS-009",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Climatización y Racks",
+        "variable": "temp_bateria_max",
+        "umbral": "T_bat > 45.0 °C",
+        "retardo": "10 seg",
+        "severidad": "Crítica",
+        "descripcion": "Sobretemperatura crítica en módulos de batería (riesgo de thermal runaway).",
+        "accion": "Desconexión de potencia del BESS, parada de emergencia y activación de protocolo contra incendios.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-BMS-010",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Climatización y Racks",
+        "variable": "temp_bateria_min",
+        "umbral": "T_bat < 5.0 °C",
+        "retardo": "60 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Baja temperatura ambiental en celdas de batería.",
+        "accion": "Inhibición de carga rápida a alta corriente para prevenir electrodeposición de litio metálico.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-BMS-011",
+        "categoria": "1. BESS y Gestión de Baterías (BMS)",
+        "subsistema": "BESS - Climatización y Racks",
+        "variable": "delta_temp_bateria",
+        "umbral": "ΔT > 10.0 °C",
+        "retardo": "120 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Dispersión térmica anormal entre módulos o racks de baterías.",
+        "accion": "Alerta de gradiente térmico. Verificación de obstrucción de flujo de aire o fallo de dampers HVAC.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+
+    # --- 2. INVERSORES PCS250 (9 Alarmas) ---
+    {
+        "id": "ALM-PCS-001",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "temp_igbt_pcs1..3",
+        "umbral": "T_igbt > 65.0 °C",
+        "retardo": "20 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Temperatura elevada en puentes de potencia IGBT de inversores.",
+        "accion": "Arranque a máxima velocidad de ventiladores de disipador. Derating térmico del 10%.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PCS-002",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "temp_igbt_pcs1..3",
+        "umbral": "T_igbt > 75.0 °C",
+        "retardo": "5 seg",
+        "severidad": "Crítica",
+        "descripcion": "Sobretemperatura crítica en módulos IGBT. Riesgo de destrucción de semiconductor.",
+        "accion": "Disparo térmico instantáneo y desconexión segura del inversor afectado.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-PCS-003",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "temp_ind_pcs1..3",
+        "umbral": "T_ind > 80.0 °C",
+        "retardo": "30 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Temperatura alta en reactancias/inductancias de filtrado sinusoidal AC.",
+        "accion": "Inspección de ventilación en compartimento de filtrado magnético.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PCS-004",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "carga_pcs1, carga_pcs2, carga_pcs3",
+        "umbral": "|PCS_i - Promedio| > 25.0 kW",
+        "retardo": "15 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Desbalance de reparto de carga activa entre inversores operando en paralelo.",
+        "accion": "Calibración de lazo de droop control o verificación de impedancias de enlace.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PCS-005",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "carga_pcs1..3",
+        "umbral": "P > 245.0 kW (98% nominal)",
+        "retardo": "60 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Inversor operando al límite de capacidad nominal continua de 250 kVA.",
+        "accion": "Redistribución automática de potencia a inversores en paralelo o arranque de diésel.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PCS-006",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "pbd_bus_voltage / vbat",
+        "umbral": "V_bus < 620 V o V_bus > 850 V",
+        "retardo": "5 seg",
+        "severidad": "Crítica",
+        "descripcion": "Tensión en el bus DC colector fuera de rango de modulación PWM del inversor.",
+        "accion": "Aislamiento inmediato del inversor para prevenir colapso de modulación o sobretensión.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-PCS-007",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "frecuencia_red_hz / vacu",
+        "umbral": "Δf > 0.3 Hz o ΔV > 10%",
+        "retardo": "3 seg",
+        "severidad": "Crítica",
+        "descripcion": "Fallo de sincronismo de ángulo de fase o frecuencia en barraje AC común.",
+        "accion": "Apertura de contactor AC del inversor desincronizado para evitar corrientes de circulación.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-PCS-008",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "sn_pcs1..3 (Telemetría)",
+        "umbral": "Sin reporte > 30 seg",
+        "retardo": "30 seg",
+        "severidad": "Crítica",
+        "descripcion": "Pérdida de comunicación de telemetría y control con inversor PCS250.",
+        "accion": "Conmutación de inversor a modo autónomo de seguridad y aviso prioritario a SCADA.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-PCS-009",
+        "categoria": "2. Inversores ATESS PCS250 (Etapa AC/DC)",
+        "subsistema": "Inversores PCS250 (AC)",
+        "variable": "q_total_kvar / pf_pcs",
+        "umbral": "FP < 0.85 con P > 50 kW",
+        "retardo": "45 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Factor de potencia bajo en microrred; consumo reactivo inductivo excesivo.",
+        "accion": "Consigna automática a inversores PCS para inyección de VAR capacitivos de compensación.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+
+    # --- 3. CAMPO SOLAR PBD250 (6 Alarmas) ---
+    {
+        "id": "ALM-PBD-001",
+        "categoria": "3. Campo Solar Fotovoltaico PBD250 y Strings DC",
+        "subsistema": "Campo Solar PBD250",
+        "variable": "pbd_matrix_json[sel].status",
+        "umbral": "status != 'CERRADO'",
+        "retardo": "10 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Seccionador DC bajo carga del convertidor PBD250 en posición ABIERTO.",
+        "accion": "Verificación si es maniobra de mantenimiento programado o disparo por fallo DC.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PBD-002",
+        "categoria": "3. Campo Solar Fotovoltaico PBD250 y Strings DC",
+        "subsistema": "Campo Solar PBD250",
+        "variable": "pbd_matrix_json[sel].currents[i]",
+        "umbral": "I_str = 0.0 A con otros > 8.0 A",
+        "retardo": "60 seg",
+        "severidad": "Advertencia",
+        "descripcion": "String solar individual sin paso de corriente en horario de alta radiación.",
+        "accion": "Inspección técnica de fusibles gPV (1500V / 25A) o conectores MC4 desconectados.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PBD-003",
+        "categoria": "3. Campo Solar Fotovoltaico PBD250 y Strings DC",
+        "subsistema": "Campo Solar PBD250",
+        "variable": "pbd_matrix_json[sel].currents[i]",
+        "umbral": "|I_str - Promedio| > 30%",
+        "retardo": "120 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Desbalance de generación entre strings paralelos del mismo convertidor.",
+        "accion": "Inspección de acumulación de suciedad/polvo, sombreado puntual o módulo dañado.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PBD-004",
+        "categoria": "3. Campo Solar Fotovoltaico PBD250 y Strings DC",
+        "subsistema": "Campo Solar PBD250",
+        "variable": "pbd_matrix_json[sel].temp",
+        "umbral": "T_pbd > 65.0 °C",
+        "retardo": "30 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Temperatura elevada en gabinete o disipadores del convertidor PBD250.",
+        "accion": "Revisión y limpieza de rejillas de ventilación y funcionamiento de extractores.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PBD-005",
+        "categoria": "3. Campo Solar Fotovoltaico PBD250 y Strings DC",
+        "subsistema": "Campo Solar PBD250",
+        "variable": "pbd_matrix_json[sel].voltages[i]",
+        "umbral": "V_str < 450 V con P_solar > 50 kW",
+        "retardo": "60 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Tensión DC de string fotovoltaico por debajo del rango MPPT normal.",
+        "accion": "Comprobación de diodos de derivación (bypass) en módulos o cortocircuito parcial.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-PBD-006",
+        "categoria": "3. Campo Solar Fotovoltaico PBD250 y Strings DC",
+        "subsistema": "Campo Solar PBD250",
+        "variable": "pbd_matrix_json[sel]",
+        "umbral": "PBD no responde en payload API",
+        "retardo": "45 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Pérdida de comunicación Modbus RS485 con el tablero PBD seleccionado.",
+        "accion": "Verificación de gateway serial-a-Ethernet o cable de comunicación en canaleta.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+
+    # --- 4. MICRORRED, BALANCE Y DIÉSEL (5 Alarmas) ---
+    {
+        "id": "ALM-MIC-001",
+        "categoria": "4. Microrred, Balance de Planta y Respaldo Diésel",
+        "subsistema": "Microrred GAORI - Barra AC",
+        "variable": "frecuencia_red_hz",
+        "umbral": "f < 59.5 Hz o f > 60.5 Hz",
+        "retardo": "5 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Frecuencia de microrred fuera de banda nominal de alta calidad (60 ± 0.5 Hz).",
+        "accion": "Ajuste dinámico de inyección de potencia activa por droop P/f en inversores.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-MIC-002",
+        "categoria": "4. Microrred, Balance de Planta y Respaldo Diésel",
+        "subsistema": "Microrred GAORI - Barra AC",
+        "variable": "frecuencia_red_hz",
+        "umbral": "f < 58.5 Hz o f > 61.5 Hz",
+        "retardo": "1 seg",
+        "severidad": "Crítica",
+        "descripcion": "Frecuencia en límites de contingencia severa (riesgo de colapso de microrred).",
+        "accion": "Deslastre automático de cargas secundarias y disparo de arranque de emergencia diésel.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-MIC-003",
+        "categoria": "4. Microrred, Balance de Planta y Respaldo Diésel",
+        "subsistema": "Balance de Planta Microrred",
+        "variable": "balance_neto_kw / bess_soc",
+        "umbral": "Balance < -10 kW con BESS SOC < 20%",
+        "retardo": "15 seg",
+        "severidad": "Crítica",
+        "descripcion": "Déficit de generación no cubierto por almacenamiento BESS.",
+        "accion": "Arranque y sincronización automática del generador diésel de respaldo.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-MIC-004",
+        "categoria": "4. Microrred, Balance de Planta y Respaldo Diésel",
+        "subsistema": "Respaldo Generador Diésel",
+        "variable": "dg_kw / estado_generador",
+        "umbral": "Orden ON pero DG_kW = 0 tras 30 s",
+        "retardo": "30 seg",
+        "severidad": "Crítica",
+        "descripcion": "Fallo de arranque o transferencia de carga en grupo electrógeno diésel.",
+        "accion": "Alarma de alta prioridad al operador, verificación de combustible/batería de arranque del diésel.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    },
+    {
+        "id": "ALM-MIC-005",
+        "categoria": "4. Microrred, Balance de Planta y Respaldo Diésel",
+        "subsistema": "Respaldo Generador Diésel",
+        "variable": "dg_corriente_fase_u, v, w",
+        "umbral": "Desbalance > 15% con I_avg > 50 A",
+        "retardo": "20 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Desbalance de corrientes de fase durante operación en diésel.",
+        "accion": "Alerta operativa para redistribución de cargas monofásicas en tablero general.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+
+    # --- 5. ENLACE & TELEMETRÍA (2 Alarmas) ---
+    {
+        "id": "ALM-SYS-001",
+        "categoria": "5. Enlace de Telemetría e Ingesta de Datos",
+        "subsistema": "Comunicaciones y Telemetría",
+        "variable": "sync_enerclo_thingsboard_produc.py",
+        "umbral": "Sin datos nuevos > 3 min",
+        "retardo": "180 seg",
+        "severidad": "Advertencia",
+        "descripcion": "Retraso o timeout en la ingesta de datos desde API OpenAPI Enerclo.",
+        "accion": "Reintento automático de consulta HTTP y registro en bitácora del servicio de ingesta.",
+        "audio": "587 Hz / 880 Hz (Doble chime de advertencia)"
+    },
+    {
+        "id": "ALM-SYS-002",
+        "categoria": "5. Enlace de Telemetría e Ingesta de Datos",
+        "subsistema": "Comunicaciones y Telemetría",
+        "variable": "thingsboard_heartbeat",
+        "umbral": "Sin actualización > 10 min",
+        "retardo": "600 seg",
+        "severidad": "Crítica",
+        "descripcion": "Pérdida prolongada de telemetría de planta en plataforma ThingsBoard.",
+        "accion": "Alerta crítica de pérdida de supervisión remota en centro de control.",
+        "audio": "880 Hz / 660 Hz (Tono dual pulsante industrial)"
+    }
+]
+
+# ==============================================================================
+# 3. GENERACIÓN DEL LIBRO EXCEL (.XLSX)
 # ==============================================================================
 
 def generar_excel():
     wb = openpyxl.Workbook()
-    # Eliminar hoja default
     default_sheet = wb.active
 
     # Estilos Corporativos HyVision
     header_fill = PatternFill(start_color="1B4D2E", end_color="1B4D2E", fill_type="solid") # Verde HyVision
-    zebra_fill  = PatternFill(start_color="F4F8F5", end_color="F4F8F5", fill_type="solid") # Gris/verde muy suave
+    zebra_fill  = PatternFill(start_color="F4F8F5", end_color="F4F8F5", fill_type="solid")
     white_fill  = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-    accent_fill = PatternFill(start_color="E2EFE7", end_color="E2EFE7", fill_type="solid")
+    crit_fill   = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid") # Rojo suave
+    warn_fill   = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid") # Amarillo suave
 
     font_header = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
     font_bold   = Font(name="Segoe UI", size=10, bold=True, color="0F172A")
     font_body   = Font(name="Segoe UI", size=10, color="1E293B")
     font_code   = Font(name="Consolas", size=9.5, color="0369A1")
     font_form   = Font(name="Segoe UI", size=9.5, italic=True, color="1E3A8A")
+    font_crit   = Font(name="Segoe UI", size=10, bold=True, color="991B1B")
+    font_warn   = Font(name="Segoe UI", size=10, bold=True, color="92400E")
 
     thin_border = Border(
         left=Side(style='thin', color='CBD5E1'),
@@ -521,7 +891,6 @@ def generar_excel():
     # HOJA 1: Mapeo_Widgets_y_Formulas
     # --------------------------------------------------------------------------
     ws1 = wb.create_sheet(title="Mapeo_Widgets_y_Formulas")
-    
     headers1 = [
         "Subsistema",
         "Widget Dashboard (ThingsBoard)",
@@ -534,7 +903,6 @@ def generar_excel():
         "Ejemplo / Valor Típico en Vivo"
     ]
     ws1.append(headers1)
-    
     for col_idx in range(1, len(headers1) + 1):
         cell = ws1.cell(row=1, column=col_idx)
         cell.fill = header_fill
@@ -556,7 +924,6 @@ def generar_excel():
         ]
         ws1.append(row_vals)
         current_fill = zebra_fill if (r_idx % 2 == 0) else white_fill
-        
         for c_idx in range(1, len(row_vals) + 1):
             c = ws1.cell(row=r_idx, column=c_idx)
             c.fill = current_fill
@@ -575,11 +942,9 @@ def generar_excel():
                 c.alignment = Alignment(vertical="center", wrap_text=True)
         ws1.row_dimensions[r_idx].height = 42
 
-    # Auto-ancho de columnas Hoja 1
     col_widths1 = [24, 34, 30, 14, 32, 28, 30, 55, 30]
     for i, w in enumerate(col_widths1, start=1):
         ws1.column_dimensions[get_column_letter(i)].width = w
-
     ws1.freeze_panes = "A2"
     ws1.auto_filter.ref = f"A1:{get_column_letter(len(headers1))}{len(WIDGETS_DATA) + 1}"
 
@@ -648,8 +1013,8 @@ def generar_excel():
         "Variables AC Principales",
         "Variables DC / Batería",
         "Variables Térmicas IGBT",
-        "Variables BMS (Celdas)",
-        "Fórmulas Consolidadas"
+        "Variables Térmicas BMS",
+        "Fórmula Reparto de Potencia"
     ]
     ws3.append(headers3)
     for col_idx in range(1, len(headers3) + 1):
@@ -660,100 +1025,180 @@ def generar_excel():
     ws3.row_dimensions[1].height = 30
 
     pcs_data = [
-        ("PCS-01 (Inversor 1 / Rack 1)", "TQG0F12136", "250 kVA / 250 kW", "pac, outReactivePower, fac, vacu, vacv, vacw", "vbat, ibat, pcsDcPower, capacity (SOC)", "temp1 (IGBT), temp (Ambiente), temp4 (Choke)", "maxBatTemp, minBatTemp, maxCellVol, minCellVol", "pac_total = Sum(pac); soc_prom = Avg(capacity)"),
-        ("PCS-02 (Inversor 2 / Rack 2)", "TQG0F12135", "250 kVA / 250 kW", "pac, outReactivePower, fac, vacu, vacv, vacw", "vbat, ibat, pcsDcPower, capacity (SOC)", "temp1 (IGBT), temp (Ambiente), temp4 (Choke)", "maxBatTemp, minBatTemp, maxCellVol, minCellVol", "bess_p_dc = Sum(pcsDcPower); vbat_prom = Avg(vbat)"),
-        ("PCS-03 (Inversor 3 / Rack 3)", "TQG0F12134", "250 kVA / 250 kW", "pac, outReactivePower, fac, vacu, vacv, vacw", "vbat, ibat, pcsDcPower, capacity (SOC)", "temp1 (IGBT), temp (Ambiente), temp4 (Choke)", "maxBatTemp, minBatTemp, maxCellVol, minCellVol", "delta_t = Max(maxBatTemp) - Min(minBatTemp)"),
-        ("Planta General (Controlador)", "TQG0F12136 (Master)", "750 kW / 1 MWh BESS", "dgActivePower, dgFrequency, dgPowerFactor", "epvToday, eloadToday, status, runModel", "Diagnóstico integral del sistema", "Delta V celdas = (MaxCell - MinCell) * 1000 mV", "load_tot = dg_kw + pac_total (o pv_est +/- pac)")
+        ("Inversor PCS-01", "TQG0F12136", "250 kW / 250 kVA", "carga_pcs1, pac_pcs1, q_pcs1", "soc_pcs1, vbat, ibat", "temp_igbt_pcs1, temp_ind_pcs1", "maxBatTemp, minBatTemp", "P_total = P1 + P2 + P3"),
+        ("Inversor PCS-02", "TQG0F12135", "250 kW / 250 kVA", "carga_pcs2, pac_pcs2, q_pcs2", "soc_pcs2, vbat, ibat", "temp_igbt_pcs2, temp_ind_pcs2", "maxBatTemp, minBatTemp", "Droop control autónomo"),
+        ("Inversor PCS-03", "TQG0F12134", "250 kW / 250 kVA", "carga_pcs3, pac_pcs3, q_pcs3", "soc_pcs3, vbat, ibat", "temp_igbt_pcs3, temp_ind_pcs3", "maxBatTemp, minBatTemp", "Droop control autónomo")
     ]
-
-    for r_idx, row in enumerate(pcs_data, start=2):
-        ws3.append(list(row))
+    for r_idx, pcs in enumerate(pcs_data, start=2):
+        ws3.append(pcs)
         c_fill = zebra_fill if (r_idx % 2 == 0) else white_fill
-        for c_idx in range(1, len(row) + 1):
+        for c_idx in range(1, len(pcs) + 1):
             c = ws3.cell(row=r_idx, column=c_idx)
             c.fill = c_fill
             c.border = thin_border
-            c.font = font_body
-            if c_idx == 2: c.font = font_code
-            if c_idx == 8: c.font = font_form
-            c.alignment = Alignment(vertical="center", wrap_text=True)
-        ws3.row_dimensions[r_idx].height = 36
+            if c_idx == 2:
+                c.font = font_code
+                c.alignment = Alignment(horizontal="center", vertical="center")
+            else:
+                c.font = font_body
+                c.alignment = Alignment(vertical="center", wrap_text=True)
+        ws3.row_dimensions[r_idx].height = 28
 
-    col_widths3 = [28, 24, 20, 36, 36, 36, 38, 42]
+    col_widths3 = [20, 24, 22, 32, 26, 28, 28, 30]
     for i, w in enumerate(col_widths3, start=1):
         ws3.column_dimensions[get_column_letter(i)].width = w
     ws3.freeze_panes = "A2"
 
-    wb.remove(default_sheet)
+    # --------------------------------------------------------------------------
+    # HOJA 4: Matriz_Alarmas_SCADA (NUEVA: 33 ALARMAS COMPLETAS)
+    # --------------------------------------------------------------------------
+    ws4 = wb.create_sheet(title="Matriz_Alarmas_SCADA")
+    headers4 = [
+        "Código Alarma",
+        "Categoría de Supervisión",
+        "Subsistema / Equipo Afectado",
+        "Variable Telemetría ThingsBoard",
+        "Condición / Umbral de Disparo",
+        "Retardo / Persistencia",
+        "Severidad",
+        "Descripción Operativa del Evento",
+        "Protocolo de Acción Automática / Operador",
+        "Tono Acústico SCADA (Web Audio API)"
+    ]
+    ws4.append(headers4)
+    for col_idx in range(1, len(headers4) + 1):
+        cell = ws4.cell(row=1, column=col_idx)
+        cell.fill = header_fill
+        cell.font = font_header
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    ws4.row_dimensions[1].height = 32
+
+    for r_idx, alm in enumerate(ALARMS_MATRIX_DATA, start=2):
+        row_vals = [
+            alm["id"],
+            alm["categoria"],
+            alm["subsistema"],
+            alm["variable"],
+            alm["umbral"],
+            alm["retardo"],
+            alm["severidad"],
+            alm["descripcion"],
+            alm["accion"],
+            alm["audio"]
+        ]
+        ws4.append(row_vals)
+        
+        is_crit = alm["severidad"] == "Crítica"
+        row_fill = crit_fill if is_crit else (warn_fill if alm["severidad"] == "Advertencia" else zebra_fill)
+        
+        for c_idx in range(1, len(row_vals) + 1):
+            c = ws4.cell(row=r_idx, column=c_idx)
+            c.fill = row_fill if (c_idx == 7) else (zebra_fill if (r_idx % 2 == 0) else white_fill)
+            c.border = thin_border
+            
+            if c_idx == 1:
+                c.font = font_bold
+                c.alignment = Alignment(horizontal="center", vertical="center")
+            elif c_idx == 4:
+                c.font = font_code
+                c.alignment = Alignment(vertical="center", wrap_text=True)
+            elif c_idx in [5, 6]:
+                c.font = font_bold
+                c.alignment = Alignment(horizontal="center", vertical="center")
+            elif c_idx == 7:
+                c.font = font_crit if is_crit else font_warn
+                c.alignment = Alignment(horizontal="center", vertical="center")
+            else:
+                c.font = font_body
+                c.alignment = Alignment(vertical="center", wrap_text=True)
+        ws4.row_dimensions[r_idx].height = 36
+
+    col_widths4 = [18, 34, 26, 32, 24, 18, 16, 45, 52, 34]
+    for i, w in enumerate(col_widths4, start=1):
+        ws4.column_dimensions[get_column_letter(i)].width = w
+    ws4.freeze_panes = "A2"
+    ws4.auto_filter.ref = f"A1:{get_column_letter(len(headers4))}{len(ALARMS_MATRIX_DATA) + 1}"
+
+    # Eliminar hoja default vacía
+    if default_sheet in wb.worksheets:
+        wb.remove(default_sheet)
+
     wb.save(EXCEL_PATH)
-    print(f"Excel generado exitosamente en: {EXCEL_PATH}")
+    print(f"Excel generado exitosamente con 4 hojas en: {EXCEL_PATH}")
 
 # ==============================================================================
-# 3. GENERACIÓN DEL INFORME WORD (.DOCX)
+# 4. GENERACIÓN DEL DOCUMENTO WORD (.DOCX)
 # ==============================================================================
 
 def generar_word():
     doc = docx.Document()
 
-    # Configurar márgenes estándar 2.54 cm
-    for s in doc.sections:
-        s.top_margin = Inches(1.0)
-        s.bottom_margin = Inches(1.0)
-        s.left_margin = Inches(1.0)
-        s.right_margin = Inches(1.0)
+    # Configuración de márgenes
+    sections = doc.sections
+    for section in sections:
+        section.top_margin    = Inches(1.0)
+        section.bottom_margin = Inches(1.0)
+        section.left_margin   = Inches(1.0)
+        section.right_margin  = Inches(1.0)
 
-    # Colores
-    c_primary = RGBColor(27, 77, 46)     # Verde HyVision
-    c_dark    = RGBColor(15, 23, 42)     # Slate 900
-    c_code    = RGBColor(3, 105, 161)    # Cyan/Blue 700
+    c_primary = RGBColor(27, 77, 46)   # Verde HyVision
+    c_accent  = RGBColor(100, 184, 86) # Verde claro SCADA
+    c_dark    = RGBColor(15, 23, 42)   # Slate 900
+    c_code    = RGBColor(3, 105, 161)  # Azul código
 
-    # Título Principal
-    p_title = doc.add_paragraph()
-    p_title.alignment = WD_ALIGN_PARAGRAPH.LEFT
-    r_title = p_title.add_run("MEMORIA TÉCNICA Y DICCIONARIO DE DATOS")
+    # TÍTULO PRINCIPAL
+    title = doc.add_paragraph()
+    r_title = title.add_run("Mapeo Técnico de Telemetría, Fórmulas de Cálculo y Matriz de Alarmas SCADA")
     r_title.font.name = "Segoe UI"
-    r_title.font.size = Pt(22)
+    r_title.font.size = Pt(20)
     r_title.font.bold = True
     r_title.font.color.rgb = c_primary
+    title.paragraph_format.space_after = Pt(2)
 
-    p_sub = doc.add_paragraph()
-    r_sub = p_sub.add_run("Mapeo de Variables, Fórmulas Físicas y Widgets SCADA — Planta Solar & BESS EPM-GAORI")
+    sub = doc.add_paragraph()
+    r_sub = sub.add_run("Planta Solar & Sistema de Almacenamiento BESS • Sitio GAORI (EPM Colombia)")
     r_sub.font.name = "Segoe UI"
-    r_sub.font.size = Pt(13)
+    r_sub.font.size = Pt(12)
+    r_sub.font.italic = True
     r_sub.font.color.rgb = RGBColor(100, 116, 139)
+    sub.paragraph_format.space_after = Pt(16)
 
-    doc.add_paragraph() # Espacio
-
-    # Resumen Ejecutivo
+    # 1. Resumen Ejecutivo
     h1 = doc.add_heading(level=1)
-    r_h1 = h1.add_run("1. Arquitectura General de Ingesta y Datos")
+    r_h1 = h1.add_run("1. Resumen Ejecutivo de Arquitectura de Telemetría")
     r_h1.font.name = "Segoe UI"
     r_h1.font.color.rgb = c_primary
 
-    p_desc = doc.add_paragraph(
-        "El sistema de monitoreo SCADA en tiempo real para el sitio industrial EPM_GAORI opera mediante un pipeline continuo de sincronización "
-        "(sync_enerclo_thingsboard_produc.py) ejecutado cada 60 segundos. Consulta en paralelo los 3 inversores bidireccionales ATESS PCS250 "
-        "(750 kW / 1 MWh BESS) y los 12 convertidores solares DC-DC ATESS PBD250 (3 MW fotovoltaicos), consolidando la telemetría "
-        "en ThingsBoard CE (puerto 8082) bajo el dispositivo BESS_EPM_GAORI."
-    )
-    p_desc.style.font.name = "Segoe UI"
-    p_desc.style.font.size = Pt(10.5)
+    p1 = doc.add_paragraph()
+    p1.add_run("El presente documento técnico establece el mapeo exhaustivo y definitivo entre las fuentes de datos de la ")
+    p1.add_run("API OpenAPI Enerclo").bold = True
+    p1.add_run(", el servicio de ingesta y normalización continua (")
+    p1.add_run("sync_enerclo_thingsboard_produc.py").font.name = "Consolas"
+    p1.add_run("), los atributos y series temporales almacenados en ")
+    p1.add_run("ThingsBoard Professional / Community Edition").bold = True
+    p1.add_run(", su expresión visual en los widgets SCADA del dashboard ")
+    p1.add_run("EPM_GAORI").bold = True
+    p1.add_run(", y la ")
+    p1.add_run("Matriz de 33 Alarmas y Protecciones Operativas con alertas acústicas Web Audio API").bold = True
+    p1.add_run(" incorporada en la consola interactiva de supervisión.")
 
-    # 2. Resumen de Hardware
+    # 2. Topología Física
     h2 = doc.add_heading(level=1)
-    r_h2 = h2.add_run("2. Topología Física del Sitio GAORI")
+    r_h2 = h2.add_run("2. Topología Física y Jerarquía de Equipos GAORI")
     r_h2.font.name = "Segoe UI"
     r_h2.font.color.rgb = c_primary
 
     p_hw = doc.add_paragraph()
-    p_hw.add_run("• Convertidores Solares: ").bold = True
+    p_hw.add_run("• Campo Solar Fotovoltaico DC: ").bold = True
     p_hw.add_run("12 gabinetes ATESS PBD250 (250 kW DC c/u) con 5 strings por equipo = 60 strings solares totales.\n")
     p_hw.add_run("• Inversores Centrales BESS: ").bold = True
     p_hw.add_run("3 unidades ATESS PCS250 (250 kW / 250 kVA c/u) en paralelo en bus AC = 750 kW capacidad nominal.\n")
     p_hw.add_run("• Banco de Baterías: ").bold = True
     p_hw.add_run("3 racks de alta tensión (~750 V DC nominal) con BMS independiente comunicando por inversor.\n")
     p_hw.add_run("• Generación de Respaldo: ").bold = True
-    p_hw.add_run("1 grupo electrógeno motogenerador diésel de emergencia (DG) sincronizado en barra AC.")
+    p_hw.add_run("1 grupo electrógeno motogenerador diésel de emergencia (DG) sincronizado en barra AC.\n")
+    p_hw.add_run("• Consola de Alarmas: ").bold = True
+    p_hw.add_run("Widget interactivo con evaluación matricial de 33 reglas, bitácora histórica y sintetizador de sonido.")
 
     # 3. Mapeo Detallado de Widgets
     h3 = doc.add_heading(level=1)
@@ -761,7 +1206,6 @@ def generar_word():
     r_h3.font.name = "Segoe UI"
     r_h3.font.color.rgb = c_primary
 
-    # Agrupar por widget
     widgets_unicos = []
     for w in WIDGETS_DATA:
         if w["widget_nombre"] not in widgets_unicos:
@@ -775,7 +1219,6 @@ def generar_word():
 
         items_w = [x for x in WIDGETS_DATA if x["widget_nombre"] == w_name]
         
-        # Tabla en Word
         table = doc.add_table(rows=1, cols=5)
         table.alignment = WD_TABLE_ALIGNMENT.CENTER
         table.autofit = False
@@ -818,7 +1261,101 @@ def generar_word():
                             r.font.name = "Consolas"
                             r.font.color.rgb = c_code
 
-        doc.add_paragraph() # Espacio entre tablas
+        doc.add_paragraph()
+
+    # 4. MATRIZ DE ALARMAS SCADA Y PROTECCIONES OPERATIVAS
+    h4 = doc.add_heading(level=1)
+    r_h4 = h4.add_run("4. Matriz Integral de 33 Alarmas SCADA y Protecciones Operativas")
+    r_h4.font.name = "Segoe UI"
+    r_h4.font.color.rgb = c_primary
+
+    p_alm_intro = doc.add_paragraph()
+    p_alm_intro.add_run("La matriz de alarmas de GAORI implementa un esquema de supervisión continua basado en las normas ")
+    p_alm_intro.add_run("IEEE 1547, IEC 62933 (Sistemas BESS) e IEC 60364").bold = True
+    p_alm_intro.add_run(". Cada alarma define un código unívoco, la variable física monitoreada, el umbral de disparo, la persistencia mínima temporal requerida para filtrado de transitorios, la severidad (Crítica, Advertencia o Informativa) y el protocolo de acción automática o manual correspondiente.")
+
+    # Agrupar por categoría
+    categorias = []
+    for a in ALARMS_MATRIX_DATA:
+        if a["categoria"] not in categorias:
+            categorias.append(a["categoria"])
+
+    for cat in categorias:
+        h_cat = doc.add_heading(level=2)
+        r_hcat = h_cat.add_run(cat)
+        r_hcat.font.name = "Segoe UI"
+        r_hcat.font.color.rgb = RGBColor(15, 23, 42)
+
+        items_cat = [x for x in ALARMS_MATRIX_DATA if x["categoria"] == cat]
+
+        t_cat = doc.add_table(rows=1, cols=6)
+        t_cat.alignment = WD_TABLE_ALIGNMENT.CENTER
+        t_cat.autofit = False
+
+        headers_cat = ["Código", "Equipo", "Variable & Umbral", "Retardo", "Severidad", "Descripción y Protocolo de Acción"]
+        widths_cat = [Inches(1.1), Inches(1.1), Inches(1.5), Inches(0.8), Inches(1.0), Inches(2.2)]
+
+        hdr_cells = t_cat.rows[0].cells
+        for idx, title in enumerate(headers_cat):
+            hdr_cells[idx].text = title
+            hdr_cells[idx].width = widths_cat[idx]
+            shd = OxmlElement('w:shd')
+            shd.set(qn('w:val'), 'clear')
+            shd.set(qn('w:color'), 'auto')
+            shd.set(qn('w:fill'), '1B4D2E')
+            hdr_cells[idx]._tc.get_or_add_tcPr().append(shd)
+            for p in hdr_cells[idx].paragraphs:
+                p.runs[0].font.name = "Segoe UI"
+                p.runs[0].font.size = Pt(8.5)
+                p.runs[0].font.bold = True
+                p.runs[0].font.color.rgb = RGBColor(255, 255, 255)
+
+        for a in items_cat:
+            r_cells = t_cat.add_row().cells
+            r_cells[0].text = a["id"]
+            r_cells[1].text = a["subsistema"]
+            r_cells[2].text = f"{a['variable']}\n[{a['umbral']}]"
+            r_cells[3].text = a["retardo"]
+            r_cells[4].text = a["severidad"]
+            r_cells[5].text = f"{a['descripcion']}\nAcción: {a['accion']}"
+
+            is_crit = a["severidad"] == "Crítica"
+
+            for idx, c in enumerate(r_cells):
+                c.width = widths_cat[idx]
+                for p in c.paragraphs:
+                    p.paragraph_format.space_before = Pt(2)
+                    p.paragraph_format.space_after = Pt(2)
+                    for r in p.runs:
+                        r.font.name = "Segoe UI"
+                        r.font.size = Pt(8)
+                        if idx == 0:
+                            r.font.bold = True
+                            r.font.name = "Consolas"
+                        elif idx == 4:
+                            r.font.bold = True
+                            r.font.color.rgb = RGBColor(185, 28, 28) if is_crit else RGBColor(180, 83, 9)
+
+        doc.add_paragraph()
+
+    # 5. Sistema de Sonido y Web Audio API
+    h5 = doc.add_heading(level=1)
+    r_h5 = h5.add_run("5. Sistema de Alertas Acústicas SCADA (Web Audio API)")
+    r_h5.font.name = "Segoe UI"
+    r_h5.font.color.rgb = c_primary
+
+    p5 = doc.add_paragraph()
+    p5.add_run("La consola SCADA incorpora un sintetizador acústico en tiempo real basado en la ")
+    p5.add_run("Web Audio API nativa del navegador").bold = True
+    p5.add_run(", lo que elimina la necesidad de archivos de audio externos (.mp3/.wav), garantizando disponibilidad al 100% incluso en entornos aislados o dentro de contenedores Docker.\n\n")
+    p5.add_run("• Tono de Falla Crítica: ").bold = True
+    p5.add_run("Onda tipo diente de sierra (sawtooth) modulada en dos frecuencias industriales alternadas (880 Hz / 659 Hz) con 3 ráfagas de pulso sonoro.\n")
+    p5.add_run("• Tono de Advertencia Preventiva: ").bold = True
+    p5.add_run("Doble chime sinusoidal melódico (587 Hz / 880 Hz, Re5-La5) con decaimiento exponencial suave.\n")
+    p5.add_run("• Tono de Reconocimiento (ACK): ").bold = True
+    p5.add_run("Tono confirmatorio suave en onda triangular (554 Hz / 659 Hz) que certifica la atención de la alarma por el operador.\n")
+    p5.add_run("• Controles de Operador: ").bold = True
+    p5.add_run("Botón de silenciar/activar (🔊/🔇) con memoria en LocalStorage, auto-silenciamiento preventivo cada 20 segundos y botón interactivo 'Probar Sonido' en consola.")
 
     doc.save(WORD_PATH)
     print(f"Word generado exitosamente en: {WORD_PATH}")
