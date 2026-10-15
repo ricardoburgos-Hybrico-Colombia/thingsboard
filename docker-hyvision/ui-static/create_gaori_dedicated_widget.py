@@ -87,7 +87,7 @@ widget_instance_id = "052de3af-13b9-f603-76bb-59e4a5e4805d"
 if widget_instance_id in dash.get("configuration", {}).get("widgets", {}):
     w_conf = dash["configuration"]["widgets"][widget_instance_id]
     w_conf["typeId"] = {"entityType": "WIDGET_TYPE", "id": gaori_w_id}
-    w_conf["typeFullFqn"] = "tenant.registro_eventos_fallas_gaori"
+    w_conf["typeFullFqn"] = f"tenant.{saved_gaori_w.get('fqn')}"
     w_conf["config"]["title"] = "SCADA GAORI - Registro de Eventos y Fallas"
     
     save_dash_req = urllib.request.Request(

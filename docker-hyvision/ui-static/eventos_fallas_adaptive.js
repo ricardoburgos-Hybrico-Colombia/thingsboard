@@ -498,6 +498,42 @@ self.updateAudioIcon = function(btn) {
 };
 
 // --------------------------------------------------------------------------
+// FORMATEO DE FECHA Y HORA EN HORA LOCAL DEL USUARIO (LATAM)
+// --------------------------------------------------------------------------
+self.formatAlarmTime = function(raw) {
+  if (!raw) return '';
+  var d;
+  if (typeof raw === 'number') {
+    d = new Date(raw);
+  } else if (typeof raw === 'string') {
+    if (raw.indexOf('T') !== -1 || raw.indexOf('Z') !== -1) {
+      d = new Date(raw);
+    } else {
+      var parts = raw.split(/[- :]/);
+      if (parts.length >= 6) {
+        return raw;
+      }
+      d = new Date(raw);
+    }
+  } else if (raw instanceof Date) {
+    d = raw;
+  } else {
+    d = new Date();
+  }
+
+  if (isNaN(d.getTime())) return String(raw);
+
+  var pad = function(n) { return (n < 10 ? '0' : '') + n; };
+  var Y = d.getFullYear();
+  var M = pad(d.getMonth() + 1);
+  var D = pad(d.getDate());
+  var h = pad(d.getHours());
+  var m = pad(d.getMinutes());
+  var s = pad(d.getSeconds());
+  return Y + '-' + M + '-' + D + ' ' + h + ':' + m + ':' + s;
+};
+
+// --------------------------------------------------------------------------
 // PROCESAMIENTO Y EVALUACIÓN DE TELEMETRÍA (33 REGLAS SCADA GAORI)
 // --------------------------------------------------------------------------
 self.onDataUpdated = function() {
@@ -509,13 +545,17 @@ self.onDataUpdated = function() {
 
   var data = self.ctx.data || [];
   var telemetry = {};
+  var maxTs = 0;
 
   for (var i = 0; i < data.length; i++) {
     var item = data[i];
     if (item.data && item.data.length > 0) {
       var key = (item.dataKey.name || item.dataKey.label || "").toLowerCase();
-      var lastVal = item.data[item.data.length - 1][1];
+      var lastPt = item.data[item.data.length - 1];
+      var ts = lastPt[0];
+      var lastVal = lastPt[1];
       telemetry[key] = lastVal;
+      if (ts && ts > maxTs) maxTs = ts;
     }
   }
 
@@ -543,7 +583,8 @@ self.onDataUpdated = function() {
 
   var activeAlarms = [];
   var warningAlarms = [];
-  var nowIso = new Date().toISOString().replace('T', ' ').substring(0, 19);
+  // Timestamp real de la telemetría en hora local del usuario
+  var nowIso = self.formatAlarmTime(maxTs > 0 ? maxTs : Date.now());
 
   // Reglas BESS
   if (soc < 15.0) {
@@ -1028,8 +1069,9 @@ self.renderModalTable = function() {
     var sevBadgeClass = r.severity === 'CRITICAL' ? 'badge-sev critical' : (r.severity === 'WARNING' ? 'badge-sev warning' : 'badge-sev ok');
     var sevText = r.severity === 'CRITICAL' ? 'CRÍTICA' : (r.severity === 'WARNING' ? 'ADVERTENCIA' : 'INFORMATIVO');
 
+    var rowTime = self.formatAlarmTime(r.time);
     html += '<tr class="' + rowClass + '">';
-    html += '  <td><span class="cell-time">' + r.time.substring(0, 10) + '</span><span class="cell-time-rel">' + r.time.substring(11) + '</span></td>';
+    html += '  <td><span class="cell-time">' + (rowTime ? rowTime.substring(0, 10) : '') + '</span><span class="cell-time-rel">' + (rowTime ? rowTime.substring(11) : '') + '</span></td>';
     html += '  <td><span class="cell-subsystem">' + r.subsystem + '</span><span class="cell-subsystem-tag">' + r.tag + '</span></td>';
     html += '  <td><span class="cell-code">' + r.code + '</span></td>';
     html += '  <td><span class="cell-desc">' + r.desc + '</span></td>';
