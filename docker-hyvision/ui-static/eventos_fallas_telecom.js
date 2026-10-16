@@ -603,6 +603,7 @@ self.onDataUpdated = function() {
   var genRuntime = parseFloat(telemetry['generator_runtime_hours'] || 0.0);
   var rectKw = parseFloat(telemetry['rectifier_power_kw'] || 0.0);
   var rectVolt = parseFloat(telemetry['rectifier_voltage'] || 0.0);
+  var invKw = parseFloat(telemetry['inverter_power_kw'] || telemetry['inverter_array_power'] || 0.0);
   var edgeOffline = parseInt(telemetry['edge_offline_alarm'] || 0, 10);
   var sysState = parseInt(telemetry['system_state_code'] || 0, 10);
   var autonomyH = parseFloat(telemetry['battery_autonomy_hours'] || 0.0);
@@ -769,19 +770,41 @@ self.onDataUpdated = function() {
     });
   }
 
-  // 4. Rectificadores Telecom AC/DC
-  if ((gridKw > 0.4 || dgKw > 0.4) && rectKw === 0.0) {
-    activeAlarms.push({
-      id: 'ALM-REC-001',
-      time: nowIso,
-      subsystem: 'Rectificadores AC/DC',
-      tag: 'Planta de Fuerza',
-      code: 'ALM-REC-001',
-      desc: 'Falla de rectificadores con fuente AC presente',
-      metrics: 'Red/DG: ' + (gridKw || dgKw).toFixed(2) + ' kW | Rect: <strong>0.0 kW</strong>',
-      severity: 'CRITICAL',
-      status: 'ACTIVA'
-    });
+  // 4. Rectificadores Telecom AC/DC y Planta de Fuerza
+  var isInvSite = (topologia.indexOf('INVERTER') !== -1) || (invKw > 0.1 && rectKw === 0.0 && rectVolt === 0.0);
+  var acPower = Math.max(gridKw, dgKw);
+  if (!isInvSite && acPower > 0.4 && rectKw === 0.0) {
+    if (solarKw < 0.15 && (soc < 50.0 || vbat < 49.5)) {
+      activeAlarms.push({
+        id: 'ALM-REC-001',
+        time: nowIso,
+        subsystem: 'Rectificadores AC/DC',
+        tag: 'Planta de Fuerza',
+        code: 'ALM-REC-001',
+        desc: 'Falla de rectificadores con fuente AC presente (Déficit energético)',
+        metrics: 'Red/DG: ' + acPower.toFixed(2) + ' kW | Rect: <strong>0.0 kW</strong> | SOC: ' + soc.toFixed(1) + '%',
+        severity: 'CRITICAL',
+        status: 'ACTIVA'
+      });
+    }
+  }
+
+  // ALM-REC-002: Tensión en Bus DC de Fuerza / Bastidor de Rectificadores
+  var vDcSys = rectVolt > 10.0 ? rectVolt : (vbat > 10.0 ? vbat : 0.0);
+  if (rectKw > 0.1 && vDcSys > 20.0) {
+    if (vDcSys < 47.0 || vDcSys > 57.6) {
+      activeAlarms.push({
+        id: 'ALM-REC-002',
+        time: nowIso,
+        subsystem: 'Rectificadores AC/DC',
+        tag: 'Planta de Fuerza',
+        code: 'ALM-REC-002',
+        desc: 'Tensión de salida de rectificadores / bus DC fuera de rango seguro',
+        metrics: 'V_bus: <strong>' + vDcSys.toFixed(2) + ' V</strong> (Rango: 48.0V - 57.5V)',
+        severity: 'CRITICAL',
+        status: 'ACTIVA'
+      });
+    }
   }
 
   // 5. Generador Diésel (si aplica)

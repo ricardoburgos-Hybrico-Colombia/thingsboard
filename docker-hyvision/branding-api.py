@@ -1368,8 +1368,11 @@ def critical_alarms_monitor_worker():
                             bat_low = int(t.get("battery_low_alarm", 0) or 0)
                             soc = float(t.get("battery_soc") or t.get("soc_promedio") or 0.0)
                             vbat = float(t.get("battery_voltage") or t.get("load_dc_voltage") or 0.0)
+                            ld_v = float(t.get("load_dc_voltage") or 0.0)
                             temp = float(t.get("temp_bateria_max") or 0.0)
                             load_kw = float(t.get("load_power_kw") or 0.0)
+                            solar_kw = float(t.get("solar_power_kw") or t.get("solar_charger_power_kw") or t.get("generacion_solar_kw") or 0.0)
+                            inv_kw = float(t.get("inverter_power_kw") or 0.0)
                             grid_kw = float(t.get("grid_power_kw") or 0.0)
                             dg_kw = float(t.get("dg_potencia_activa_kw") or t.get("generator_power_kw") or 0.0)
                             rect_kw = float(t.get("rectifier_power_kw") or 0.0)
@@ -1378,6 +1381,7 @@ def critical_alarms_monitor_worker():
                             grid_avail = int(t.get("grid_available", 1) or 1)
                             raw_fuel = t.get("generator_fuel_level")
                             fuel = float(raw_fuel) if raw_fuel not in (None, "", "None") else None
+                            topologia = str(t.get("site_topology") or "").upper()
 
                             # 1. Gateway Edge HyNet
                             if offline == 1:
@@ -1449,24 +1453,40 @@ def critical_alarms_monitor_worker():
                                     "metrics": {"load_power_kw": f"{load_kw:.3f} kW"}
                                 })
 
-                            # 4. Rectificadores AC/DC
+                            # 4. Rectificadores AC/DC y Planta de Fuerza Telecom
+                            # Tensión efectiva del bus DC de fuerza (usar sensor de rectificador si existe y > 10V; sino bus DC / batería)
+                            v_dc_sys = rect_volt if rect_volt > 10.0 else (ld_v if ld_v > 10.0 else vbat)
+
+                            # ALM-REC-002: Tensión fuera de rango en bus DC / Rectificadores
+                            # Valida contra tensión real del bus de fuerza para evitar falsos positivos por falta de sensor terminal
+                            if rect_kw > 0.1 and v_dc_sys > 20.0:
+                                if v_dc_sys < 47.0 or v_dc_sys > 57.6:
+                                    detected_events.append({
+                                        "code": "ALM-REC-002",
+                                        "title": "Tensión Rectificadores / Bus DC Fuera de Rango",
+                                        "subsystem": "Rectificadores AC/DC",
+                                        "detail": f"Tensión del bus de fuerza anormal: {v_dc_sys:.1f} V (Rango seguro: 48.0V - 57.5V)",
+                                        "metrics": {"dc_bus_voltage": f"{v_dc_sys:.1f} V", "rectifier_power_kw": f"{rect_kw:.2f} kW"}
+                                    })
+
+                            # ALM-REC-001: Falla de Rectificadores con Fuente AC Presente
+                            # Falla CRÍTICA multivariable:
+                            # 1) Hay fuente AC presente (Red o DG > 0.4 kW)
+                            # 2) No es sitio de topología exclusiva Inversor AC (Arenal, etc.) donde no existen rectificadores DC
+                            # 3) Rectificadores entregan 0.0 kW
+                            # 4) NO hay soporte solar que cubra el sitio (solar_kw < 0.15 kW)
+                            # 5) La batería se encuentra en déficit o descarga (soc < 50.0% o vbat < 49.5V)
                             ac_power = max(grid_kw, dg_kw)
-                            if ac_power > 0.4 and rect_kw == 0.0:
-                                detected_events.append({
-                                    "code": "ALM-REC-001",
-                                    "title": "Falla de Rectificadores con Fuente AC Presente",
-                                    "subsystem": "Rectificadores AC/DC (Planta de Fuerza)",
-                                    "detail": f"Fuente AC activa ({ac_power:.2f} kW) pero rectificadores entregan 0.0 kW al bus DC",
-                                    "metrics": {"grid_or_dg_power": f"{ac_power:.2f} kW", "rectifier_power_kw": "0.0 kW", "battery_soc": f"{soc:.1f}%"}
-                                })
-                            if rect_kw > 0.1 and (rect_volt < 48.0 or rect_volt > 57.5):
-                                detected_events.append({
-                                    "code": "ALM-REC-002",
-                                    "title": "Tensión Rectificadores Fuera de Rango",
-                                    "subsystem": "Rectificadores AC/DC",
-                                    "detail": f"Tensión de flotación anormal en bastidor: {rect_volt:.1f} V (Rango seguro: 48.0V - 57.5V)",
-                                    "metrics": {"rectifier_voltage": f"{rect_volt:.1f} V", "rectifier_power_kw": f"{rect_kw:.2f} kW"}
-                                })
+                            is_inverter_site = ("INVERTER" in topologia) or (inv_kw > 0.1 and rect_kw == 0.0 and rect_volt == 0.0)
+                            if not is_inverter_site and ac_power > 0.4 and rect_kw == 0.0:
+                                if solar_kw < 0.15 and (soc < 50.0 or vbat < 49.5):
+                                    detected_events.append({
+                                        "code": "ALM-REC-001",
+                                        "title": "Falla de Rectificadores con Fuente AC Presente",
+                                        "subsystem": "Rectificadores AC/DC (Planta de Fuerza)",
+                                        "detail": f"Fuente AC activa ({ac_power:.2f} kW) pero rectificadores en 0.0 kW sin soporte solar y batería en déficit ({soc:.1f}%)",
+                                        "metrics": {"grid_or_dg_power": f"{ac_power:.2f} kW", "rectifier_power_kw": "0.0 kW", "battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.2f} V"}
+                                    })
 
                             # 5. Generador Diésel
                             if fuel is not None and 0.0 < fuel < 15.0:

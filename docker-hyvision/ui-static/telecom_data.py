@@ -236,25 +236,25 @@ TELECOM_ALARMS = [
         "subsistema": "Rectificadores AC/DC",
         "equipo": "Planta de Fuerza Telecom",
         "variable": "rectifier_power_kw",
-        "disparo": "== 0.0 kW (con Red/DG > 0.4 kW)",
-        "despeje": "> 0.1 kW",
+        "disparo": "== 0.0 kW (con Red/DG > 0.4 kW, Solar < 0.15 kW y Batería < 50%)",
+        "despeje": "> 0.1 kW o Aporte Solar > 0.3 kW o Batería > 85%",
         "severidad": "Critica",
         "origen": "Device Profile HYBRICO_MICROGRID",
-        "descripcion": "Falla de modulos rectificadores con fuente AC presente (red o diesel activo sin conversion a DC).",
+        "descripcion": "Falla de módulos rectificadores con fuente AC presente en condición de déficit energético (sin soporte solar y baterías en descarga).",
         "accion": "Inspeccionar breakers de entrada AC a los rectificadores y alarmas LED en el bastidor de fuerza.",
-        "sitios_aplica": "Sitios con Red Comercial o Generador"
+        "sitios_aplica": "Sitios con Red Comercial o Generador (Topología Rectificador DC)"
     },
     {
         "id": "ALM-REC-002",
         "subsistema": "Rectificadores AC/DC",
         "equipo": "Planta de Fuerza Telecom",
-        "variable": "rectifier_voltage",
-        "disparo": "< 48.0 V o > 57.5 V (con rectificador activo)",
+        "variable": "rectifier_voltage / load_dc_voltage",
+        "disparo": "< 47.0 V o > 57.6 V en Bus DC (con rectificador activo > 0.1 kW)",
         "despeje": "Entre 51.0 V y 55.0 V",
         "severidad": "Critica",
         "origen": "Device Profile HYBRICO_MICROGRID",
-        "descripcion": "Tension de salida del bastidor de rectificadores fuera de la banda segura de flotacion.",
-        "accion": "Reajustar tension de flotacion/ecualizacion en el controlador de la planta de fuerza.",
+        "descripcion": "Tensión real de salida del bastidor de rectificadores o bus DC fuera de la banda segura de operación (riesgo LVD o sobretensión).",
+        "accion": "Reajustar tensión de flotación/ecualización en el controlador de la planta de fuerza.",
         "sitios_aplica": "Sitios con Red Comercial o Generador"
     },
     {

@@ -404,4 +404,3 @@ def restaurar_hoja_telecom_en_gaori():
 
 if __name__ == "__main__":
     generar_excel_dedicado_telecom()
-    restaurar_hoja_telecom_en_gaori()
