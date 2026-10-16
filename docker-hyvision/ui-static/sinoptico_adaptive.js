@@ -1,4 +1,5 @@
 // Controller Script: SCADA - Sinóptico Animado Microrred Universal con Topología y Distribución Espacial Dinámica
+// hyv-fleet-theme-v3
 // Soporta 100% Telemetría Real de Stellar (New Sun Road) / HyNet sin solapamientos espaciales.
 self.onInit = function() {
   self.onDataUpdated();
@@ -489,7 +490,7 @@ self.onDataUpdated = function() {
       } else {
         elSolSt.textContent = isIndustrial ? '● Inyección Activa' : '● MPPT SOLAR ACTIVO';
       }
-      elSolSt.setAttribute('fill', '#22c55e');
+      elSolSt.setAttribute('fill', '#64B856');
     } else {
       elSolSt.textContent = '○ Standby Solar';
       elSolSt.setAttribute('fill', '#64748b');
@@ -502,9 +503,9 @@ self.onDataUpdated = function() {
   if (elFlowBess) {
     var bessPrefix = isCharging ? '▲ ' : (isDischarging ? '▼ ' : '○ ');
     elFlowBess.textContent = bessPrefix + pBatDisp.toFixed(2) + ' kW';
-    elFlowBess.setAttribute('fill', isCharging ? '#64B856' : (isDischarging ? '#f59e0b' : '#94a3b8'));
+    elFlowBess.setAttribute('fill', isCharging ? '#64B856' : (isDischarging ? '#f7d048' : '#94a3b8'));
   }
-  if (elFlowBgBess) elFlowBgBess.setAttribute('stroke', isCharging ? '#64B856' : (isDischarging ? '#f59e0b' : '#475569'));
+  if (elFlowBgBess) elFlowBgBess.setAttribute('stroke', isCharging ? '#64B856' : (isDischarging ? '#f7d048' : '#475569'));
 
   var elBessHeader = container.querySelector('#svg-bess-header');
   if (elBessHeader) {
@@ -524,7 +525,7 @@ self.onDataUpdated = function() {
       var arrow = isCharging ? '▲' : (isDischarging ? '▼' : '○');
       var tBat = isCharging ? ' (CARGANDO)' : (isDischarging ? ' (DESCARGANDO)' : ' (STANDBY)');
       elBessKw.textContent = arrow + ' ' + pBatDisp.toFixed(2) + ' kW' + tBat;
-      elBessKw.setAttribute('fill', isCharging ? '#64B856' : (isDischarging ? '#f59e0b' : '#94a3b8'));
+      elBessKw.setAttribute('fill', isCharging ? '#64B856' : (isDischarging ? '#f7d048' : '#94a3b8'));
     } else {
       elBessKw.textContent = '● MODO FLOTACIÓN (' + vdc.toFixed(1) + 'V)';
       elBessKw.setAttribute('fill', '#64B856');
@@ -557,9 +558,9 @@ self.onDataUpdated = function() {
   if (isIndustrial) {
     if (elPcsHeader) elPcsHeader.textContent = '⚡ INVERSORES PCS';
     if (elPcsSubTag) elPcsSubTag.textContent = '3 × PCS250 (750 kVA)';
-    if (elPcs1) elPcs1.innerHTML = 'PCS-1: <tspan fill="#38bdf8" font-weight="700">' + pcs1.toFixed(1) + ' kW</tspan>';
-    if (elPcs2) elPcs2.innerHTML = 'PCS-2: <tspan fill="#38bdf8" font-weight="700">' + pcs2.toFixed(1) + ' kW</tspan>';
-    if (elPcs3) elPcs3.innerHTML = 'PCS-3: <tspan fill="#38bdf8" font-weight="700">' + pcs3.toFixed(1) + ' kW</tspan>';
+    if (elPcs1) elPcs1.innerHTML = 'PCS-1: <tspan fill="#8ce47e" font-weight="700">' + pcs1.toFixed(1) + ' kW</tspan>';
+    if (elPcs2) elPcs2.innerHTML = 'PCS-2: <tspan fill="#8ce47e" font-weight="700">' + pcs2.toFixed(1) + ' kW</tspan>';
+    if (elPcs3) elPcs3.innerHTML = 'PCS-3: <tspan fill="#8ce47e" font-weight="700">' + pcs3.toFixed(1) + ' kW</tspan>';
     if (elPcsStatus) elPcsStatus.textContent = '● 3/3 SINCRONIZADOS';
     if (elFlowPcs) elFlowPcs.textContent = loadKw.toFixed(1) + ' kW';
   } else {
@@ -567,15 +568,15 @@ self.onDataUpdated = function() {
     if (elPcsSubTag) elPcsSubTag.textContent = 'CONVERSIÓN 48V DC';
     if (elPcs1) elPcs1.innerHTML = 'MPPT Solar: <tspan fill="#f7d048" font-weight="700">' + scKw.toFixed(2) + ' kW</tspan>';
     var pRectShow = rectKw > 0 ? rectKw : (gridKw > 0 ? (gridKw * 0.95) : 0.0);
-    if (elPcs2) elPcs2.innerHTML = 'Rectificador: <tspan fill="#38bdf8" font-weight="700">' + pRectShow.toFixed(2) + ' kW (' + rectAmps + 'A)</tspan>';
+    if (elPcs2) elPcs2.innerHTML = 'Rectificador: <tspan fill="#8ce47e" font-weight="700">' + pRectShow.toFixed(2) + ' kW (' + rectAmps + 'A)</tspan>';
     if (elPcs3) elPcs3.innerHTML = 'Tensión Salida: <tspan fill="#64B856" font-weight="700">' + vdc.toFixed(1) + ' V</tspan>';
     if (elPcsStatus) {
       if (rectKw > 0.05) {
         elPcsStatus.textContent = '● RECTIFICADOR ACTIVO';
-        elPcsStatus.setAttribute('fill', '#38bdf8');
+        elPcsStatus.setAttribute('fill', '#8ce47e');
       } else if (scKw > 0.05) {
         elPcsStatus.textContent = '● MPPT EN CONVERSIÓN';
-        elPcsStatus.setAttribute('fill', '#22c55e');
+        elPcsStatus.setAttribute('fill', '#64B856');
       } else {
         elPcsStatus.textContent = '○ BUS DC ESTABILIZADO';
         elPcsStatus.setAttribute('fill', '#64748b');
@@ -634,7 +635,7 @@ self.onDataUpdated = function() {
       } else {
         elDgKw.innerHTML = pExt.toFixed(2) + ' <tspan font-size="13" fill="#94a3b8">kW</tspan>';
       }
-      elDgKw.setAttribute('fill', isDgRunning ? '#a855f7' : (isGridActive ? '#38bdf8' : '#94a3b8'));
+      elDgKw.setAttribute('fill', isDgRunning ? '#f7d048' : (isGridActive ? '#8ce47e' : '#94a3b8'));
     }
 
     var elDgEn = container.querySelector('#svg-dg-energy');
@@ -647,10 +648,10 @@ self.onDataUpdated = function() {
     if (elAts) {
       if (isDgRunning) {
         elAts.textContent = 'ATS: CONECTADO A DIÉSEL';
-        elAts.setAttribute('fill', '#a855f7');
+        elAts.setAttribute('fill', '#f7d048');
       } else if (isGridActive) {
         elAts.textContent = isSplitPhaseSingleCt ? 'ATS: CONECTADO A RED (L1+L2)' : 'ATS: CONECTADO A RED';
-        elAts.setAttribute('fill', '#38bdf8');
+        elAts.setAttribute('fill', '#8ce47e');
       } else {
         elAts.textContent = 'ATS: EN ESPERA (STANDBY)';
         elAts.setAttribute('fill', '#64748b');
@@ -661,7 +662,7 @@ self.onDataUpdated = function() {
     if (elDgSt) {
       if (isDgRunning) {
         elDgSt.textContent = '● DIÉSEL EN MARCHA (' + dgKw.toFixed(2) + ' kW)';
-        elDgSt.setAttribute('fill', '#a855f7');
+        elDgSt.setAttribute('fill', '#f7d048');
       } else if (isGridActive) {
         if (gridV !== null && gridV > 50) {
           var strGV = gridV.toFixed(0);
@@ -670,7 +671,7 @@ self.onDataUpdated = function() {
         } else {
           elDgSt.textContent = isSplitPhaseSingleCt ? '● RED: L1+L2 ACTIVA (~240V)' : '● RED CONECTADA (AC OK)';
         }
-        elDgSt.setAttribute('fill', '#38bdf8');
+        elDgSt.setAttribute('fill', '#8ce47e');
       } else if (gridV !== null && gridV > 50.0) {
         var strGV = gridV.toFixed(0);
         var strGH = (gridHz !== null && gridHz > 0) ? gridHz.toFixed(1) : '60.0';
@@ -689,10 +690,10 @@ self.onDataUpdated = function() {
     var elFlowBgDg = container.querySelector('#flow-bg-dg');
     if (elFlowDg) {
       elFlowDg.textContent = pExt.toFixed(2) + ' kW';
-      elFlowDg.setAttribute('fill', isDgRunning ? '#a855f7' : (isGridActive ? '#38bdf8' : '#94a3b8'));
+      elFlowDg.setAttribute('fill', isDgRunning ? '#f7d048' : (isGridActive ? '#8ce47e' : '#94a3b8'));
     }
     if (elFlowBgDg) {
-      elFlowBgDg.setAttribute('stroke', isDgRunning ? '#a855f7' : (isGridActive ? '#38bdf8' : '#475569'));
+      elFlowBgDg.setAttribute('stroke', isDgRunning ? '#f7d048' : (isGridActive ? '#8ce47e' : '#475569'));
     }
   }
 
@@ -706,6 +707,8 @@ self.onDataUpdated = function() {
     var clDg = isDgRunning ? 'flow-dg-running' : (isGridActive ? 'flow-grid' : 'flow-dg-standby');
     pDg.className.baseVal = 'flow-line ' + clDg;
   }
+  if (pPcs) pPcs.className.baseVal = 'flow-line flow-pcs';
+  if (pLoad) pLoad.className.baseVal = 'flow-line flow-load';
 
   // ── 5. BALANCE DE PLANTA EN FOOTER ──
   var elBal = container.querySelector('#footer-balance-text');
@@ -715,14 +718,14 @@ self.onDataUpdated = function() {
     if (isIndustrial) {
       if (isDgRunning) {
         elBal.textContent = 'RESPALDO DIÉSEL ACTIVO (DG: +' + dgKw.toFixed(1) + ' kW | BESS: ' + pBatDisp.toFixed(1) + ' kW)';
-        elBal.style.color = '#a855f7';
+        elBal.style.color = '#f7d048';
       } else if (isSolarProducing && solarKw >= loadKw) {
         elBal.textContent = 'SUPERÁVIT SOLAR (+' + (solarKw - loadKw).toFixed(2) + ' kW NETO) → BESS EN CARGA';
         elBal.style.color = '#64B856';
       } else if (isDischarging) {
         var txtDesc = isSolarProducing ? 'DESCARGA BESS DIURNA' : 'DESCARGA BESS NOCTURNA';
         elBal.textContent = txtDesc + ' (Carga ' + loadKw.toFixed(2) + ' kW cubierta por BESS)';
-        elBal.style.color = '#f59e0b';
+        elBal.style.color = '#f7d048';
       } else {
         elBal.textContent = 'MICRORRED EN EQUILIBRIO OPERATIVO (Carga: ' + loadKw.toFixed(2) + ' kW)';
         elBal.style.color = '#64B856';
@@ -731,16 +734,16 @@ self.onDataUpdated = function() {
       if (isGridActive) {
         var strBalGrid = isSplitPhaseSingleCt ? ('Red L1: ' + gridKw.toFixed(2) + ' kW [P.Tot Est: ~' + (gridKw * 2).toFixed(1) + ' kW]') : ('Red: ' + gridKw.toFixed(2) + ' kW');
         elBal.textContent = 'ALIMENTACIÓN DE RED COMERCIAL (' + strBalGrid + ' | Solar: ' + solarKw.toFixed(2) + ' kW | Autonomía Solar: ' + autoPct + '%)';
-        elBal.style.color = '#38bdf8';
+        elBal.style.color = '#8ce47e';
       } else if (isDgRunning) {
         elBal.textContent = 'RESPALDO GRUPO ELECTRÓGENO ACTIVO (DG: +' + dgKw.toFixed(2) + ' kW → Bus 48V)';
-        elBal.style.color = '#a855f7';
+        elBal.style.color = '#f7d048';
       } else if (solarKw >= loadKw && isSolarProducing) {
         elBal.textContent = '100% AUTONOMÍA SOLAR (Solar +' + solarKw.toFixed(2) + ' kW cubre Carga ' + loadKw.toFixed(2) + ' kW BTS)';
         elBal.style.color = '#64B856';
       } else if (isDischarging) {
         elBal.textContent = 'RESPALDO POR BANCO DE BATERÍAS (Descarga: ' + pBatDisp.toFixed(2) + ' kW → Carga BTS: ' + loadKw.toFixed(2) + ' kW)';
-        elBal.style.color = '#f59e0b';
+        elBal.style.color = '#f7d048';
       } else {
         elBal.textContent = 'MICRORRED TELECOM EN EQUILIBRIO OPERATIVO (Carga BTS: ' + loadKw.toFixed(2) + ' kW | ' + loadAmps + ' A)';
         elBal.style.color = '#64B856';
@@ -752,13 +755,13 @@ self.onDataUpdated = function() {
     if (topologyMode === 'FULL_SOLAR') {
       elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar MPPT</strong> → <strong style="color:#64B856;">2° Batería 48V</strong>';
     } else if (topologyMode === 'GRID_ONLY') {
-      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar</strong> → <strong style="color:#38bdf8;">2° Red Comercial</strong> → <strong style="color:#64B856;">3° Batería Flotación</strong>';
+      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar</strong> → <strong style="color:#8ce47e;">2° Red Comercial</strong> → <strong style="color:#64B856;">3° Batería Flotación</strong>';
     } else if (topologyMode === 'DG_SOLAR') {
-      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar MPPT</strong> → <strong style="color:#64B856;">2° Batería 48V</strong> → <strong style="color:#a855f7;">3° Grupo Electrógeno</strong>';
+      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar MPPT</strong> → <strong style="color:#64B856;">2° Batería 48V</strong> → <strong style="color:#f7d048;">3° Grupo Electrógeno</strong>';
     } else if (topologyMode === 'INDUSTRIAL') {
-      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar</strong> → <strong style="color:#64B856;">2° BESS</strong> → <strong style="color:#38bdf8;">3° Red / Diésel</strong>';
+      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar</strong> → <strong style="color:#64B856;">2° BESS</strong> → <strong style="color:#8ce47e;">3° Red / Diésel</strong>';
     } else {
-      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar</strong> → <strong style="color:#38bdf8;">2° Red</strong> → <strong style="color:#64B856;">3° Batería</strong> → <strong style="color:#a855f7;">4° Diésel</strong>';
+      elDisp.innerHTML = 'Prioridad: <strong style="color:#f7d048;">1° Solar</strong> → <strong style="color:#8ce47e;">2° Red</strong> → <strong style="color:#64B856;">3° Batería</strong> → <strong style="color:#f7d048;">4° Diésel</strong>';
     }
   }
 };

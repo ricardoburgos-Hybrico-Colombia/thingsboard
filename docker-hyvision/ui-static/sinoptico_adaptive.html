@@ -53,14 +53,14 @@
 
       <!-- Badge Conversión -> Bus -->
       <g id="badge-pcs" transform="translate(600, 235)">
-        <rect x="-38" y="-11" width="76" height="22" rx="11" class="flow-badge-bg" stroke="#38bdf8" stroke-width="1.5"/>
-        <text x="0" y="4" text-anchor="middle" id="flow-val-pcs" class="flow-badge-text" fill="#38bdf8">0.0 kW</text>
+        <rect x="-38" y="-11" width="76" height="22" rx="11" class="flow-badge-bg" stroke="#8ce47e" stroke-width="1.5"/>
+        <text x="0" y="4" text-anchor="middle" id="flow-val-pcs" class="flow-badge-text" fill="#8ce47e">0.0 kW</text>
       </g>
 
       <!-- Badge Bus -> Carga -->
       <g id="badge-load" transform="translate(710, 105)">
-        <rect x="-38" y="-11" width="76" height="22" rx="11" class="flow-badge-bg" stroke="#62c3f5" stroke-width="1.5"/>
-        <text x="0" y="4" text-anchor="middle" id="flow-val-load" class="flow-badge-text" fill="#62c3f5">0.0 kW</text>
+        <rect x="-38" y="-11" width="76" height="22" rx="11" class="flow-badge-bg" stroke="#ffffff" stroke-width="1.5"/>
+        <text x="0" y="4" text-anchor="middle" id="flow-val-load" class="flow-badge-text" fill="#ffffff">0.0 kW</text>
       </g>
 
       <!-- Badge Entrada Externa (Red / Diésel) -->
@@ -72,7 +72,7 @@
       <!-- BARRA COLECTORA PRINCIPAL -->
       <g id="node-busbar-group">
         <line id="svg-busbar-line" x1="645" y1="75" x2="645" y2="410" class="ac-busbar"/>
-        <text id="svg-busbar-title" x="645" y="48" text-anchor="middle" fill="#38bdf8" font-size="11" font-weight="800" letter-spacing="0.5">BARRA COLECTORA DC</text>
+        <text id="svg-busbar-title" x="645" y="48" text-anchor="middle" fill="#64B856" font-size="11" font-weight="800" letter-spacing="0.5">BARRA COLECTORA DC</text>
         <text id="svg-bus-telemetry" x="645" y="64" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="600">-- V | -- Hz</text>
       </g>
 
@@ -101,12 +101,12 @@
       <!-- NODO 3: CONVERSIÓN & RECTIFICACIÓN (Center) -->
       <g id="node-pcs" transform="translate(385, 155)">
         <rect id="svg-pcs-box" width="170" height="165" rx="10" class="scada-node-box"/>
-        <line id="svg-pcs-topline" x1="0" y1="2" x2="170" y2="2" stroke="#38bdf8" stroke-width="3.5"/>
+        <line id="svg-pcs-topline" x1="0" y1="2" x2="170" y2="2" stroke="#8ce47e" stroke-width="3.5"/>
         <text id="svg-pcs-header" x="85" y="22" text-anchor="middle" class="n-header">⚡ RECTIFICADOR & MPPT</text>
         <text id="svg-pcs-subtag" x="85" y="42" text-anchor="middle" class="n-mini-tag">CONVERSIÓN 48V DC</text>
         <line id="svg-pcs-divider" x1="12" y1="52" x2="158" y2="52" stroke="rgba(255,255,255,0.08)"/>
         <text id="svg-pcs1-row" x="14" y="72" class="n-pcs-item">MPPT Solar: <tspan id="svg-pcs1-kw" fill="#f7d048" font-weight="700">0.0 kW</tspan></text>
-        <text id="svg-pcs2-row" x="14" y="94" class="n-pcs-item">Rectificador: <tspan id="svg-pcs2-kw" fill="#38bdf8" font-weight="700">0.0 kW</tspan></text>
+        <text id="svg-pcs2-row" x="14" y="94" class="n-pcs-item">Rectificador: <tspan id="svg-pcs2-kw" fill="#8ce47e" font-weight="700">0.0 kW</tspan></text>
         <text id="svg-pcs3-row" x="14" y="116" class="n-pcs-item">Tensión Salida: <tspan id="svg-pcs3-kw" fill="#64B856" font-weight="700">50.0 V</tspan></text>
         <text id="svg-pcs-status" x="85" y="144" text-anchor="middle" class="n-status" fill="#64B856">● BUS DC 48V OPERATIVO</text>
       </g>
@@ -114,9 +114,9 @@
       <!-- NODO 4: CARGAS TELECOM BTS (Top-Right) -->
       <g id="node-load" transform="translate(775, 45)">
         <rect id="svg-load-box" width="195" height="120" rx="10" class="scada-node-box"/>
-        <line id="svg-load-topline" x1="0" y1="2" x2="195" y2="2" stroke="#62c3f5" stroke-width="3.5"/>
+        <line id="svg-load-topline" x1="0" y1="2" x2="195" y2="2" stroke="#ffffff" stroke-width="3.5"/>
         <text id="svg-load-header" x="97.5" y="22" text-anchor="middle" class="n-header">📡 CARGAS TELECOM BTS</text>
-        <text id="svg-load-kw" x="14" y="54" class="n-value" fill="#62c3f5">0.0 <tspan font-size="13" fill="#94a3b8">kW</tspan></text>
+        <text id="svg-load-kw" x="14" y="54" class="n-value" fill="#ffffff">0.0 <tspan font-size="13" fill="#92b08f">kW</tspan></text>
         <text id="svg-load-kwh" x="14" y="78" class="n-sub">Hoy: 0.0 kWh</text>
         <text id="svg-load-telemetry" x="14" y="96" class="n-sub">DC: 50.0 V | 0.0 A</text>
         <text id="svg-load-sub" x="14" y="112" class="n-sub">Estación Base BTS 48V</text>
