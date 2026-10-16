@@ -90,6 +90,7 @@ def generate_css(config):
   --hyvision-accent: oklch(0.72 0.11 140.527);
   --hyvision-login-card: {card_color};
   --hyvision-bg: {bg_color};
+  --hyvision-shell-chrome: linear-gradient(180deg, #3a6234 0%, #2b4926 52%, #1f3520 100%);
 }}
 
 body, html, tb-login, .tb-login-content, .tb-login-content.mat-app-background {{
@@ -114,6 +115,14 @@ body, html, tb-login, .tb-login-content, .tb-login-content.mat-app-background {{
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-flat-button.mat-primary {{
   background-color: oklch(0.481 0.08 140.527) !important;
+}}
+
+mat-sidenav.tb-site-sidenav,
+mat-sidenav.tb-site-sidenav .tb-nav-header-toolbar.mat-toolbar.mat-primary,
+mat-sidenav.tb-site-sidenav .tb-side-menu-toolbar.mat-toolbar.mat-primary,
+mat-sidenav-content .tb-primary-toolbar.mat-toolbar.mat-primary {{
+  background: var(--hyvision-shell-chrome) !important;
+  background-color: #2b4926 !important;
 }}
 
 /* Custom user CSS overrides */
