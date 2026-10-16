@@ -28,9 +28,9 @@ DEFAULT_CONFIG = {
     "appTitle": "HYVISION",
     "appSubtitle": "POWERED BY HYBRICO ENERGY",
     "browserTitle": "HyVision",
-    "primaryColor": "#436A3C",
-    "loginCardColor": "#2b4c23",
-    "backgroundColor": "#173117",
+    "primaryColor": "#5a5f4d",
+    "loginCardColor": "#383b2f",
+    "backgroundColor": "#191b13",
     "backgroundMode": "dark_scada",
     "logoLoginUrl": "assets/logo_title_white.png",
     "logoToolbarUrl": "assets/logo_title_white.png",
@@ -128,14 +128,14 @@ def load_config():
     return DEFAULT_CONFIG.copy()
 
 def generate_css(config):
-    primary = config.get("primaryColor", "#436A3C")
-    card_color = config.get("loginCardColor", "#2b4c23")
-    bg_color = config.get("backgroundColor", "#173117")
+    primary = config.get("primaryColor", "#5a5f4d")
+    card_color = config.get("loginCardColor", "#383b2f")
+    bg_color = config.get("backgroundColor", "#191b13")
     mode = config.get("backgroundMode", "dark_scada")
     custom_css = config.get("customCss", "")
 
     if mode == "dark_scada":
-        bg_css = f"radial-gradient(circle at 50% 36%, {bg_color} 0%, #0c1c0c 48%, #070e07 100%) !important"
+        bg_css = f"radial-gradient(circle at 50% 36%, {bg_color} 0%, #121410 48%, #0a0b08 100%) !important"
     elif mode == "clean_light":
         bg_css = f"linear-gradient(135deg, #f0f5f0 0%, #e2ece2 100%) !important"
     else:
@@ -143,9 +143,12 @@ def generate_css(config):
 
     css = f"""/* HyVision Dynamic White-Label Styles */
 :root {{
-  --hyvision-primary: {primary};
+  --accent-foreground: oklch(0.481 0.08 140.527);
+  --hyvision-primary: oklch(0.481 0.08 140.527);
+  --hyvision-accent: oklch(0.72 0.11 140.527);
   --hyvision-login-card: {card_color};
   --hyvision-bg: {bg_color};
+  --hyvision-shell-chrome: linear-gradient(180deg, #3a6234 0%, #2b4926 52%, #1f3520 100%);
 }}
 
 body, html, tb-login, .tb-login-content, .tb-login-content.mat-app-background {{
@@ -162,14 +165,22 @@ body, html, tb-login, .tb-login-content, .tb-login-content.mat-app-background {{
 }}
 
 .tb-login-content .tb-login-form .tb-action-button {{
-  background: linear-gradient(135deg, {primary} 0%, #2f4e2a 100%) !important;
+  background: linear-gradient(135deg, oklch(0.481 0.08 140.527) 0%, {card_color} 100%) !important;
   box-shadow: 0 6px 20px {primary}80 !important;
 }}
 
 .mat-mdc-unelevated-button.mat-primary,
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-flat-button.mat-primary {{
-  background-color: {primary} !important;
+  background-color: oklch(0.481 0.08 140.527) !important;
+}}
+
+mat-sidenav.tb-site-sidenav,
+mat-sidenav.tb-site-sidenav .tb-nav-header-toolbar.mat-toolbar.mat-primary,
+mat-sidenav.tb-site-sidenav .tb-side-menu-toolbar.mat-toolbar.mat-primary,
+mat-sidenav-content .tb-primary-toolbar.mat-toolbar.mat-primary {{
+  background: var(--hyvision-shell-chrome) !important;
+  background-color: #2b4926 !important;
 }}
 
 /* Custom user CSS overrides */

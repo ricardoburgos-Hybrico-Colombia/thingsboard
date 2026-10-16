@@ -3,31 +3,41 @@
   --hyvision-primary: #436A3C;
   --hyvision-login-card: #2b4c23;
   --hyvision-bg: #173117;
+  /* Shell (barra + menú): verde oscuro portafolio (.hyv-btn-scada), no el primary Material */
+  --hyvision-shell-chrome: linear-gradient(180deg, #3a6234 0%, #2b4926 52%, #1f3520 100%);
 }
 
 body, html, tb-login, .tb-login-content, .tb-login-content.mat-app-background {
-  background: radial-gradient(circle at 50% 36%, #173117 0%, #0c1c0c 48%, #070e07 100%) !important;
+  background: radial-gradient(circle at 50% 36%, #191b13 0%, #121410 48%, #0a0b08 100%) !important;
 }
 
 .hyvision-login-header .hyvision-main-title {
-  text-shadow: 0 0 45px #436A3Ccc, 0 4px 20px rgba(0, 0, 0, 0.9) !important;
+  text-shadow: 0 0 45px #5a5f4dcc, 0 4px 20px rgba(0, 0, 0, 0.9) !important;
 }
 
 .tb-login-content mat-card, .tb-login-content .mat-mdc-card {
-  background: linear-gradient(165deg, #2b4c23 0%, rgba(20, 39, 17, 0.95) 100%) !important;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px #436A3C40 !important;
+  background: linear-gradient(165deg, #383b2f 0%, rgba(20, 39, 17, 0.95) 100%) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 35px #5a5f4d40 !important;
 }
 
 .tb-login-content .tb-login-form .tb-action-button {
-  background: linear-gradient(135deg, #436A3C 0%, #2f4e2a 100%) !important;
-  box-shadow: 0 6px 20px #436A3C80 !important;
+  background: linear-gradient(135deg, oklch(0.481 0.08 140.527) 0%, #383b2f 100%) !important;
+  box-shadow: 0 6px 20px #5a5f4d80 !important;
 }
 
 .mat-mdc-unelevated-button.mat-primary,
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-flat-button.mat-primary {
-  background-color: #436A3C !important;
+  background-color: oklch(0.481 0.08 140.527) !important;
+}
+
+/* Barra superior + lateral: mismo tono oscuro que botones del Fleet Hub */
+mat-sidenav.tb-site-sidenav,
+mat-sidenav.tb-site-sidenav .tb-nav-header-toolbar.mat-toolbar.mat-primary,
+mat-sidenav.tb-site-sidenav .tb-side-menu-toolbar.mat-toolbar.mat-primary,
+mat-sidenav-content .tb-primary-toolbar.mat-toolbar.mat-primary {
+  background: var(--hyvision-shell-chrome) !important;
+  background-color: #2b4926 !important;
 }
 
 /* Custom user CSS overrides */
-

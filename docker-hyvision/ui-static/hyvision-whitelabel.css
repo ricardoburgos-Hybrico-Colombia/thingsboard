@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, #436A3C 0%, #2b4926 100%);
+  background: linear-gradient(135deg, #5a5f4d 0%, #383b2f 100%);
   color: #ffffff;
   border: 1px solid rgba(130, 195, 120, 0.4);
   border-radius: 30px;
@@ -171,9 +171,9 @@
 }
 
 .hyvision-wl-tab-btn.active {
-  color: #64B856;
-  border-bottom-color: #64B856;
-  background: rgba(100, 184, 86, 0.05);
+  color: #9fa68b;
+  border-bottom-color: #9fa68b;
+  background: rgba(159, 166, 139, 0.05);
 }
 
 .hyvision-wl-tab-pane {
@@ -212,8 +212,8 @@
 
 .hyv-rep-action-card:hover {
   transform: translateY(-2px);
-  background: rgba(100, 184, 86, 0.12);
-  border-color: #64B856;
+  background: rgba(159, 166, 139, 0.12);
+  border-color: #9fa68b;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
@@ -260,10 +260,10 @@
 }
 
 .hyv-period-chip.active {
-  background: rgba(100, 184, 86, 0.2);
-  border-color: #64B856;
+  background: rgba(159, 166, 139, 0.2);
+  border-color: #9fa68b;
   color: #a3e099;
-  box-shadow: 0 0 12px rgba(100, 184, 86, 0.3);
+  box-shadow: 0 0 12px rgba(159, 166, 139, 0.3);
 }
 
 /* Sidebar Reports Nav Item (Native Look & Feel) */
@@ -361,8 +361,8 @@ body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
 
 .hyvision-wl-input:focus,
 .hyvision-wl-select:focus {
-  border-color: #64B856;
-  box-shadow: 0 0 10px rgba(100, 184, 86, 0.35);
+  border-color: #9fa68b;
+  box-shadow: 0 0 10px rgba(159, 166, 139, 0.35);
 }
 
 .hyvision-wl-color-row {
@@ -423,7 +423,7 @@ body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
 
 .hyvision-wl-file-btn:hover {
   background: rgba(67, 106, 60, 0.45);
-  border-color: #64B856;
+  border-color: #9fa68b;
   color: #ffffff;
 }
 
@@ -444,7 +444,7 @@ body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
 }
 
 .hyvision-wl-textarea:focus {
-  border-color: #64B856;
+  border-color: #9fa68b;
 }
 
 /* Modal Footer */
@@ -496,7 +496,7 @@ body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
 }
 
 .hyvision-wl-btn-save {
-  background: linear-gradient(135deg, #436A3C 0%, #305429 100%);
+  background: linear-gradient(135deg, #5a5f4d 0%, #383b2f 100%);
   color: #ffffff;
   border: 1px solid rgba(130, 195, 120, 0.4);
   box-shadow: 0 4px 14px rgba(67, 106, 60, 0.4);
@@ -515,13 +515,13 @@ body.hyvision-role-customer li[data-hyvision-customer-hidden="true"] {
   left: 50%;
   transform: translateX(-50%) translateY(50px);
   background: #1b3819;
-  border: 1px solid #64B856;
+  border: 1px solid #9fa68b;
   color: #ffffff;
   padding: 12px 24px;
   border-radius: 30px;
   font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(100, 184, 86, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(159, 166, 139, 0.4);
   opacity: 0;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 100001;
@@ -605,7 +605,7 @@ tb-entities-table {
   letter-spacing: 1px;
   padding: 3px 10px;
   background: rgba(67, 106, 60, 0.35);
-  border: 1px solid #64B856;
+  border: 1px solid #9fa68b;
   border-radius: 20px;
   color: #8ce47e;
 }
@@ -653,7 +653,7 @@ tb-entities-table {
 }
 
 .hyv-view-btn.active {
-  background: linear-gradient(135deg, #436A3C 0%, #2f4e2a 100%);
+  background: linear-gradient(135deg, #5a5f4d 0%, #383b2f 100%);
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(67, 106, 60, 0.5);
   border: 1px solid rgba(140, 228, 126, 0.3);
@@ -791,8 +791,8 @@ tb-entities-table {
 }
 
 .hyv-search-input:focus {
-  border-color: #64B856;
-  box-shadow: 0 0 14px rgba(100, 184, 86, 0.3);
+  border-color: #9fa68b;
+  box-shadow: 0 0 14px rgba(159, 166, 139, 0.3);
   background: rgba(20, 36, 20, 0.95);
 }
 
@@ -822,7 +822,7 @@ tb-entities-table {
 
 .hyv-chip.active {
   background: rgba(67, 106, 60, 0.6);
-  border-color: #64B856;
+  border-color: #9fa68b;
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(67, 106, 60, 0.4);
 }
@@ -851,6 +851,51 @@ tb-entities-table {
   transform: translateY(-4px);
   border-color: rgba(140, 228, 126, 0.5);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), 0 0 24px rgba(67, 106, 60, 0.35);
+}
+
+.hyv-site-card-offline {
+  border-color: rgba(239, 68, 68, 0.28);
+  background: linear-gradient(165deg, rgba(28, 28, 32, 0.55) 0%, rgba(12, 14, 16, 0.9) 100%);
+}
+
+.hyv-site-card-offline:hover {
+  border-color: rgba(248, 113, 113, 0.45);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+.hyv-offline-banner {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  padding: 6px 10px;
+  line-height: 1.35;
+}
+
+.hyv-no-data {
+  color: #64748b !important;
+  font-weight: 600;
+}
+
+.hyv-power-triad-muted .hyv-triad-val {
+  color: #64748b !important;
+}
+
+.hyv-sparkline-offline {
+  opacity: 0.65;
+}
+
+.hyv-table-row-offline {
+  background: rgba(15, 18, 20, 0.45);
+}
+
+.hyv-table-offline-hint {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 3px;
+  font-weight: 500;
 }
 
 /* Card Header */
@@ -958,7 +1003,7 @@ tb-entities-table {
 
 .hyv-triad-val.solar { color: #f7d048; }
 .hyv-triad-val.bess { color: #6be35b; }
-.hyv-triad-val.load { color: #62c3f5; }
+.hyv-triad-val.load { color: #ffffff; }
 
 .hyv-triad-extra {
   font-size: 10.5px;
@@ -1008,7 +1053,7 @@ tb-entities-table {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: linear-gradient(135deg, #436A3C 0%, #2b4926 100%);
+  background: linear-gradient(135deg, #5a5f4d 0%, #383b2f 100%);
   color: #ffffff;
   border: 1px solid rgba(130, 195, 120, 0.4);
   padding: 8px 12px;
@@ -1026,6 +1071,25 @@ tb-entities-table {
   box-shadow: 0 5px 16px rgba(67, 106, 60, 0.6);
   transform: translateY(-1px);
   color: #ffffff;
+}
+
+/* TB/Material tiñe <a> de azul-primary: forzar blanco en tarjetas y SCADA */
+#hyvision-fleet-hub a.hyv-card-title,
+#hyvision-fleet-hub a.hyv-card-title:link,
+#hyvision-fleet-hub a.hyv-card-title:visited,
+#hyvision-fleet-hub a.hyv-btn-scada,
+#hyvision-fleet-hub a.hyv-btn-scada:link,
+#hyvision-fleet-hub a.hyv-btn-scada:visited,
+#hyvision-fleet-hub a.hyv-btn-scada span,
+#hyvision-fleet-hub .hyv-scada-table a.hyv-btn-scada,
+#hyvision-fleet-hub .hyv-scada-table td a {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff;
+}
+
+#hyvision-fleet-hub a.hyv-card-title:hover {
+  color: #8ce47e !important;
+  -webkit-text-fill-color: #8ce47e;
 }
 
 .hyv-btn-report {
@@ -1115,7 +1179,7 @@ tb-entities-table {
 }
 
 .hyv-map-tab-btn.active {
-  background: linear-gradient(135deg, #436A3C 0%, #2b4926 100%);
+  background: linear-gradient(135deg, #5a5f4d 0%, #383b2f 100%);
   color: #ffffff;
   box-shadow: 0 2px 10px rgba(67, 106, 60, 0.5);
   border: 1px solid rgba(130, 195, 120, 0.4);
@@ -1152,9 +1216,9 @@ tb-entities-table {
 
 .hyv-land-active {
   fill: #162f16;
-  stroke: #64B856;
+  stroke: #9fa68b;
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 10px rgba(100, 184, 86, 0.3));
+  filter: drop-shadow(0 0 10px rgba(159, 166, 139, 0.3));
   transition: all 0.3s ease;
 }
 
@@ -1222,7 +1286,7 @@ tb-entities-table {
   bottom: 20px;
   left: 20px;
   background: rgba(14, 25, 14, 0.95);
-  border: 1px solid #64B856;
+  border: 1px solid #9fa68b;
   border-radius: 12px;
   padding: 16px 20px;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(67, 106, 60, 0.4);
@@ -1257,9 +1321,9 @@ tb-entities-table {
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 4px;
-  background: rgba(100, 184, 86, 0.18);
+  background: rgba(159, 166, 139, 0.18);
   color: #8ce47e;
-  border: 1px solid rgba(100, 184, 86, 0.3);
+  border: 1px solid rgba(159, 166, 139, 0.3);
 }
 
 .hyv-float-sub {
@@ -1286,7 +1350,7 @@ tb-entities-table {
   justify-content: center;
   gap: 6px;
   width: 100%;
-  background: linear-gradient(135deg, #436A3C 0%, #2b4926 100%);
+  background: linear-gradient(135deg, #5a5f4d 0%, #383b2f 100%);
   color: #ffffff;
   border: 1px solid rgba(130, 195, 120, 0.5);
   padding: 8px 12px;
@@ -1379,7 +1443,7 @@ tb-entities-table {
 
 .hyv-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #436A3C 0%, #64B856 100%);
+  background: linear-gradient(90deg, #5a5f4d 0%, #9fa68b 100%);
   border-radius: 4px;
 }
 
@@ -1412,7 +1476,7 @@ table.mat-table {
 .tb-timeseries-table .mat-mdc-header-row,
 tr.mat-header-row {
   background: rgba(18, 34, 20, 0.9) !important;
-  border-bottom: 1px solid rgba(100, 184, 86, 0.25) !important;
+  border-bottom: 1px solid rgba(159, 166, 139, 0.25) !important;
 }
 
 .tb-table-widget .mat-mdc-header-cell,
@@ -1435,7 +1499,7 @@ td.mat-cell {
 .tb-table-widget .mat-mdc-row:hover,
 .tb-timeseries-table .mat-mdc-row:hover,
 tr.mat-row:hover {
-  background: rgba(100, 184, 86, 0.08) !important;
+  background: rgba(159, 166, 139, 0.08) !important;
 }
 
 /* Native Paginator */
@@ -1443,7 +1507,7 @@ tr.mat-row:hover {
 .mat-paginator {
   background: transparent !important;
   color: #94a3b8 !important;
-  border-top: 1px solid rgba(100, 184, 86, 0.15) !important;
+  border-top: 1px solid rgba(159, 166, 139, 0.15) !important;
 }
 
 .mat-mdc-paginator .mat-mdc-select-value,
