@@ -1434,13 +1434,20 @@ def critical_alarms_monitor_worker():
                                     "detail": f"Temperatura de baterías: {temp:.1f} °C (Límite crítico: > 45.0 °C)",
                                     "metrics": {"temp_bateria_max": f"{temp:.1f} °C"}
                                 })
-                            if 0 < aut_h < 2.0 and grid_avail == 0 and dg_kw < 0.1:
+                            # ALM-BAT-009: Autonomía Restante Crítica
+                            # Falla CRÍTICA multivariable de autonomía solo si:
+                            # 1) Autonomía residual proyectada < 2.0 h
+                            # 2) Banco en agotamiento real: soc < 25.0% o vbat < 48.0V (si soc > 50% no hay riesgo inminente)
+                            # 3) Ausencia de fuentes externas de energía activa (red, diésel o solar suficiente)
+                            has_active_generation = (grid_avail == 1 and grid_kw > 0.1) or (dg_kw > 0.1) or (solar_kw >= 0.3 * max(0.1, load_kw))
+                            is_bess_depleted = (0 < soc < 25.0) or (20.0 < vbat < 48.0)
+                            if 0 < aut_h < 2.0 and not has_active_generation and is_bess_depleted:
                                 detected_events.append({
                                     "code": "ALM-BAT-009",
                                     "title": "Autonomía Restante Crítica",
                                     "subsystem": "Autonomía de Sitio",
-                                    "detail": f"Autonomía estimada: {aut_h:.1f} h (Límite: < 2.0 h sin red ni diésel)",
-                                    "metrics": {"battery_autonomy_hours": f"{aut_h:.1f} h", "battery_soc": f"{soc:.1f}%"}
+                                    "detail": f"Autonomía estimada crítica: {aut_h:.1f} h (SOC: {soc:.1f}%, sin red, diésel ni solar suficiente)",
+                                    "metrics": {"battery_autonomy_hours": f"{aut_h:.1f} h", "battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.2f} V"}
                                 })
 
                             # 3. Carga BTS Telecom

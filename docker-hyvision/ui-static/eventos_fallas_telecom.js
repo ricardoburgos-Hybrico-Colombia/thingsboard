@@ -741,15 +741,18 @@ self.onDataUpdated = function() {
     });
   }
 
-  if (autonomyH > 0 && autonomyH < 2.0 && gridAvail === 0 && dgKw < 0.1) {
+  // ALM-BAT-009: Autonomía Residual Crítica (Solo ante agotamiento real sin generación activa)
+  var hasActiveGen = (gridAvail === 1 && gridKw > 0.1) || (dgKw > 0.1) || (solarKw >= 0.3 * Math.max(0.1, loadKw));
+  var isBessDepleted = (soc > 0 && soc < 25.0) || (vbat > 20.0 && vbat < 48.0);
+  if (autonomyH > 0 && autonomyH < 2.0 && !hasActiveGen && isBessDepleted) {
     activeAlarms.push({
       id: 'ALM-BAT-009',
       time: nowIso,
       subsystem: 'Autonomía de Sitio',
       tag: 'Estimación BESS',
       code: 'ALM-BAT-009',
-      desc: 'Autonomía residual crítica (Sin red ni diésel activo)',
-      metrics: 'Autonomía: <strong>' + autonomyH.toFixed(1) + ' h</strong> (Límite: < 2.0 h)',
+      desc: 'Autonomía residual crítica (Batería en agotamiento sin fuentes activas)',
+      metrics: 'Autonomía: <strong>' + autonomyH.toFixed(1) + ' h</strong> | SOC: ' + soc.toFixed(1) + '%',
       severity: 'CRITICAL',
       status: 'ACTIVA'
     });

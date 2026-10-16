@@ -167,13 +167,13 @@ TELECOM_ALARMS = [
         "id": "ALM-BAT-009",
         "subsistema": "Autonomia de Sitio",
         "equipo": "Estimador BESS / Carga",
-        "variable": "battery_autonomy_hours",
-        "disparo": "< 2.0 h (con red/diesel caido)",
-        "despeje": ">= 3.5 h",
+        "variable": "battery_autonomy_hours / battery_soc",
+        "disparo": "< 2.0 h con Batería < 25%, sin Red, sin Diésel y sin Solar suficiente (< 30% carga)",
+        "despeje": ">= 3.5 h o Batería >= 40% o Generación Activa > 50%",
         "severidad": "Critica",
         "origen": "Device Profile HYBRICO_MICROGRID",
-        "descripcion": "Autonomia residual estimada critica. Quedan menos de 2 horas de respaldo a la tasa de descarga actual.",
-        "accion": "Escalar a NOC Telecom como incidente de alta prioridad para evitar corte de servicio de la estacion base.",
+        "descripcion": "Autonomía residual crítica ante agotamiento real de baterías sin fuentes de generación activas (riesgo inminente de apagado BTS).",
+        "accion": "Escalar a NOC Telecom como incidente de alta prioridad para forzar arranque de motogenerador o despacho de cuadrilla.",
         "sitios_aplica": "Todos los 15 sitios Telecom"
     },
     # 3. Cargas de Radiobase Telecom

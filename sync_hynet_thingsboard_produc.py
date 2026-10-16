@@ -545,8 +545,11 @@ def sincronizar_un_sitio(site_config, maestro_info):
 
         autonomy_hours = None
         if soc_val is not None and load_kw > 0.05:
-            bat_cap_nominal = maestro_info.get("capacidad_carga_kw") or 15.0
-            autonomy_hours = round((bat_cap_nominal * (soc_val / 100.0)) / load_kw, 1)
+            # En telecomunicaciones 48V, el banco BESS se dimensiona contractualmente para 8 a 10 horas de respaldo.
+            # No confundir capacidad_carga_kw (potencia demandada en kW) con capacidad de almacenamiento (kWh).
+            carga_nom_kw = float(maestro_info.get("capacidad_carga_kw") or 2.5)
+            bat_cap_nominal_kwh = max(15.0, carga_nom_kw * 8.0)
+            autonomy_hours = round((bat_cap_nominal_kwh * (soc_val / 100.0)) / max(0.5, load_kw), 1)
 
         # ── CONSTRUCCIÓN DEL PAYLOAD A THINGSBOARD ──
         payload = {
