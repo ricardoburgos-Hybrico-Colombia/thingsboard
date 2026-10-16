@@ -2,6 +2,18 @@
    HyVision White-Labeling Module Styles
    ============================================================ */
 
+/* Paleta compartida: portafolio (Sistemas de energía) + vista SCADA (dashboard) */
+:root {
+  --hyv-surface-bg: radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%);
+  --hyv-surface-solid: #070d07;
+  --hyv-surface-text: #e5ede4;
+  --hyv-card-bg: linear-gradient(165deg, rgba(32, 54, 28, 0.5) 0%, rgba(14, 25, 14, 0.85) 100%);
+  --hyv-card-border: rgba(130, 195, 120, 0.22);
+  --hyv-text-muted: #92b08f;
+  --hyv-accent-soft: #8ce47e;
+  --hyv-btn-scada-bg: linear-gradient(135deg, #5a5f4d 0%, #383b2f 100%);
+}
+
 /* Floating Launcher Button */
 .hyvision-wl-trigger {
   position: fixed;
@@ -545,7 +557,7 @@ tb-entities-table,
 .tb-dashboards-table-container,
 .tb-default-dashboard,
 .mat-drawer-container {
-  background: radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%) !important;
+  background: var(--hyv-surface-bg) !important;
 }
 
 tb-dashboards-table,
@@ -559,8 +571,8 @@ tb-entities-table {
   width: 100%;
   min-height: calc(100vh - 64px);
   box-sizing: border-box;
-  background: radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%);
-  color: #e5ede4;
+  background: var(--hyv-surface-bg);
+  color: var(--hyv-surface-text);
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   padding: 24px 32px 60px 32px;
   display: flex;
@@ -1449,14 +1461,199 @@ tb-entities-table {
 
 /* ============================================================
    Native ThingsBoard Widgets Harmonization (Obsidian Emerald)
+   Misma paleta que .hyv-fleet-hub / Sistemas de energía
    ============================================================ */
 
-/* Dashboard Canvas Background Uniformity */
+/* Canvas del tablero (Abrir SCADA): anula el gris #eee por defecto de ThingsBoard */
+html.hyvision-route-dashboard mat-sidenav-content,
+html.hyvision-route-dashboard .mat-drawer-content,
+html.hyvision-route-dashboard .tb-main-content,
+html.hyvision-route-dashboard .mat-app-background {
+  background: var(--hyv-surface-bg) !important;
+  color: var(--hyv-surface-text) !important;
+}
+
+div.tb-dashboard-page.mat-content,
 .tb-dashboard-page,
 .tb-dashboard-container,
 .tb-dashboard-content,
+tb-dashboard-page,
 tb-dashboard {
-  background-color: #070d07 !important;
+  background: var(--hyv-surface-bg) !important;
+  background-color: var(--hyv-surface-solid) !important;
+  color: var(--hyv-surface-text) !important;
+}
+
+html.hyvision-route-dashboard #gridster-background,
+html.hyvision-route-dashboard .tb-dashboard-content gridster,
+html.hyvision-route-dashboard .tb-dashboard-content .gridster-item {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Widgets: fondo claro del config TB → transparente; conservar borde superior de acento */
+html.hyvision-route-dashboard div.tb-widget {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+/* Tarjetas SCADA internas — franja superior (respaldo si TB cachea CSS viejo) */
+html.hyvision-route-dashboard .solar-card-container,
+html.hyvision-route-dashboard .pbd-card-container {
+  border-top: 3.5px solid #f7d048 !important;
+}
+
+html.hyvision-route-dashboard .bess-card-container,
+html.hyvision-route-dashboard .bess-dyn-card,
+html.hyvision-route-dashboard .bess-rack-card,
+html.hyvision-route-dashboard .alarm-card-container,
+html.hyvision-route-dashboard .state-card-container,
+html.hyvision-route-dashboard .balance-card-container,
+html.hyvision-route-dashboard .general-card-container,
+html.hyvision-route-dashboard .balance-planta-container {
+  border-top: 3.5px solid #64B856 !important;
+}
+
+html.hyvision-route-dashboard .load-card-container,
+html.hyvision-route-dashboard .carga-card-container {
+  border-top: 3.5px solid #ffffff !important;
+}
+
+html.hyvision-route-dashboard .dg-card-container,
+html.hyvision-route-dashboard .dg-pwr-card,
+html.hyvision-route-dashboard .dg-sync-card {
+  border-top: 3.5px solid #64748b !important;
+}
+
+html.hyvision-route-dashboard .pcs-card-container:not(.reactive):not(.thermal) {
+  border-top: 3.5px solid #8ce47e !important;
+}
+
+html.hyvision-route-dashboard .pcs-card-container.reactive {
+  border-top: 3.5px solid #c4b5fd !important;
+}
+
+html.hyvision-route-dashboard .pcs-card-container.thermal,
+html.hyvision-route-dashboard .trend-card-container.therm {
+  border-top: 3.5px solid #f97316 !important;
+}
+
+html.hyvision-route-dashboard .trend-card-container.elec {
+  border-top: 3.5px solid #8ce47e !important;
+}
+
+html.hyvision-route-dashboard div.tb-widget:has([class*="-card-container"]),
+html.hyvision-route-dashboard div.tb-widget:has(.scada-view-container),
+html.hyvision-route-dashboard div.tb-widget:has(.bess-rack-card),
+html.hyvision-route-dashboard div.tb-widget:has(.trend-card-container),
+html.hyvision-route-dashboard div.tb-widget:has(.pcs-card-container) {
+  border: none !important;
+  border-top: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+html.hyvision-route-dashboard div.tb-widget.mat-elevation-z4:not(:has([class*="-card-container"])) {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.hyvision-route-dashboard div.tb-widget .title,
+html.hyvision-route-dashboard div.tb-widget .tb-widget-title .title {
+  color: #f1f5f9 !important;
+}
+
+html.hyvision-route-dashboard tb-timewindow,
+html.hyvision-route-dashboard .tb-widget-title tb-timewindow {
+  color: var(--hyv-text-muted) !important;
+}
+
+html.hyvision-route-dashboard tb-dashboard-toolbar .mat-toolbar,
+html.hyvision-route-dashboard tb-dashboard-toolbar .mat-fab-toolbar-wrapper {
+  background: transparent !important;
+}
+
+html.hyvision-route-dashboard .tb-breadcrumb,
+html.hyvision-route-dashboard .tb-breadcrumb-item,
+html.hyvision-route-dashboard .tb-breadcrumb-item a {
+  color: var(--hyv-text-muted) !important;
+}
+
+html.hyvision-route-dashboard .tb-breadcrumb-item a:hover {
+  color: var(--hyv-accent-soft) !important;
+}
+
+html.hyvision-route-dashboard tb-dashboard-page a:not(.mat-mdc-button):not(.mat-mdc-icon-button) {
+  color: #ffffff !important;
+}
+
+html.hyvision-route-dashboard tb-dashboard-page a:not(.mat-mdc-button):not(.mat-mdc-icon-button):hover {
+  color: var(--hyv-accent-soft) !important;
+}
+
+/* Sinóptico animado — overrides (TB cachea widgetType por sesión) */
+html.hyvision-route-dashboard .scada-view-container {
+  background: var(--hyv-card-bg) !important;
+  border: var(--hyv-card-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .scada-badge.offgrid {
+  color: #8ce47e !important;
+  border-color: #9fa68b !important;
+  background: rgba(67, 106, 60, 0.35) !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .scada-badge.ongrid {
+  color: #6be35b !important;
+  border-color: rgba(130, 195, 120, 0.55) !important;
+  background: rgba(67, 106, 60, 0.28) !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .ac-busbar {
+  stroke: #64B856 !important;
+  filter: drop-shadow(0 0 10px rgba(100, 184, 86, 0.55)) !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .flow-solar {
+  stroke: #f7d048 !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .flow-bess-charging {
+  stroke: #64B856 !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .flow-bess-discharging {
+  stroke: #f7d048 !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .flow-pcs,
+html.hyvision-route-dashboard .scada-view-container .flow-grid {
+  stroke: #8ce47e !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .flow-load {
+  stroke: #ffffff !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .flow-dg-running {
+  stroke: #f7d048 !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .scada-node-box {
+  fill: rgba(14, 25, 14, 0.88) !important;
+  stroke: rgba(130, 195, 120, 0.28) !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .n-header {
+  fill: #92b08f !important;
+}
+
+html.hyvision-route-dashboard .scada-view-container .scada-footer-bar {
+  color: #92b08f !important;
+  border-top-color: rgba(130, 195, 120, 0.12) !important;
 }
 
 /* Native Timeseries Table */

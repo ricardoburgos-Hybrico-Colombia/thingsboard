@@ -1062,6 +1062,88 @@
     return false;
   }
 
+  /** Vista de un tablero concreto (/dashboards/{uuid}) — pantalla SCADA. */
+  function isDashboardDetailView() {
+    if (isLoginPage() || !isLoggedIn()) return false;
+    var path = window.location.pathname || '';
+    if (path.indexOf('/dashboards/groups') === 0) return false;
+    var parts = path.replace(/^\/+|\/+$/g, '').split('/');
+    if (parts.length !== 2 || parts[0] !== 'dashboards') return false;
+    var id = parts[1];
+    return id && id.length >= 8;
+  }
+
+  function syncHyvisionDocumentRouteClasses() {
+    var html = document.documentElement;
+    var onFleet = isDashboardsListView() && !fleetHubState.isClassicMode;
+    html.classList.toggle('hyvision-route-fleet', onFleet);
+    html.classList.toggle('hyvision-route-dashboard', isDashboardDetailView());
+  }
+
+  /** Paleta Fleet sobre sinóptico (TB cachea widgetType por FQN en la misma pestaña). */
+  var HYV_SINOPTICO_THEME_VER = '3';
+
+  /** Evita “doble pestaña”: shell TB sin borde si la tarjeta HTML ya tiene border-top. */
+  function patchWidgetAvoidDoubleAccent() {
+    if (!isDashboardDetailView()) return;
+    var innerCardSel = [
+      '[class*="-card-container"]', '.scada-view-container', '.bess-rack-card',
+      '.trend-card-container', '.pcs-card-container', '.dg-card-container',
+      '.general-card-container', '.balance-planta-container', '.dg-pwr-card', '.dg-sync-card'
+    ].join(', ');
+    document.querySelectorAll('gridster-item div.tb-widget, tb-dashboard-page div.tb-widget').forEach(function(wEl) {
+      if (!wEl.querySelector(innerCardSel)) return;
+      wEl.style.setProperty('background', 'transparent', 'important');
+      wEl.style.setProperty('border', 'none', 'important');
+      wEl.style.setProperty('border-top', 'none', 'important');
+      wEl.style.setProperty('box-shadow', 'none', 'important');
+    });
+  }
+  function patchSinopticoFleetColors() {
+    if (!isDashboardDetailView()) return;
+    var roots = document.querySelectorAll('.scada-view-container');
+    if (!roots.length) return;
+
+    roots.forEach(function(root) {
+      var bus = root.querySelector('.ac-busbar');
+      if (bus) {
+        bus.setAttribute('stroke', '#64B856');
+      }
+      root.querySelectorAll('.flow-solar').forEach(function(el) { el.setAttribute('stroke', '#f7d048'); });
+      root.querySelectorAll('.flow-bess-charging').forEach(function(el) { el.setAttribute('stroke', '#64B856'); });
+      root.querySelectorAll('.flow-bess-discharging').forEach(function(el) { el.setAttribute('stroke', '#f7d048'); });
+      root.querySelectorAll('.flow-pcs, .flow-grid').forEach(function(el) { el.setAttribute('stroke', '#8ce47e'); });
+      root.querySelectorAll('.flow-load').forEach(function(el) { el.setAttribute('stroke', '#ffffff'); });
+      root.querySelectorAll('.flow-dg-running').forEach(function(el) { el.setAttribute('stroke', '#f7d048'); });
+
+      root.querySelectorAll('.scada-badge.offgrid').forEach(function(el) {
+        el.style.color = '#8ce47e';
+        el.style.borderColor = '#9fa68b';
+        el.style.background = 'rgba(67, 106, 60, 0.35)';
+      });
+      root.querySelectorAll('.scada-badge.ongrid').forEach(function(el) {
+        el.style.color = '#6be35b';
+        el.style.borderColor = 'rgba(130, 195, 120, 0.55)';
+        el.style.background = 'rgba(67, 106, 60, 0.28)';
+      });
+      root.querySelectorAll('#svg-busbar-title').forEach(function(el) {
+        el.setAttribute('fill', '#64B856');
+      });
+    });
+  }
+
+  function maybeHardReloadForSinopticoTheme() {
+    if (!isDashboardDetailView()) return;
+    var key = 'hyv_sinoptico_theme_ver';
+    try {
+      if (sessionStorage.getItem(key) === HYV_SINOPTICO_THEME_VER) return;
+      sessionStorage.setItem(key, HYV_SINOPTICO_THEME_VER);
+      if (window.__hyvSinopticoReloadDone) return;
+      window.__hyvSinopticoReloadDone = true;
+      window.location.reload();
+    } catch (e) { /* ignore */ }
+  }
+
   var HYV_TELEMETRY_KEYS = 'generacion_solar_kw,solar_power_kw,solar_charger_power_kw,epv_hoy_kwh,solar_energy_kwh,soc_promedio,battery_soc,vbat_promedio,battery_voltage,rectifier_voltage,demanda_carga_kw,load_power_kw,load_dc_power_kw,grid_power_kw,potencia_bess_kw,battery_power_kw,temp_bateria_max,battery_temperature,ambient_temperature,battery_cycles,latitude,longitude,ultima_actualizacion,estado_bess';
   var HYV_HEARTBEAT_KEYS = [
     'ultima_actualizacion', 'generacion_solar_kw', 'solar_power_kw', 'solar_charger_power_kw',
@@ -2319,6 +2401,7 @@
   // 11. Lifecycle & Clean Listeners (Zero Infinite Loops)
   window.addEventListener('DOMContentLoaded', function() {
     loadInitialConfig();
+    syncHyvisionDocumentRouteClasses();
     updateTriggerVisibility();
     updateSidebarTranslations();
     injectSidebarReportsLink();
@@ -2327,6 +2410,10 @@
 
     // Periodic check for SPA navigation updates (every 800ms)
     setInterval(function() {
+      syncHyvisionDocumentRouteClasses();
+      patchSinopticoFleetColors();
+      patchWidgetAvoidDoubleAccent();
+      maybeHardReloadForSinopticoTheme();
       updateTriggerVisibility();
       updateSidebarTranslations();
       injectSidebarReportsLink();
