@@ -213,6 +213,7 @@ def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
                 "latitude": float(lat),
                 "longitude": float(lon),
                 "device_profile": target_profile,
+                "conversion_hardware": "INVERSOR_CARGADOR" if alias in {"ARENAL - HN794", "AGUA CALIENTE - HN801", "BUENOS AIRES II SPS - HN682", "CAMPO LIMONES LOS ENCUENTROS - HN493", "CAMALOTE - HN2013"} else ("SOLO_SOLAR_BESS" if target_profile == "HYBRICO_TELCO_OFFGRID" else "RECTIFICADOR_DC"),
                 "solar_topology": m.get("variable_solar") or s.get("solar_topology") or "solarChargerPower",
                 "master_topology": m.get("topologia", ""),
                 "solar_capacity_kwp": m.get("capacidad_solar_kwp", 0.0),
@@ -427,7 +428,9 @@ def sincronizar_un_sitio(site_config, maestro_info):
         grid_energy_kwh = round(max(0.0, float(raw_grid_e)), 2)
 
         # ── 6. INVERSORES Y RECTIFICADORES ──
-        inv_kw = round(max(0.0, float(pt.get("inverterPower") or 0.0)), 3)
+        # El inversor/cargador es bidireccional: positivo = inyección AC a cargas; negativo = recarga de batería desde AC
+        raw_inv_p = pt.get("inverterPower")
+        inv_kw = round(float(raw_inv_p), 3) if raw_inv_p is not None else 0.0
         inv_v = round(float(pt.get("inverterVoltage")), 1) if pt.get("inverterVoltage") is not None else None
         inv_hz = round(float(pt.get("inverterFrequency")), 2) if pt.get("inverterFrequency") is not None else None
         inv_energy_kwh = round(max(0.0, float(pt.get("inverterEnergy") or 0.0)), 3)
@@ -517,6 +520,21 @@ def sincronizar_un_sitio(site_config, maestro_info):
             site_top_class = "OFF_GRID_DG_SOLAR"
         else:
             site_top_class = "OFF_GRID_100_SOLAR"
+
+        # Hardware de Conversión de Potencia Real (Inversor/Cargador AC vs Rectificador DC)
+        SITES_INVERTER_CHARGER = {
+            "ARENAL - HN794",
+            "AGUA CALIENTE - HN801",
+            "BUENOS AIRES II SPS - HN682",
+            "CAMPO LIMONES LOS ENCUENTROS - HN493",
+            "CAMALOTE - HN2013"
+        }
+        if alias in SITES_INVERTER_CHARGER or "inverter" in topologia.lower():
+            conversion_hw = "INVERSOR_CARGADOR"
+        elif site_top_class == "OFF_GRID_100_SOLAR":
+            conversion_hw = "SOLO_SOLAR_BESS"
+        else:
+            conversion_hw = "RECTIFICADOR_DC"
 
         # APLICACIÓN DE REGLAS SEGÚN TOPOLOGÍA (CERO VALORES FALSOS O ASUMIDOS)
         if site_top_class == "OFF_GRID_100_SOLAR":
@@ -608,8 +626,10 @@ def sincronizar_un_sitio(site_config, maestro_info):
 
         # ── CONSTRUCCIÓN DEL PAYLOAD A THINGSBOARD ──
         payload = {
-            # Topología Real
+            # Topología Real y Hardware de Conversión
             "site_topology": site_top_class,
+            "conversion_hardware": conversion_hw,
+            "inverter_mode": "CHARGING" if inv_kw < -0.05 else ("INVERTING" if inv_kw > 0.05 else "STANDBY"),
             # Solar
             "solar_power_kw": solar_kw,
             "solar_charger_power_kw": sc_kw,

@@ -773,19 +773,46 @@ self.onDataUpdated = function() {
     });
   }
 
-  // 4. Rectificadores Telecom AC/DC y Planta de Fuerza
-  var isInvSite = (topologia.indexOf('INVERTER') !== -1) || (invKw > 0.1 && rectKw === 0.0 && rectVolt === 0.0);
+  // 4. Rectificadores Telecom AC/DC vs Inversor/Cargador AC
+  var convHw = (telemetry['conversion_hardware'] || '').toUpperCase();
+  var isInvSite = (convHw === 'INVERSOR_CARGADOR') ||
+                  (siteName.indexOf('ARENAL') !== -1 || siteName.indexOf('AGUA CALIENTE') !== -1 ||
+                   siteName.indexOf('BUENOS AIRES') !== -1 || siteName.indexOf('CAMPO LIMONES') !== -1 ||
+                   siteName.indexOf('CAMALOTE') !== -1 || topologia.indexOf('INVERTER') !== -1 ||
+                   (Math.abs(invKw) > 0.05 && rectKw === 0.0 && rectVolt === 0.0));
+
   var acPower = Math.max(gridKw, dgKw);
-  if (!isInvSite && acPower > 0.4 && rectKw === 0.0) {
-    if (solarKw < 0.15 && (soc < 50.0 || vbat < 49.5)) {
+  var batCurr = parseFloat(telemetry['battery_current'] || 0.0);
+  var batPwr = parseFloat(telemetry['battery_power_kw'] || 0.0);
+
+  // CASO A: Sitios con Planta de Rectificadores DC
+  if (!isInvSite && !isOffGrid && acPower > 0.4 && rectKw <= 0.05) {
+    if (solarKw < 0.15 && (batCurr < 0.2 || batPwr <= 0.0) && (soc < 50.0 || vbat < 49.5)) {
       activeAlarms.push({
         id: 'ALM-REC-001',
         time: nowIso,
         subsystem: 'Rectificadores AC/DC',
         tag: 'Planta de Fuerza',
         code: 'ALM-REC-001',
-        desc: 'Falla de rectificadores con fuente AC presente (Déficit energético)',
-        metrics: 'Red/DG: ' + acPower.toFixed(2) + ' kW | Rect: <strong>0.0 kW</strong> | SOC: ' + soc.toFixed(1) + '%',
+        desc: 'Falla de rectificadores con fuente AC presente (Batería en descarga)',
+        metrics: 'Red/DG: ' + acPower.toFixed(2) + ' kW | Rect: <strong>' + rectKw.toFixed(2) + ' kW</strong> | I_bat: ' + batCurr.toFixed(1) + ' A | SOC: ' + soc.toFixed(1) + '%',
+        severity: 'CRITICAL',
+        status: 'ACTIVA'
+      });
+    }
+  }
+
+  // CASO B: Sitios con Inversor / Cargador Bidireccional AC
+  if (isInvSite && acPower > 0.4 && solarKw < 0.15) {
+    if ((batCurr < -1.0 || batPwr < -0.05) && (soc < 50.0 || vbat < 48.5)) {
+      activeAlarms.push({
+        id: 'ALM-INV-001',
+        time: nowIso,
+        subsystem: 'Inversor / Cargador AC',
+        tag: 'Planta Inversor',
+        code: 'ALM-INV-001',
+        desc: 'Falla de cargador en inversor con fuente AC presente (Batería en descarga)',
+        metrics: 'Red/DG: ' + acPower.toFixed(2) + ' kW | Inv: ' + invKw.toFixed(2) + ' kW | I_bat: <strong>' + batCurr.toFixed(1) + ' A</strong> | SOC: ' + soc.toFixed(1) + '%',
         severity: 'CRITICAL',
         status: 'ACTIVA'
       });

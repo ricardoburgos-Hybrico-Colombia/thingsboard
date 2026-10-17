@@ -1388,6 +1388,9 @@ def critical_alarms_monitor_worker():
                             dg_kw = float(t.get("dg_potencia_activa_kw") or t.get("generator_power_kw") or 0.0)
                             rect_kw = float(t.get("rectifier_power_kw") or 0.0)
                             rect_volt = float(t.get("rectifier_voltage") or 0.0)
+                            bat_curr = float(t.get("battery_current") or 0.0)
+                            bat_pwr = float(t.get("battery_power_kw") or 0.0)
+                            conv_hw = str(t.get("conversion_hardware") or "").upper()
                             aut_h = float(t.get("battery_autonomy_hours") or 0.0)
                             grid_avail = int(t.get("grid_available", 1) or 1)
                             raw_fuel = t.get("generator_fuel_level")
@@ -1487,23 +1490,40 @@ def critical_alarms_monitor_worker():
                                         "metrics": {"dc_bus_voltage": f"{v_dc_sys:.1f} V", "rectifier_power_kw": f"{rect_kw:.2f} kW"}
                                     })
 
-                            # ALM-REC-001: Falla de Rectificadores con Fuente AC Presente
-                            # Falla CRÍTICA multivariable:
-                            # 1) Hay fuente AC presente (Red o DG > 0.4 kW)
-                            # 2) No es sitio de topología exclusiva Inversor AC (Arenal, etc.) donde no existen rectificadores DC
-                            # 3) Rectificadores entregan 0.0 kW
-                            # 4) NO hay soporte solar que cubra el sitio (solar_kw < 0.15 kW)
-                            # 5) La batería se encuentra en déficit o descarga (soc < 50.0% o vbat < 49.5V)
+                            # 4. Rectificadores AC/DC vs Inversor/Cargador AC (Conversión de Potencia)
                             ac_power = max(grid_kw, dg_kw)
-                            is_inverter_site = ("INVERTER" in topologia) or (inv_kw > 0.1 and rect_kw == 0.0 and rect_volt == 0.0)
-                            if not is_inverter_site and ac_power > 0.4 and rect_kw == 0.0:
-                                if solar_kw < 0.15 and (soc < 50.0 or vbat < 49.5):
+                            is_inverter_site = (conv_hw == "INVERSOR_CARGADOR") or (d_name in {
+                                "ARENAL - HN794", "AGUA CALIENTE - HN801", "BUENOS AIRES II SPS - HN682",
+                                "CAMPO LIMONES LOS ENCUENTROS - HN493", "CAMALOTE - HN2013"
+                            }) or ("INVERTER" in topologia) or (abs(inv_kw) > 0.05 and rect_kw == 0.0 and rect_volt == 0.0)
+
+                            # CASO A: Sitios con Planta de Rectificadores DC (West End, Dixon Hill, West Bay, French Harbor, COR9007)
+                            # ALM-REC-001: Falla de Rectificadores con Fuente AC Presente
+                            # Falla CRÍTICA: Hay fuente AC disponible (Red o DG > 0.4 kW), rectificadores entregan <= 0.05 kW,
+                            # no hay soporte solar (< 0.15 kW), y la batería está en descarga real (bat_curr < 0.2 A o bat_pwr <= 0.0) con SOC < 50% o Vbat < 49.5V.
+                            if not is_inverter_site and ac_power > 0.4 and rect_kw <= 0.05:
+                                if solar_kw < 0.15 and (bat_curr < 0.2 or bat_pwr <= 0.0) and (soc < 50.0 or vbat < 49.5):
                                     detected_events.append({
                                         "code": "ALM-REC-001",
                                         "title": "Falla de Rectificadores con Fuente AC Presente",
                                         "subsystem": "Rectificadores AC/DC (Planta de Fuerza)",
-                                        "detail": f"Fuente AC activa ({ac_power:.2f} kW) pero rectificadores en 0.0 kW sin soporte solar y batería en déficit ({soc:.1f}%)",
-                                        "metrics": {"grid_or_dg_power": f"{ac_power:.2f} kW", "rectifier_power_kw": "0.0 kW", "battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.2f} V"}
+                                        "detail": f"Fuente AC activa ({ac_power:.2f} kW) pero rectificadores en {rect_kw:.2f} kW; batería en descarga ({bat_curr:.1f} A, SOC: {soc:.1f}%)",
+                                        "metrics": {"grid_or_dg_power": f"{ac_power:.2f} kW", "rectifier_power_kw": f"{rect_kw:.2f} kW", "battery_current": f"{bat_curr:.1f} A", "battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.2f} V"}
+                                    })
+
+                            # CASO B: Sitios con Inversor/Cargador AC Bidireccional (Arenal, Agua Caliente, Buenos Aires, Campo Limones, Camalote)
+                            # ALM-INV-001: Falla de Cargador en Inversor con Fuente AC Presente
+                            # Falla CRÍTICA: Hay fuente AC disponible (Red o DG > 0.4 kW) y sin soporte solar (< 0.15 kW),
+                            # pero el cargador del inversor no está asistiendo la recarga, provocando que la batería se descargue (bat_curr < -1.0 A o bat_pwr < -0.05 kW)
+                            # bajo nivel bajo de reserva (SOC < 50.0% o Vbat < 48.5V).
+                            if is_inverter_site and ac_power > 0.4 and solar_kw < 0.15:
+                                if (bat_curr < -1.0 or bat_pwr < -0.05) and (soc < 50.0 or vbat < 48.5):
+                                    detected_events.append({
+                                        "code": "ALM-INV-001",
+                                        "title": "Falla de Cargador en Inversor con Fuente AC Presente",
+                                        "subsystem": "Inversor / Cargador AC",
+                                        "detail": f"Fuente AC activa ({ac_power:.2f} kW) pero el inversor/cargador no asume la recarga; batería en descarga activa ({bat_curr:.1f} A, SOC: {soc:.1f}%)",
+                                        "metrics": {"grid_or_dg_power": f"{ac_power:.2f} kW", "inverter_power_kw": f"{inv_kw:.2f} kW", "battery_current": f"{bat_curr:.1f} A", "battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.2f} V"}
                                     })
 
                             # 5. Generador Diésel
