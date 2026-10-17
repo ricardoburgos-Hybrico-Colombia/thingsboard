@@ -62,7 +62,7 @@ def generar_excel_dedicado_telecom():
     ws1.row_dimensions[1].height = 36
 
     ws1.merge_cells("A2:K2")
-    ws1["A2"] = "Ecosistema HyVision • Integración Nativa Device Profile 'HYBRICO_MICROGRID' en ThingsBoard & API HyNet (Stellar by New Sun Road)"
+    ws1["A2"] = "Ecosistema HyVision • Integración Modular de 4 Device Profiles por Topología en ThingsBoard (Híbrido, Off-Grid, On-Grid, Backup DG)"
     ws1["A2"].font = font_subtitle
     ws1["A2"].fill = fill_dark
     ws1["A2"].alignment = Alignment(horizontal="center", vertical="center")
@@ -147,7 +147,7 @@ def generar_excel_dedicado_telecom():
     ws2 = wb.create_sheet(title="Topologia_15_Sitios_Telecom")
     ws2.views.sheetView[0].showGridLines = True
 
-    ws2.merge_cells("A1:G1")
+    ws2.merge_cells("A1:H1")
     ws2["A1"] = "CLASIFICACIÓN TOPOLÓGICA Y EQUIPAMIENTO DE LOS 15 SITIOS TELECOM"
     ws2["A1"].font = font_title
     ws2["A1"].fill = fill_dark
@@ -159,6 +159,7 @@ def generar_excel_dedicado_telecom():
         "País",
         "ID Dispositivo ThingsBoard / Gateway (ps_id)",
         "Clasificación Topológica",
+        "Device Profile ThingsBoard",
         "Equipamiento Solar Fotovoltaico",
         "Acometida Red Comercial",
         "Grupo Electrógeno Diésel"
@@ -179,6 +180,7 @@ def generar_excel_dedicado_telecom():
             s["pais"],
             s["ps_id"],
             s["topologia"],
+            s.get("perfil_tb", "HYBRICO_MICROGRID"),
             s["solar"],
             s["red"],
             s["dg"]
@@ -190,17 +192,17 @@ def generar_excel_dedicado_telecom():
             if c_idx == 1:
                 cell.font = font_bold
                 cell.alignment = Alignment(vertical="center")
-            elif c_idx == 3:
+            elif c_idx in [3, 5]:
                 cell.font = font_code
                 cell.alignment = Alignment(vertical="center")
-            elif c_idx in [2, 6, 7]:
+            elif c_idx in [2, 7, 8]:
                 cell.font = font_body
                 cell.alignment = Alignment(horizontal="center", vertical="center")
             else:
                 cell.font = font_body
                 cell.alignment = Alignment(vertical="center", wrap_text=True)
 
-    col_widths_top = [34, 16, 36, 26, 36, 20, 20]
+    col_widths_top = [34, 16, 36, 26, 28, 36, 20, 20]
     for i, w in enumerate(col_widths_top, start=1):
         ws2.column_dimensions[get_column_letter(i)].width = w
     ws2.freeze_panes = "A4"

@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 SITES_15_LIST = [
-    {"alias": "WEST_END_II", "pais": "Honduras", "ps_id": "hyb_west_end2", "topologia": "ON_GRID_SOLAR_BESS", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
-    {"alias": "DIXON_HILL", "pais": "Honduras", "ps_id": "hyb_dixon_hill", "topologia": "ON_GRID_SOLAR_BESS", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
-    {"alias": "WEST_BAY", "pais": "Honduras", "ps_id": "hyb_west_bay", "topologia": "ON_GRID_SOLAR_BESS", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
-    {"alias": "FRENCH_HARBOR_ESTE", "pais": "Honduras", "ps_id": "hyb_french_harbor_este", "topologia": "ON_GRID_SOLAR_BESS", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
-    {"alias": "PALACIOS", "pais": "Honduras", "ps_id": "hyb_palacios", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"},
-    {"alias": "ARENAL - HN794", "pais": "Honduras", "ps_id": "hyb_arenal_-_hn794", "topologia": "HIBRIDO_GRID_DG", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
-    {"alias": "AGUA CALIENTE - HN801", "pais": "Honduras", "ps_id": "hyb_agua_caliente_-_hn801", "topologia": "HIBRIDO_GRID_DG", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
-    {"alias": "BUENOS AIRES II SPS - HN682", "pais": "Honduras", "ps_id": "hyb_buenos_aires_ii_sps", "topologia": "ON_GRID_SOLAR_BESS", "solar": "inverterArrayPower", "red": "Presente", "dg": "No"},
-    {"alias": "CAMPO LIMONES LOS ENCUENTROS - HN493", "pais": "Honduras", "ps_id": "hyb_campo_limones_los_encuentros_-_hn493", "topologia": "HIBRIDO_GRID_DG", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
-    {"alias": "CAMALOTE - HN2013", "pais": "Honduras", "ps_id": "hyb_camalote_-_hn2013", "topologia": "HIBRIDO_GRID_DG", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
-    {"alias": "COR9007", "pais": "Colombia", "ps_id": "hyb_cor9007", "topologia": "ON_GRID_SOLAR_BESS", "solar": "inverterArrayPower", "red": "Presente", "dg": "No"},
-    {"alias": "CUN7016", "pais": "Colombia", "ps_id": "hyb_cun7016", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"},
-    {"alias": "ANT7086", "pais": "Colombia", "ps_id": "hyb_ant7086", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"},
-    {"alias": "CHO7151", "pais": "Colombia", "ps_id": "hyb_cho7151", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"},
-    {"alias": "BOY7014", "pais": "Colombia", "ps_id": "hyb_boy-7014", "topologia": "OFF_GRID_100_SOLAR", "solar": "solarChargerPower", "red": "No", "dg": "No"}
+    {"alias": "WEST_END_II", "pais": "Honduras", "ps_id": "hyb_west_end2", "topologia": "ON_GRID_SOLAR_BESS", "perfil_tb": "HYBRICO_TELCO_ONGRID", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
+    {"alias": "DIXON_HILL", "pais": "Honduras", "ps_id": "hyb_dixon_hill", "topologia": "ON_GRID_SOLAR_BESS", "perfil_tb": "HYBRICO_TELCO_ONGRID", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
+    {"alias": "WEST_BAY", "pais": "Honduras", "ps_id": "hyb_west_bay", "topologia": "ON_GRID_SOLAR_BESS", "perfil_tb": "HYBRICO_TELCO_ONGRID", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
+    {"alias": "FRENCH_HARBOR_ESTE", "pais": "Honduras", "ps_id": "hyb_french_harbor_este", "topologia": "ON_GRID_SOLAR_BESS", "perfil_tb": "HYBRICO_TELCO_ONGRID", "solar": "solarChargerPower", "red": "Presente", "dg": "No"},
+    {"alias": "PALACIOS", "pais": "Honduras", "ps_id": "hyb_palacios", "topologia": "OFF_GRID_100_SOLAR", "perfil_tb": "HYBRICO_TELCO_OFFGRID", "solar": "solarChargerPower", "red": "No", "dg": "No"},
+    {"alias": "ARENAL - HN794", "pais": "Honduras", "ps_id": "hyb_arenal_-_hn794", "topologia": "HIBRIDO_GRID_DG", "perfil_tb": "HYBRICO_TELCO_HIBRIDO", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
+    {"alias": "AGUA CALIENTE - HN801", "pais": "Honduras", "ps_id": "hyb_agua_caliente_-_hn801", "topologia": "HIBRIDO_GRID_DG", "perfil_tb": "HYBRICO_TELCO_HIBRIDO", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
+    {"alias": "BUENOS AIRES II SPS - HN682", "pais": "Honduras", "ps_id": "hyb_buenos_aires_ii_sps", "topologia": "ON_GRID_SOLAR_BESS", "perfil_tb": "HYBRICO_TELCO_ONGRID", "solar": "inverterArrayPower", "red": "Presente", "dg": "No"},
+    {"alias": "CAMPO LIMONES LOS ENCUENTROS - HN493", "pais": "Honduras", "ps_id": "hyb_campo_limones_los_encuentros_-_hn493", "topologia": "HIBRIDO_GRID_DG", "perfil_tb": "HYBRICO_TELCO_HIBRIDO", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
+    {"alias": "CAMALOTE - HN2013", "pais": "Honduras", "ps_id": "hyb_camalote_-_hn2013", "topologia": "HIBRIDO_GRID_DG", "perfil_tb": "HYBRICO_TELCO_HIBRIDO", "solar": "solarChargerPower + inverterArrayPower", "red": "Presente", "dg": "Presente"},
+    {"alias": "COR9007", "pais": "Colombia", "ps_id": "hyb_cor9007", "topologia": "ON_GRID_SOLAR_BESS", "perfil_tb": "HYBRICO_TELCO_ONGRID", "solar": "inverterArrayPower", "red": "Presente", "dg": "No"},
+    {"alias": "CUN7016", "pais": "Colombia", "ps_id": "hyb_cun7016", "topologia": "OFF_GRID_100_SOLAR", "perfil_tb": "HYBRICO_TELCO_OFFGRID", "solar": "solarChargerPower", "red": "No", "dg": "No"},
+    {"alias": "ANT7086", "pais": "Colombia", "ps_id": "hyb_ant7086", "topologia": "OFF_GRID_100_SOLAR", "perfil_tb": "HYBRICO_TELCO_OFFGRID", "solar": "solarChargerPower", "red": "No", "dg": "No"},
+    {"alias": "CHO7151", "pais": "Colombia", "ps_id": "hyb_cho7151", "topologia": "OFF_GRID_100_SOLAR", "perfil_tb": "HYBRICO_TELCO_OFFGRID", "solar": "solarChargerPower", "red": "No", "dg": "No"},
+    {"alias": "BOY7014", "pais": "Colombia", "ps_id": "hyb_boy-7014", "topologia": "OFF_GRID_100_SOLAR", "perfil_tb": "HYBRICO_TELCO_OFFGRID", "solar": "solarChargerPower", "red": "No", "dg": "No"}
 ]
 
 TELECOM_ALARMS = [
