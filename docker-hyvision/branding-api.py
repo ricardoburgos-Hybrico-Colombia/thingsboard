@@ -239,30 +239,64 @@ def get_tb_token(user_auth_header=None):
 def send_telegram_message(bot_token, chat_id, text):
     if not bot_token or not chat_id:
         return False, "Bot token o Chat ID no configurados"
+
+    # Soporte para un único chat_id (str/int) o múltiples destinos (list o string separado por comas)
+    if isinstance(chat_id, (list, tuple)):
+        targets = [str(c).strip() for c in chat_id if str(c).strip()]
+    elif isinstance(chat_id, str) and "," in chat_id:
+        targets = [c.strip() for c in chat_id.split(",") if c.strip()]
+    else:
+        targets = [str(chat_id).strip()]
+
     url = f"https://api.telegram.org/bot{bot_token.strip()}/sendMessage"
-    payload = json.dumps({
-        "chat_id": str(chat_id).strip(),
-        "text": text,
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": False
-    }).encode("utf-8")
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            if data.get("ok"):
-                return True, "Mensaje enviado exitosamente"
-            else:
-                return False, data.get("description", "Error desconocido de Telegram")
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8")
+    all_ok = True
+    last_msg = ""
+
+    for target in targets:
+        payload = json.dumps({
+            "chat_id": target,
+            "text": text,
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": False
+        }).encode("utf-8")
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
         try:
-            err_json = json.loads(err_body)
-            return False, err_json.get("description", str(e))
-        except Exception:
-            return False, f"HTTP Error {e.code}: {e.reason}"
-    except Exception as e:
-        return False, str(e)
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                if data.get("ok"):
+                    last_msg = "Mensaje enviado exitosamente"
+                else:
+                    all_ok = False
+                    last_msg = data.get("description", "Error desconocido de Telegram")
+        except urllib.error.HTTPError as e:
+            err_body = e.read().decode("utf-8")
+            try:
+                err_json = json.loads(err_body)
+                # Resiliencia Telegram: Si el grupo fue promovido a supergrupo, reintentar con el migrate_to_chat_id
+                migrated_id = err_json.get("parameters", {}).get("migrate_to_chat_id")
+                if migrated_id:
+                    retry_payload = json.dumps({
+                        "chat_id": str(migrated_id),
+                        "text": text,
+                        "parse_mode": "Markdown",
+                        "disable_web_page_preview": False
+                    }).encode("utf-8")
+                    req_retry = urllib.request.Request(url, data=retry_payload, headers={"Content-Type": "application/json"})
+                    with urllib.request.urlopen(req_retry, timeout=10) as resp_retry:
+                        data_retry = json.loads(resp_retry.read().decode("utf-8"))
+                        if data_retry.get("ok"):
+                            last_msg = f"Mensaje enviado con ID migrado ({migrated_id})"
+                            continue
+                all_ok = False
+                last_msg = err_json.get("description", str(e))
+            except Exception:
+                all_ok = False
+                last_msg = f"HTTP Error {e.code}: {e.reason}"
+        except Exception as e:
+            all_ok = False
+            last_msg = str(e)
+
+    return all_ok, last_msg
 
 # =================================================================
 # REPORT GENERATION ENGINES (TELEMETRY, EXCEL & PRINTABLE HTML)

@@ -12,7 +12,7 @@
   "customCss": "",
   "telegramEnabled": true,
   "telegramBotToken": "8705026290:AAF24pHQ4Ve7CEfh_il0OrQ_Zv_a-xSA6qU",
-  "telegramChatId": "8688336384",
+  "telegramChatId": "-1004430952043",
   "telegramAlertSeverity": "CRITICAL",
   "reportSchedule": {
     "enabled": true,
