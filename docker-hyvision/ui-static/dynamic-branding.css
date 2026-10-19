@@ -1,9 +1,10 @@
 /* HyVision Dynamic White-Label Styles */
 :root {
-  --hyvision-primary: #436A3C;
-  --hyvision-login-card: #2b4c23;
-  --hyvision-bg: #173117;
-  /* Shell (barra + menú): verde oscuro portafolio (.hyv-btn-scada), no el primary Material */
+  --accent-foreground: oklch(0.481 0.08 140.527);
+  --hyvision-primary: oklch(0.481 0.08 140.527);
+  --hyvision-accent: oklch(0.72 0.11 140.527);
+  --hyvision-login-card: #383b2f;
+  --hyvision-bg: #191b13;
   --hyvision-shell-chrome: linear-gradient(180deg, #3a6234 0%, #2b4926 52%, #1f3520 100%);
 }
 
@@ -31,7 +32,6 @@ body, html, tb-login, .tb-login-content, .tb-login-content.mat-app-background {
   background-color: oklch(0.481 0.08 140.527) !important;
 }
 
-/* Barra superior + lateral: mismo tono oscuro que botones del Fleet Hub */
 mat-sidenav.tb-site-sidenav,
 mat-sidenav.tb-site-sidenav .tb-nav-header-toolbar.mat-toolbar.mat-primary,
 mat-sidenav.tb-site-sidenav .tb-side-menu-toolbar.mat-toolbar.mat-primary,
@@ -41,3 +41,4 @@ mat-sidenav-content .tb-primary-toolbar.mat-toolbar.mat-primary {
 }
 
 /* Custom user CSS overrides */
+

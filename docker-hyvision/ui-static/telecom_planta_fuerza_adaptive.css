@@ -1,0 +1,289 @@
+.telecom-card-container {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, rgba(14, 25, 16, 0.95) 0%, rgba(8, 15, 9, 0.98) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(100, 184, 86, 0.22);
+  border-top: 3.5px solid #38bdf8;
+  padding: 14px 18px 10px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.telecom-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.telecom-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.telecom-icon {
+  font-size: 15px;
+  color: #38bdf8;
+}
+
+.telecom-title-main {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.5px;
+}
+
+.telecom-subtag {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  letter-spacing: 0.4px;
+}
+
+.telecom-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.telecom-mode-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.1);
+  letter-spacing: 0.3px;
+}
+
+.telecom-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+.telecom-badge.ok {
+  color: #64B856;
+  border: 1.5px solid #64B856;
+  background: rgba(100, 184, 86, 0.1);
+}
+
+.telecom-badge.warn {
+  color: #f59e0b;
+  border: 1.5px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.telecom-badge.err {
+  color: #ef4444;
+  border: 1.5px solid #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Métricas Principales */
+.telecom-top-metrics {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(100, 184, 86, 0.14);
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin: 6px 0;
+}
+
+.telecom-kpi-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kpi-sub-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.kpi-val-group {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.kpi-vbus   { font-size: 22px; font-weight: 800; color: #38bdf8; line-height: 1.1; }
+.kpi-isolar { font-size: 22px; font-weight: 800; color: #f59e0b; line-height: 1.1; }
+.kpi-psolar { font-size: 22px; font-weight: 800; color: #64B856; line-height: 1.1; }
+.kpi-irect  { font-size: 22px; font-weight: 800; color: #c084fc; line-height: 1.1; }
+.kpi-temp   { font-size: 22px; font-weight: 800; color: #fb923c; line-height: 1.1; }
+
+.kpi-unit-pbd {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.telecom-sep {
+  width: 1px;
+  height: 28px;
+  background: rgba(148, 163, 184, 0.15);
+}
+
+/* Grilla de Canales Técnicos */
+.telecom-channels-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 6px 0;
+}
+
+.telecom-channel-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(100, 184, 86, 0.16);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.telecom-channel-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(100, 184, 86, 0.35);
+}
+
+.channel-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.channel-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.channel-dot {
+  font-size: 8px;
+  line-height: 1;
+}
+
+.channel-dot.ok { color: #64B856; text-shadow: 0 0 6px rgba(100,184,86,0.6); }
+.channel-dot.standby { color: #f59e0b; }
+.channel-dot.off { color: #64748b; }
+
+.channel-status-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 12px;
+}
+
+.channel-status-lbl.ok {
+  color: #64B856;
+  background: rgba(100, 184, 86, 0.12);
+  border: 1px solid rgba(100, 184, 86, 0.25);
+}
+
+.channel-status-lbl.standby {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.channel-status-lbl.off {
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.channel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.channel-main-val {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.val-num {
+  font-size: 18px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.val-sub {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.channel-bar-wrap {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.channel-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.channel-bar-fill.solar {
+  background: linear-gradient(90deg, #f59e0b 0%, #eab308 100%);
+}
+
+.channel-bar-fill.rect {
+  background: linear-gradient(90deg, #a855f7 0%, #38bdf8 100%);
+}
+
+.channel-bar-fill.battery {
+  background: linear-gradient(90deg, #38bdf8 0%, #64B856 100%);
+}
+
+.channel-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.channel-details strong {
+  color: #cbd5e1;
+}
+
+/* Pie de Tarjeta */
+.telecom-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #64748b;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  padding-top: 6px;
+  margin-top: 4px;
+}

@@ -297,7 +297,39 @@
     }
   }
 
-  // 7. Filter Customer Sidebar (Hide "Entidades" & "Instancias de edge" strictly for Customer Users)
+  // 7. Ocultar "Inicio" (/home) y usar portafolio como landing
+  function applyHomeNavigationPolicy() {
+    if (isLoginPage()) return;
+
+    var path = window.location.pathname || '';
+    if (path === '/home' || path === '/home/') {
+      if (window.hyvisionTryRedirectFromHome) {
+        window.hyvisionTryRedirectFromHome();
+      } else if (isLoggedIn()) {
+        window.location.replace('/dashboards');
+      }
+      if (isLoggedIn()) return;
+    }
+
+    if (!isLoggedIn()) return;
+
+    var sideMenu = document.querySelector('ul.tb-side-menu, mat-sidenav .tb-side-menu, tb-side-menu ul');
+    if (!sideMenu) return;
+
+    sideMenu.querySelectorAll('li').forEach(function(li) {
+      if (li.classList.contains('hyvision-sidebar-reports-item')) return;
+      var a = li.querySelector('a');
+      if (!a) return;
+      var href = (a.getAttribute('href') || a.getAttribute('routerlink') || '').split('?')[0];
+      var isHomeLink = href === '/home' || href === '/home/';
+      if (isHomeLink) {
+        li.style.display = 'none';
+        li.setAttribute('data-hyvision-home-hidden', 'true');
+      }
+    });
+  }
+
+  // 8. Filter Customer Sidebar (Hide "Entidades" & "Instancias de edge" strictly for Customer Users)
   function filterCustomerSidebar() {
     if (isLoginPage() || !isLoggedIn()) return;
 
@@ -338,7 +370,7 @@
     });
   }
 
-  // 8. Update Trigger Button Visibility (Role-Based Access Control)
+  // 9. Update Trigger Button Visibility (Role-Based Access Control)
   function updateTriggerVisibility() {
     var existingBtn = document.querySelector('.hyvision-wl-trigger');
 
@@ -624,6 +656,15 @@
                   <label for="wl-telegramEnabled" class="hyvision-wl-label" style="cursor:pointer; font-weight:600; color:#ffffff;">
                     Activar Despacho Automático de Alertas y Reportes a Telegram
                   </label>
+                </div>
+
+                <div class="hyvision-wl-field hyvision-wl-form-full" style="background:rgba(20,40,18,0.6); border:1px solid rgba(100,184,86,0.3); border-radius:6px; padding:10px 14px; font-size:12px; line-height:1.5; color:#cde3cb;">
+                  <div style="font-weight:700; color:#85db76; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                    <span>🛡️</span> Política de Despacho Multi-Zona LatAm (24/7)
+                  </div>
+                  <div>• <strong style="color:#ff6b6b;">Filtro Estricto:</strong> Se despachan <strong>ÚNICAMENTE alertas CRÍTICAS</strong> (bloqueo automático de advertencias y spam).</div>
+                  <div>• <strong style="color:#64B856;">Zonas Horarias Automáticas:</strong> Reporta la hora local del sitio (<strong>Colombia/Perú UTC-5</strong> o <strong>Honduras/Guatemala UTC-6</strong>) con referencia regional cruzada.</div>
+                  <div>• <strong style="color:#a3e099;">Enfriamiento Anti-Spam:</strong> Cooldown de 10 minutos por sitio y tipo de alarma para evitar saturación de chats.</div>
                 </div>
 
                 <div class="hyvision-wl-field">
@@ -1150,8 +1191,8 @@
     'demanda_carga_kw', 'load_power_kw', 'load_dc_power_kw', 'soc_promedio', 'battery_soc',
     'vbat_promedio', 'battery_voltage', 'potencia_bess_kw', 'battery_power_kw', 'estado_bess'
   ];
-  /** Alineado con ThingsBoard device profile (actividad ~10 min); no ampliar sin motivo. */
-  var HYV_FRESHNESS_WINDOW_MS = 10 * 60 * 1000;
+  /** Sin telemetría heartbeat en este plazo → sitio OFFLINE en portafolio. */
+  var HYV_FRESHNESS_WINDOW_MS = 5 * 60 * 1000;
   /** Poll REST del portafolio (dashboards + telemetría por device). */
   var HYV_FLEET_REFRESH_MS = 3 * 60 * 1000;
 
@@ -2134,7 +2175,7 @@
   }
 
   function triggerNativeAddDashboard() {
-    var nativeBtn = document.querySelector('tb-dashboards-table button[aria-label*="añadir" i], tb-dashboards-table .mat-mdc-unelevated-button, tb-entities-table button[aria-label*="añadir" i], tb-entities-table .mat-mdc-unelevated-button');
+    var nativeBtn = document.querySelector('tb-entities-table button[aria-label*="añadir" i], tb-entities-table .mat-mdc-unelevated-button, tb-dashboards-table button[aria-label*="añadir" i], tb-dashboards-table .mat-mdc-unelevated-button');
     if (nativeBtn) {
       nativeBtn.click();
     } else {
@@ -2143,12 +2184,69 @@
     }
   }
 
+  function enableFleetHostMode(tableEl) {
+    if (!tableEl) return;
+    tableEl.classList.add('hyvision-fleet-host');
+  }
+
+  function disableFleetHostMode(tableEl) {
+    if (!tableEl) return;
+    tableEl.classList.remove('hyvision-fleet-host');
+  }
+
+  function getFleetDrawerContent(tableEl) {
+    if (!tableEl) return null;
+    return tableEl.querySelector('mat-drawer-content');
+  }
+
+  /** Hub dentro de tb-entities-table (mismo layout que la lista nativa TB; no en tb-main-content). */
+  function mountFleetHubInTable(hub, tableEl) {
+    var drawerContent = getFleetDrawerContent(tableEl);
+    if (!drawerContent) return false;
+    drawerContent.insertBefore(hub, drawerContent.firstChild);
+    enableFleetHostMode(tableEl);
+    return true;
+  }
+
+  function removeOrphanFleetHub(tableEl) {
+    var hub = document.getElementById('hyvision-fleet-hub');
+    if (!hub) return;
+    if (tableEl && tableEl.contains(hub)) return;
+    hub.remove();
+  }
+
+  function resetShellLayoutAfterFleetHub() {
+    document.querySelectorAll('tb-entities-table.hyvision-fleet-host, tb-dashboards-table.hyvision-fleet-host').forEach(disableFleetHostMode);
+    document.querySelectorAll('#hyvision-fleet-hub').forEach(function(el) { el.remove(); });
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  function syncFleetListChrome() {
+    if (isLoginPage() || !isLoggedIn()) {
+      document.body.classList.remove('hyvision-fleet-list-mode', 'hyvision-fleet-classic-mode', 'hyvision-fleet-ready');
+      return;
+    }
+    if (isDashboardsListView()) {
+      document.body.classList.add('hyvision-fleet-list-mode');
+      document.body.classList.toggle('hyvision-fleet-classic-mode', !!fleetHubState.isClassicMode);
+      document.documentElement.classList.toggle('hyvision-fleet-classic-doc', !!fleetHubState.isClassicMode);
+      document.documentElement.classList.add('hyvision-route-dashboards');
+      if (window.hyvisionSyncDashboardsRouteClass) window.hyvisionSyncDashboardsRouteClass();
+    } else {
+      document.body.classList.remove('hyvision-fleet-list-mode', 'hyvision-fleet-classic-mode', 'hyvision-fleet-ready');
+      document.documentElement.classList.remove('hyvision-route-dashboards', 'hyvision-fleet-classic-doc');
+      if (window.hyvisionSyncDashboardsRouteClass) window.hyvisionSyncDashboardsRouteClass();
+    }
+  }
+
   function injectFleetControlHub() {
+    syncFleetListChrome();
+
     if (!isDashboardsListView()) {
-      var existingHub = document.getElementById('hyvision-fleet-hub');
-      if (existingHub) existingHub.remove();
+      document.querySelectorAll('#hyvision-fleet-hub').forEach(function(el) { el.remove(); });
       var returnBanner = document.getElementById('hyv-return-classic-banner');
       if (returnBanner) returnBanner.remove();
+      resetShellLayoutAfterFleetHub();
       if (fleetHubState.refreshIntervalId) {
         clearInterval(fleetHubState.refreshIntervalId);
         fleetHubState.refreshIntervalId = null;
@@ -2156,18 +2254,20 @@
       return;
     }
 
-    var tableContainer = document.querySelector('tb-dashboards-table, tb-entities-table');
-    if (!tableContainer) return;
+    var tableContainer = document.querySelector('tb-entities-table, tb-dashboards-table');
+    if (!tableContainer && !document.getElementById('hyvision-fleet-hub')) return;
 
     var existingHub = document.getElementById('hyvision-fleet-hub');
+    removeOrphanFleetHub(tableContainer);
+
+    if (existingHub && tableContainer && !tableContainer.contains(existingHub)) {
+      existingHub.remove();
+      existingHub = null;
+    }
+
     if (fleetHubState.isClassicMode) {
       if (existingHub) existingHub.style.display = 'none';
-      tableContainer.style.position = '';
-      tableContainer.style.opacity = '1';
-      tableContainer.style.pointerEvents = 'auto';
-      tableContainer.style.height = '';
-      tableContainer.style.overflow = '';
-      tableContainer.style.zIndex = '';
+      if (tableContainer) disableFleetHostMode(tableContainer);
 
       if (!document.getElementById('hyv-return-classic-banner')) {
         var banner = document.createElement('div');
@@ -2189,16 +2289,14 @@
     } else {
       var returnBanner = document.getElementById('hyv-return-classic-banner');
       if (returnBanner) returnBanner.remove();
-      tableContainer.style.position = 'absolute';
-      tableContainer.style.opacity = '0';
-      tableContainer.style.pointerEvents = 'none';
-      tableContainer.style.height = '0';
-      tableContainer.style.overflow = 'hidden';
-      tableContainer.style.zIndex = '-1';
+      if (tableContainer) {
+        enableFleetHostMode(tableContainer);
+      }
     }
 
     if (existingHub) {
       existingHub.style.display = 'flex';
+      document.body.classList.add('hyvision-fleet-ready');
       if (Date.now() - fleetHubState.lastTelemetryFetch > HYV_FLEET_REFRESH_MS) {
         loadRealDashboards(function() {
           updateKpisAndHeader(existingHub);
@@ -2208,7 +2306,9 @@
       return;
     }
 
-    // Create Fleet Hub Element
+    if (!tableContainer) return;
+
+    // Create Fleet Hub Element (HyVision — la tabla TB queda oculta debajo, no se elimina del DOM)
     var hub = document.createElement('div');
     hub.id = 'hyvision-fleet-hub';
     hub.className = 'hyv-fleet-hub';
@@ -2322,17 +2422,8 @@
       <div id="hyv-fleet-dynamic-body"></div>
     `;
 
-    if (tableContainer.parentElement) {
-      tableContainer.parentElement.style.padding = '0';
-      tableContainer.parentElement.style.margin = '0';
-      tableContainer.parentElement.style.background = 'radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%)';
-    }
-    var sidenav = document.querySelector('mat-sidenav-content, .mat-drawer-content');
-    if (sidenav) {
-      sidenav.style.background = 'radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%)';
-    }
-
-    tableContainer.parentNode.insertBefore(hub, tableContainer);
+    if (!mountFleetHubInTable(hub, tableContainer)) return;
+    document.body.classList.add('hyvision-fleet-ready');
 
     // Event: Add System button
     var addBtn = hub.querySelector('#hyv-btn-add-system');
@@ -2399,16 +2490,53 @@
   }
 
   // 11. Lifecycle & Clean Listeners (Zero Infinite Loops)
-  window.addEventListener('DOMContentLoaded', function() {
+  var fleetInjectScheduled = false;
+  /** Montar hub en /dashboards (dentro de tb-entities-table) o limpiar al salir. */
+  function scheduleFleetInject() {
+    if (fleetInjectScheduled) return;
+    fleetInjectScheduled = true;
+    requestAnimationFrame(function() {
+      fleetInjectScheduled = false;
+      if (!isLoggedIn() || isLoginPage()) return;
+      syncFleetListChrome();
+      injectFleetControlHub();
+    });
+  }
+
+  function installHyvisionRouteListener() {
+    if (window.__hyvisionFleetRouteListener) return;
+    window.__hyvisionFleetRouteListener = true;
+    window.addEventListener('hyvision:route', function() {
+      applyHomeNavigationPolicy();
+      scheduleFleetInject();
+    });
+  }
+
+  function startFleetHubDomObserver() {
+    var root = document.querySelector('tb-root');
+    if (!root || root.getAttribute('data-hyvision-fleet-obs') === '1') return;
+    root.setAttribute('data-hyvision-fleet-obs', '1');
+    var obs = new MutationObserver(function() {
+      if (isLoggedIn() && !isLoginPage()) {
+        scheduleFleetInject();
+      }
+    });
+    obs.observe(root, { childList: true, subtree: true });
+  }
+
+  function hyvisionAppBootstrap() {
     loadInitialConfig();
+    installHyvisionRouteListener();
     syncHyvisionDocumentRouteClasses();
     updateTriggerVisibility();
     updateSidebarTranslations();
     injectSidebarReportsLink();
     filterCustomerSidebar();
-    injectFleetControlHub();
+    applyHomeNavigationPolicy();
+    syncFleetListChrome();
+    scheduleFleetInject();
+    startFleetHubDomObserver();
 
-    // Periodic check for SPA navigation updates (every 800ms)
     setInterval(function() {
       syncHyvisionDocumentRouteClasses();
       patchSinopticoFleetColors();
@@ -2417,10 +2545,17 @@
       updateTriggerVisibility();
       updateSidebarTranslations();
       injectSidebarReportsLink();
+      applyHomeNavigationPolicy();
       filterCustomerSidebar();
-      injectFleetControlHub();
+      scheduleFleetInject();
     }, 800);
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', hyvisionAppBootstrap);
+  } else {
+    hyvisionAppBootstrap();
+  }
 
   // Global API
   window.hyvisionSuite = {

@@ -1,12 +1,32 @@
 <div class="pbd-card-container">
+  <!-- Header con Selector Desplegable y Búsqueda -->
   <div class="pbd-header">
-    <div class="pbd-title">
-      <span class="pbd-icon">☀️</span>
-      <span id="pbd-title-text">TABLEROS DC / STRINGS MPPT</span>
+    <div class="pbd-dropdown-wrap" id="pbd-dropdown-wrap">
+      <button type="button" class="pbd-selector-btn" id="pbd-selector-btn" title="Click para cambiar y buscar entre los 12 PBD">
+        <span class="pbd-icon">☀️</span>
+        <span id="pbd-title-text" class="pbd-title-main">TABLERO SOLAR PBD-01</span>
+        <span class="pbd-chevron" id="pbd-chevron">▾</span>
+      </button>
+
+      <!-- Panel Flotante de Selección y Búsqueda -->
+      <div class="pbd-menu" id="pbd-menu" style="display: none;">
+        <div class="pbd-search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="pbd-search-input" class="pbd-search-input" placeholder="Buscar PBD (ej. 01, 12, SN...)" autocomplete="off" />
+        </div>
+        <div class="pbd-list-scroll" id="pbd-list-scroll">
+          <!-- Opciones PBD-01 a PBD-12 inyectadas por JS -->
+        </div>
+      </div>
     </div>
-    <div id="pbd-status-badge" class="pbd-badge ok">BUS DC ACTIVO</div>
+
+    <div class="pbd-header-right">
+      <div id="pbd-power-badge" class="pbd-power-badge">0.0 kW</div>
+      <div id="pbd-status-badge" class="pbd-badge ok">SECCIONADOR CERRADO</div>
+    </div>
   </div>
 
+  <!-- Métricas Principales del PBD Seleccionado -->
   <div class="pbd-top-metrics">
     <div class="pbd-kpi-block">
       <span class="kpi-sub-lbl">TENSIÓN BUS DC</span>
@@ -17,24 +37,86 @@
     </div>
     <div class="pbd-sep"></div>
     <div class="pbd-kpi-block">
-      <span class="kpi-sub-lbl">CORRIENTE SOLAR TOTAL</span>
+      <span class="kpi-sub-lbl">CORRIENTE SOLAR</span>
       <div class="kpi-val-group">
         <span id="pbd-itot-val" class="kpi-itot">0.0</span>
         <span class="kpi-unit-pbd">A</span>
       </div>
     </div>
+    <div class="pbd-sep"></div>
+    <div class="pbd-kpi-block">
+      <span class="kpi-sub-lbl">POTENCIA PBD</span>
+      <div class="kpi-val-group">
+        <span id="pbd-pwr-val" class="kpi-pwr">0.0</span>
+        <span class="kpi-unit-pbd">kW</span>
+      </div>
+    </div>
+    <div class="pbd-sep"></div>
+    <div class="pbd-kpi-block">
+      <span class="kpi-sub-lbl">TEMP. PBD</span>
+      <div class="kpi-val-group">
+        <span id="pbd-temp-val" class="kpi-temp">--</span>
+        <span class="kpi-unit-pbd">°C</span>
+      </div>
+    </div>
   </div>
 
+  <!-- Matriz de 5 Strings MPPT (Corriente + Tensión por canal) -->
   <div class="strings-matrix">
-    <div class="str-col"><span class="s-tag">STR 1</span><span id="str1-val" class="s-val">0.0 A</span><div class="s-bar"><div id="str1-bar" class="s-fill" style="width:0%;"></div></div></div>
-    <div class="str-col"><span class="s-tag">STR 2</span><span id="str2-val" class="s-val">0.0 A</span><div class="s-bar"><div id="str2-bar" class="s-fill" style="width:0%;"></div></div></div>
-    <div class="str-col"><span class="s-tag">STR 3</span><span id="str3-val" class="s-val">0.0 A</span><div class="s-bar"><div id="str3-bar" class="s-fill" style="width:0%;"></div></div></div>
-    <div class="str-col"><span class="s-tag">STR 4</span><span id="str4-val" class="s-val">0.0 A</span><div class="s-bar"><div id="str4-bar" class="s-fill" style="width:0%;"></div></div></div>
-    <div class="str-col"><span class="s-tag">STR 5</span><span id="str5-val" class="s-val">0.0 A</span><div class="s-bar"><div id="str5-bar" class="s-fill" style="width:0%;"></div></div></div>
+    <div class="str-col" id="str-col-1">
+      <div class="str-hdr">
+        <span class="s-tag">STR 1</span>
+        <span class="s-dot" id="str1-dot">●</span>
+      </div>
+      <span id="str1-val" class="s-val">0.0 A</span>
+      <div class="s-bar"><div id="str1-bar" class="s-fill" style="width:0%;"></div></div>
+      <span id="str1-volt" class="s-volt">-- V</span>
+    </div>
+
+    <div class="str-col" id="str-col-2">
+      <div class="str-hdr">
+        <span class="s-tag">STR 2</span>
+        <span class="s-dot" id="str2-dot">●</span>
+      </div>
+      <span id="str2-val" class="s-val">0.0 A</span>
+      <div class="s-bar"><div id="str2-bar" class="s-fill" style="width:0%;"></div></div>
+      <span id="str2-volt" class="s-volt">-- V</span>
+    </div>
+
+    <div class="str-col" id="str-col-3">
+      <div class="str-hdr">
+        <span class="s-tag">STR 3</span>
+        <span class="s-dot" id="str3-dot">●</span>
+      </div>
+      <span id="str3-val" class="s-val">0.0 A</span>
+      <div class="s-bar"><div id="str3-bar" class="s-fill" style="width:0%;"></div></div>
+      <span id="str3-volt" class="s-volt">-- V</span>
+    </div>
+
+    <div class="str-col" id="str-col-4">
+      <div class="str-hdr">
+        <span class="s-tag">STR 4</span>
+        <span class="s-dot" id="str4-dot">●</span>
+      </div>
+      <span id="str4-val" class="s-val">0.0 A</span>
+      <div class="s-bar"><div id="str4-bar" class="s-fill" style="width:0%;"></div></div>
+      <span id="str4-volt" class="s-volt">-- V</span>
+    </div>
+
+    <div class="str-col" id="str-col-5">
+      <div class="str-hdr">
+        <span class="s-tag">STR 5</span>
+        <span class="s-dot" id="str5-dot">●</span>
+      </div>
+      <span id="str5-val" class="s-val">0.0 A</span>
+      <div class="s-bar"><div id="str5-bar" class="s-fill" style="width:0%;"></div></div>
+      <span id="str5-volt" class="s-volt">-- V</span>
+    </div>
   </div>
 
+  <!-- Pie de Tarjeta -->
   <div class="pbd-footer">
-    <span>Disponibilidad DC: <strong id="pbd-secc-text" style="color:#64B856;">Conectado (Normal)</strong></span>
-    <span id="pbd-footer-cap">Capacidad: <strong>Bus Telecom 48V</strong></span>
+    <span>Disponibilidad DC: <strong id="pbd-secc-text" style="color:#64B856;">Conectado (Normal)</strong> <span id="pbd-sn-text" style="color:#64748b; font-family:monospace; margin-left:6px; font-size:10px;"></span></span>
+    <span id="pbd-footer-cap">Capacidad: <strong>250 kW DC · MPPT 5 Canales</strong></span>
   </div>
 </div>
