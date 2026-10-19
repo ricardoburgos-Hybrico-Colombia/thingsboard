@@ -603,6 +603,7 @@ self.onDataUpdated = function() {
   var genRuntime = parseFloat(telemetry['generator_runtime_hours'] || 0.0);
   var rectKw = parseFloat(telemetry['rectifier_power_kw'] || 0.0);
   var rectVolt = parseFloat(telemetry['rectifier_voltage'] || 0.0);
+  var invKw = parseFloat(telemetry['inverter_power_kw'] || telemetry['inverter_array_power'] || 0.0);
   var edgeOffline = parseInt(telemetry['edge_offline_alarm'] || 0, 10);
   var sysState = parseInt(telemetry['system_state_code'] || 0, 10);
   var autonomyH = parseFloat(telemetry['battery_autonomy_hours'] || 0.0);
@@ -740,15 +741,18 @@ self.onDataUpdated = function() {
     });
   }
 
-  if (autonomyH > 0 && autonomyH < 2.0 && gridAvail === 0 && dgKw < 0.1) {
+  // ALM-BAT-009: Autonomía Residual Crítica (Solo ante agotamiento real sin generación activa)
+  var hasActiveGen = (gridAvail === 1 && gridKw > 0.1) || (dgKw > 0.1) || (solarKw >= 0.3 * Math.max(0.1, loadKw));
+  var isBessDepleted = (soc > 0 && soc < 25.0) || (vbat > 20.0 && vbat < 48.0);
+  if (autonomyH > 0 && autonomyH < 2.0 && !hasActiveGen && isBessDepleted) {
     activeAlarms.push({
       id: 'ALM-BAT-009',
       time: nowIso,
       subsystem: 'Autonomía de Sitio',
       tag: 'Estimación BESS',
       code: 'ALM-BAT-009',
-      desc: 'Autonomía residual crítica (Sin red ni diésel activo)',
-      metrics: 'Autonomía: <strong>' + autonomyH.toFixed(1) + ' h</strong> (Límite: < 2.0 h)',
+      desc: 'Autonomía residual crítica (Batería en agotamiento sin fuentes activas)',
+      metrics: 'Autonomía: <strong>' + autonomyH.toFixed(1) + ' h</strong> | SOC: ' + soc.toFixed(1) + '%',
       severity: 'CRITICAL',
       status: 'ACTIVA'
     });
@@ -769,19 +773,68 @@ self.onDataUpdated = function() {
     });
   }
 
-  // 4. Rectificadores Telecom AC/DC
-  if ((gridKw > 0.4 || dgKw > 0.4) && rectKw === 0.0) {
-    activeAlarms.push({
-      id: 'ALM-REC-001',
-      time: nowIso,
-      subsystem: 'Rectificadores AC/DC',
-      tag: 'Planta de Fuerza',
-      code: 'ALM-REC-001',
-      desc: 'Falla de rectificadores con fuente AC presente',
-      metrics: 'Red/DG: ' + (gridKw || dgKw).toFixed(2) + ' kW | Rect: <strong>0.0 kW</strong>',
-      severity: 'CRITICAL',
-      status: 'ACTIVA'
-    });
+  // 4. Rectificadores Telecom AC/DC vs Inversor/Cargador AC
+  var convHw = (telemetry['conversion_hardware'] || '').toUpperCase();
+  var isInvSite = (convHw === 'INVERSOR_CARGADOR') ||
+                  (siteName.indexOf('ARENAL') !== -1 || siteName.indexOf('AGUA CALIENTE') !== -1 ||
+                   siteName.indexOf('BUENOS AIRES') !== -1 || siteName.indexOf('CAMPO LIMONES') !== -1 ||
+                   siteName.indexOf('CAMALOTE') !== -1 || topologia.indexOf('INVERTER') !== -1 ||
+                   (Math.abs(invKw) > 0.05 && rectKw === 0.0 && rectVolt === 0.0));
+
+  var acPower = Math.max(gridKw, dgKw);
+  var batCurr = parseFloat(telemetry['battery_current'] || 0.0);
+  var batPwr = parseFloat(telemetry['battery_power_kw'] || 0.0);
+
+  // CASO A: Sitios con Planta de Rectificadores DC
+  if (!isInvSite && !isOffGrid && acPower > 0.4 && rectKw <= 0.05) {
+    if (solarKw < 0.15 && (batCurr < 0.2 || batPwr <= 0.0) && (soc < 50.0 || vbat < 49.5)) {
+      activeAlarms.push({
+        id: 'ALM-REC-001',
+        time: nowIso,
+        subsystem: 'Rectificadores AC/DC',
+        tag: 'Planta de Fuerza',
+        code: 'ALM-REC-001',
+        desc: 'Falla de rectificadores con fuente AC presente (Batería en descarga)',
+        metrics: 'Red/DG: ' + acPower.toFixed(2) + ' kW | Rect: <strong>' + rectKw.toFixed(2) + ' kW</strong> | I_bat: ' + batCurr.toFixed(1) + ' A | SOC: ' + soc.toFixed(1) + '%',
+        severity: 'CRITICAL',
+        status: 'ACTIVA'
+      });
+    }
+  }
+
+  // CASO B: Sitios con Inversor / Cargador Bidireccional AC
+  if (isInvSite && acPower > 0.4 && solarKw < 0.15) {
+    if ((batCurr < -1.0 || batPwr < -0.05) && (soc < 50.0 || vbat < 48.5)) {
+      activeAlarms.push({
+        id: 'ALM-INV-001',
+        time: nowIso,
+        subsystem: 'Inversor / Cargador AC',
+        tag: 'Planta Inversor',
+        code: 'ALM-INV-001',
+        desc: 'Falla de cargador en inversor con fuente AC presente (Batería en descarga)',
+        metrics: 'Red/DG: ' + acPower.toFixed(2) + ' kW | Inv: ' + invKw.toFixed(2) + ' kW | I_bat: <strong>' + batCurr.toFixed(1) + ' A</strong> | SOC: ' + soc.toFixed(1) + '%',
+        severity: 'CRITICAL',
+        status: 'ACTIVA'
+      });
+    }
+  }
+
+  // ALM-REC-002: Tensión en Bus DC de Fuerza / Bastidor de Rectificadores
+  var vDcSys = rectVolt > 10.0 ? rectVolt : (vbat > 10.0 ? vbat : 0.0);
+  if (rectKw > 0.1 && vDcSys > 20.0) {
+    if (vDcSys < 47.0 || vDcSys > 57.6) {
+      activeAlarms.push({
+        id: 'ALM-REC-002',
+        time: nowIso,
+        subsystem: 'Rectificadores AC/DC',
+        tag: 'Planta de Fuerza',
+        code: 'ALM-REC-002',
+        desc: 'Tensión de salida de rectificadores / bus DC fuera de rango seguro',
+        metrics: 'V_bus: <strong>' + vDcSys.toFixed(2) + ' V</strong> (Rango: 48.0V - 57.5V)',
+        severity: 'CRITICAL',
+        status: 'ACTIVA'
+      });
+    }
   }
 
   // 5. Generador Diésel (si aplica)

@@ -1065,7 +1065,7 @@ tb-dashboards-table.hyvision-fleet-host mat-drawer-content {
 
 .hyv-triad-val.solar { color: #f7d048; }
 .hyv-triad-val.bess { color: #6be35b; }
-.hyv-triad-val.load { color: #62c3f5; }
+.hyv-triad-val.load { color: #ffffff; }
 
 .hyv-triad-extra {
   font-size: 10.5px;
@@ -1133,6 +1133,25 @@ tb-dashboards-table.hyvision-fleet-host mat-drawer-content {
   box-shadow: 0 5px 16px rgba(67, 106, 60, 0.6);
   transform: translateY(-1px);
   color: #ffffff;
+}
+
+/* TB/Material tiñe <a> de azul-primary: forzar blanco en tarjetas y SCADA */
+#hyvision-fleet-hub a.hyv-card-title,
+#hyvision-fleet-hub a.hyv-card-title:link,
+#hyvision-fleet-hub a.hyv-card-title:visited,
+#hyvision-fleet-hub a.hyv-btn-scada,
+#hyvision-fleet-hub a.hyv-btn-scada:link,
+#hyvision-fleet-hub a.hyv-btn-scada:visited,
+#hyvision-fleet-hub a.hyv-btn-scada span,
+#hyvision-fleet-hub .hyv-scada-table a.hyv-btn-scada,
+#hyvision-fleet-hub .hyv-scada-table td a {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff;
+}
+
+#hyvision-fleet-hub a.hyv-card-title:hover {
+  color: #8ce47e !important;
+  -webkit-text-fill-color: #8ce47e;
 }
 
 .hyv-btn-report {

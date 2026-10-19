@@ -7,7 +7,7 @@ import time
 import io
 import urllib.request
 import urllib.error
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import threading
@@ -49,8 +49,66 @@ DEFAULT_CONFIG = {
     }
 }
 
-# Cooldown memory store for anti-spam (5 minutes per device+alarm)
+# Cooldown memory store for anti-spam (10 minutes per device+alarm)
 alert_cooldown = {}
+
+def format_multizone_time(dt_or_ts=None, site_country=None):
+    """
+    Convierte una estampa de tiempo a formato multi-zona para operaciones LatAm:
+    - UTC-5: Colombia (COT), Perú (PET), Ecuador (ECT)
+    - UTC-6: Honduras (CST), Guatemala (CST), El Salvador, Nicaragua, Costa Rica
+    """
+    if dt_or_ts is None:
+        dt_utc = datetime.now(timezone.utc)
+    elif isinstance(dt_or_ts, (int, float)):
+        if dt_or_ts > 1e11:  # Epoch en milisegundos
+            dt_utc = datetime.fromtimestamp(dt_or_ts / 1000.0, tz=timezone.utc)
+        else:
+            dt_utc = datetime.fromtimestamp(dt_or_ts, tz=timezone.utc)
+    elif isinstance(dt_or_ts, datetime):
+        if dt_or_ts.tzinfo is None:
+            dt_utc = dt_or_ts.replace(tzinfo=timezone.utc)
+        else:
+            dt_utc = dt_or_ts.astimezone(timezone.utc)
+    elif isinstance(dt_or_ts, str):
+        try:
+            clean_str = dt_or_ts.replace("Z", "+00:00")
+            parsed_dt = datetime.fromisoformat(clean_str)
+            if parsed_dt.tzinfo is None:
+                dt_utc = parsed_dt.replace(tzinfo=timezone.utc)
+            else:
+                dt_utc = parsed_dt.astimezone(timezone.utc)
+        except Exception:
+            dt_utc = datetime.now(timezone.utc)
+    else:
+        dt_utc = datetime.now(timezone.utc)
+
+    tz_cot = timezone(timedelta(hours=-5))
+    tz_cst = timezone(timedelta(hours=-6))
+
+    str_cot = dt_utc.astimezone(tz_cot).strftime("%Y-%m-%d %H:%M:%S")
+    str_cst = dt_utc.astimezone(tz_cst).strftime("%Y-%m-%d %H:%M:%S")
+
+    c_upper = (site_country or "").strip().upper()
+    is_cst_site = c_upper in ("HN", "GT", "HONDURAS", "GUATEMALA", "CENTROAMERICA", "CENTRAL_AMERICA")
+
+    if is_cst_site:
+        time_block = (
+            f"🕒 *Hora Sitio (HN/GT UTC-6):* `{str_cst}`\n"
+            f"🌐 *Ref. Colombia/Perú (UTC-5):* `{str_cot}`"
+        )
+    else:
+        time_block = (
+            f"🕒 *Hora Sitio (CO UTC-5):* `{str_cot}`\n"
+            f"🌐 *Ref. Centroamérica (UTC-6):* `{str_cst}`"
+        )
+
+    return {
+        "time_block": time_block,
+        "cot": str_cot,
+        "cst": str_cst,
+        "utc": dt_utc.strftime("%Y-%m-%d %H:%M:%S")
+    }
 
 def load_config():
     if os.path.exists(CONFIG_PATH):
@@ -90,6 +148,7 @@ def generate_css(config):
   --hyvision-accent: oklch(0.72 0.11 140.527);
   --hyvision-login-card: {card_color};
   --hyvision-bg: {bg_color};
+  --hyvision-shell-chrome: linear-gradient(180deg, #3a6234 0%, #2b4926 52%, #1f3520 100%);
 }}
 
 body, html, tb-login, .tb-login-content, .tb-login-content.mat-app-background {{
@@ -114,6 +173,14 @@ body, html, tb-login, .tb-login-content, .tb-login-content.mat-app-background {{
 .mat-mdc-raised-button.mat-primary,
 .mat-mdc-flat-button.mat-primary {{
   background-color: oklch(0.481 0.08 140.527) !important;
+}}
+
+mat-sidenav.tb-site-sidenav,
+mat-sidenav.tb-site-sidenav .tb-nav-header-toolbar.mat-toolbar.mat-primary,
+mat-sidenav.tb-site-sidenav .tb-side-menu-toolbar.mat-toolbar.mat-primary,
+mat-sidenav-content .tb-primary-toolbar.mat-toolbar.mat-primary {{
+  background: var(--hyvision-shell-chrome) !important;
+  background-color: #2b4926 !important;
 }}
 
 /* Custom user CSS overrides */
@@ -172,30 +239,64 @@ def get_tb_token(user_auth_header=None):
 def send_telegram_message(bot_token, chat_id, text):
     if not bot_token or not chat_id:
         return False, "Bot token o Chat ID no configurados"
+
+    # Soporte para un único chat_id (str/int) o múltiples destinos (list o string separado por comas)
+    if isinstance(chat_id, (list, tuple)):
+        targets = [str(c).strip() for c in chat_id if str(c).strip()]
+    elif isinstance(chat_id, str) and "," in chat_id:
+        targets = [c.strip() for c in chat_id.split(",") if c.strip()]
+    else:
+        targets = [str(chat_id).strip()]
+
     url = f"https://api.telegram.org/bot{bot_token.strip()}/sendMessage"
-    payload = json.dumps({
-        "chat_id": str(chat_id).strip(),
-        "text": text,
-        "parse_mode": "Markdown",
-        "disable_web_page_preview": False
-    }).encode("utf-8")
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            if data.get("ok"):
-                return True, "Mensaje enviado exitosamente"
-            else:
-                return False, data.get("description", "Error desconocido de Telegram")
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8")
+    all_ok = True
+    last_msg = ""
+
+    for target in targets:
+        payload = json.dumps({
+            "chat_id": target,
+            "text": text,
+            "parse_mode": "Markdown",
+            "disable_web_page_preview": False
+        }).encode("utf-8")
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
         try:
-            err_json = json.loads(err_body)
-            return False, err_json.get("description", str(e))
-        except Exception:
-            return False, f"HTTP Error {e.code}: {e.reason}"
-    except Exception as e:
-        return False, str(e)
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                if data.get("ok"):
+                    last_msg = "Mensaje enviado exitosamente"
+                else:
+                    all_ok = False
+                    last_msg = data.get("description", "Error desconocido de Telegram")
+        except urllib.error.HTTPError as e:
+            err_body = e.read().decode("utf-8")
+            try:
+                err_json = json.loads(err_body)
+                # Resiliencia Telegram: Si el grupo fue promovido a supergrupo, reintentar con el migrate_to_chat_id
+                migrated_id = err_json.get("parameters", {}).get("migrate_to_chat_id")
+                if migrated_id:
+                    retry_payload = json.dumps({
+                        "chat_id": str(migrated_id),
+                        "text": text,
+                        "parse_mode": "Markdown",
+                        "disable_web_page_preview": False
+                    }).encode("utf-8")
+                    req_retry = urllib.request.Request(url, data=retry_payload, headers={"Content-Type": "application/json"})
+                    with urllib.request.urlopen(req_retry, timeout=10) as resp_retry:
+                        data_retry = json.loads(resp_retry.read().decode("utf-8"))
+                        if data_retry.get("ok"):
+                            last_msg = f"Mensaje enviado con ID migrado ({migrated_id})"
+                            continue
+                all_ok = False
+                last_msg = err_json.get("description", str(e))
+            except Exception:
+                all_ok = False
+                last_msg = f"HTTP Error {e.code}: {e.reason}"
+        except Exception as e:
+            all_ok = False
+            last_msg = str(e)
+
+    return all_ok, last_msg
 
 # =================================================================
 # REPORT GENERATION ENGINES (TELEMETRY, EXCEL & PRINTABLE HTML)
@@ -1135,12 +1236,16 @@ def send_telegram_report(report_data, config):
     if not bot_token or not chat_id:
         return False, "Bot token o Chat ID de Telegram no configurados"
 
+    tz_info = format_multizone_time()
+
     text = (
         "📑 *REPORTE EJECUTIVO HYVISION — PARQUE GAORI*\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         f"📍 *Instalación:* `{report_data['plant_name']}`\n"
         f"📅 *Período:* `{report_data['start_date']} al {report_data['end_date']}` ({report_data['period_days']} Días)\n"
-        f"🕒 *Generado:* `{report_data['generated_at']}`\n"
+        "🕒 *Hora de Generación Multi-Zona:*\n"
+        f"🇨🇴 *Colombia / Perú (UTC-5):* `{tz_info['cot']}`\n"
+        f"🇭🇳🇬🇹 *Centroamérica (UTC-6):* `{tz_info['cst']}`\n"
         "━━━━━━━━━━━━━━━━━━━━━━\n"
         f"☀️ *Generación Solar:* *{report_data['total_solar_mwh']} MWh* ({report_data['total_solar_kwh']:,.0f} kWh)\n"
         f"⚡ *Potencia Solar Pico:* `{report_data['peak_solar_kw']} kW`\n"
@@ -1154,6 +1259,434 @@ def send_telegram_report(report_data, config):
     )
 
     return send_telegram_message(bot_token, chat_id, text)
+
+# Demonio de monitoreo continuo de alarmas estrictamente CRÍTICAS (Multi-Zona)
+def critical_alarms_monitor_worker():
+    """
+    Demonio en segundo plano que monitorea activamente 24/7:
+    1. Alarmas activas nativas en ThingsBoard (/api/alarms?searchStatus=ACTIVE)
+    2. Matriz completa de Telecom (15 sitios): Software y Hardware
+       - ALM-HNT-001: Controlador Edge Offline
+       - ALM-HNT-003: BMS / LVD Local Batería Baja
+       - ALM-BAT-001: SOC Crítico Telecom (< 15%)
+       - ALM-BAT-003: Subtensión Bus DC 48V (< 47.0V)
+       - ALM-BAT-005: Sobretensión Bus DC 48V (> 57.6V)
+       - ALM-BAT-006: Sobretemperatura Batería Telecom (> 45°C)
+       - ALM-BAT-009: Autonomía Restante Crítica (< 2.0h sin red/DG)
+       - ALM-LOD-001: Caída Carga Telecom (< 0.05 kW)
+       - ALM-REC-001: Falla Rectificadores con Fuente AC Presente (Red/DG > 0.4 kW y Rect == 0 kW)
+       - ALM-REC-002: Tensión Rectificadores Fuera de Rango (< 48V o > 57.5V con Rect > 0.1 kW)
+       - ALM-GEN-001: Nivel Crítico Combustible Diésel (0 < fuel < 15%)
+    3. Matriz completa de Gaori (BESS & Solar): Software y Hardware
+       - ALM-BMS-001: SOC Crítico BESS (< 15%)
+       - ALM-BMS-003: Desbalance Severo Celdas (> 60 mV)
+       - ALM-BMS-005: Sobretemperatura Baterías BESS (> 45°C)
+       - ALM-PCS-001: Sobretemperatura IGBTs PCS (> 85°C)
+       - ALM-GRD-001: Desviación Frecuencia AC (< 58.5 Hz o > 61.5 Hz)
+       - Hardware ATESS: Fallas activas en inversores PCS-01, PCS-02, PCS-03 (fault_history_json)
+    
+    Filtro estricto: Despacha ÚNICAMENTE alertas de severidad CRITICAL a Telegram.
+    Soporte Multi-Zona LatAm (UTC-5 Colombia/Perú y UTC-6 Honduras/Guatemala).
+    Cooldown de enfriamiento anti-spam: 10 minutos (600s) por evento.
+    """
+    print("[Telegram Monitor] Demonio de alarmas CRÍTICAS (Multi-Zona LatAm - Matrices Gaori & Telco) iniciado...", flush=True)
+    cached_devices = []
+    last_device_fetch = 0
+
+    while True:
+        try:
+            time.sleep(20)
+            config = load_config()
+            if not config.get("telegramEnabled"):
+                continue
+
+            bot_token = config.get("telegramBotToken", "")
+            chat_id = config.get("telegramChatId", "")
+            if not bot_token or not chat_id:
+                continue
+
+            token = get_tb_token()
+            if not token:
+                continue
+
+            now_ts = time.time()
+
+            # -------------------------------------------------------------
+            # FUENTE 1: Alarmas registradas en ThingsBoard
+            # -------------------------------------------------------------
+            try:
+                url_tb = "http://hyvision-app:8080/api/alarms?pageSize=50&page=0&searchStatus=ACTIVE"
+                req_tb = urllib.request.Request(url_tb, headers={"X-Authorization": f"Bearer {token}"})
+                with urllib.request.urlopen(req_tb, timeout=8) as resp_tb:
+                    alarms_resp = json.loads(resp_tb.read().decode("utf-8"))
+                    for a in alarms_resp.get("data", []):
+                        sev = (a.get("severity") or "").strip().upper()
+                        if sev != "CRITICAL":
+                            continue
+
+                        orig_name = a.get("originatorName") or "Dispositivo HyVision"
+                        alarm_type = a.get("type", "Alarma Crítica")
+                        created_time = a.get("createdTime", int(now_ts * 1000))
+                        cooldown_key = f"tb_crit:{orig_name}:{alarm_type}"
+
+                        if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 600:
+                            continue
+
+                        is_hn = ("HN" in orig_name.upper()) or ("ROATAN" in orig_name.upper()) or ("HONDURAS" in orig_name.upper())
+                        site_country = "HN" if is_hn else "CO"
+                        country_label = "Honduras" if is_hn else "Colombia"
+                        country_flag = "🇭🇳" if is_hn else "🇨🇴"
+
+                        tz_info = format_multizone_time(created_time, site_country=site_country)
+
+                        details = a.get("details", {})
+                        detail_str = ""
+                        if isinstance(details, dict):
+                            detail_str = details.get("data") or json.dumps(details, ensure_ascii=False)
+                        elif isinstance(details, str):
+                            detail_str = details
+
+                        msg_text = (
+                            "🚨 *ALERTA CRÍTICA — HYVISION SCADA*\n"
+                            "━━━━━━━━━━━━━━━━━━━━━━\n"
+                            f"📍 *Sitio:* `{orig_name}` ({country_label} {country_flag})\n"
+                            f"⚠️ *Alarma:* *{alarm_type}*\n"
+                            f"🔴 *Severidad:* `CRITICAL`\n"
+                            f"{tz_info['time_block']}\n"
+                        )
+                        if detail_str:
+                            msg_text += f"📝 *Detalle:* {detail_str}\n"
+                        msg_text += (
+                            "━━━━━━━━━━━━━━━━━━━━━━\n"
+                            "👉 [Abrir SCADA HyVision en Vivo](http://localhost:8082)\n"
+                        )
+
+                        ok, send_res = send_telegram_message(bot_token, chat_id, msg_text)
+                        if ok:
+                            alert_cooldown[cooldown_key] = now_ts
+                            print(f"[Telegram Dispatch] Alarma CRÍTICA (ThingsBoard) despachada: {orig_name} - {alarm_type}")
+            except Exception:
+                pass
+
+            # -------------------------------------------------------------
+            # FUENTE 2: Evaluación en tiempo real de Matrices Telco y Gaori
+            # -------------------------------------------------------------
+            if (now_ts - last_device_fetch) > 300 or not cached_devices:
+                try:
+                    url_devs = "http://hyvision-app:8080/api/tenant/devices?pageSize=50&page=0"
+                    req_d = urllib.request.Request(url_devs, headers={"X-Authorization": f"Bearer {token}"})
+                    with urllib.request.urlopen(req_d, timeout=8) as resp_d:
+                        cached_devices = json.loads(resp_d.read().decode("utf-8")).get("data", [])
+                        last_device_fetch = now_ts
+                except Exception:
+                    pass
+
+            for dev in cached_devices:
+                d_id = dev.get("id", {}).get("id")
+                d_name = dev.get("name", "")
+                d_type = dev.get("type", "")
+
+                is_hn = ("HN" in d_name.upper()) or ("ROATAN" in d_name.upper()) or ("HONDURAS" in d_name.upper())
+                site_country = "HN" if is_hn else "CO"
+                country_label = "Honduras" if is_hn else "Colombia"
+                country_flag = "🇭🇳" if is_hn else "🇨🇴"
+
+                url_t = f"http://hyvision-app:8080/api/plugins/telemetry/DEVICE/{d_id}/values/timeseries"
+                req_t = urllib.request.Request(url_t, headers={"X-Authorization": f"Bearer {token}"})
+                try:
+                    with urllib.request.urlopen(req_t, timeout=5) as resp_t:
+                        raw_data = json.loads(resp_t.read().decode("utf-8"))
+                        t = {}
+                        max_ts = 0
+                        for k, pts in raw_data.items():
+                            if pts and len(pts) > 0:
+                                t[k] = pts[0]["value"]
+                                ts_pt = pts[0].get("ts", 0)
+                                if ts_pt > max_ts:
+                                    max_ts = ts_pt
+
+                        detected_events = []
+
+                        # ================= SITIOS TELCO (15 SITIOS) =================
+                        if d_type != "BESS":
+                            offline = int(t.get("edge_offline_alarm", 0) or 0)
+                            bat_low = int(t.get("battery_low_alarm", 0) or 0)
+                            soc = float(t.get("battery_soc") or t.get("soc_promedio") or 0.0)
+                            vbat = float(t.get("battery_voltage") or t.get("load_dc_voltage") or 0.0)
+                            ld_v = float(t.get("load_dc_voltage") or 0.0)
+                            temp = float(t.get("temp_bateria_max") or 0.0)
+                            load_kw = float(t.get("load_power_kw") or 0.0)
+                            solar_kw = float(t.get("solar_power_kw") or t.get("solar_charger_power_kw") or t.get("generacion_solar_kw") or 0.0)
+                            inv_kw = float(t.get("inverter_power_kw") or 0.0)
+                            grid_kw = float(t.get("grid_power_kw") or 0.0)
+                            dg_kw = float(t.get("dg_potencia_activa_kw") or t.get("generator_power_kw") or 0.0)
+                            rect_kw = float(t.get("rectifier_power_kw") or 0.0)
+                            rect_volt = float(t.get("rectifier_voltage") or 0.0)
+                            bat_curr = float(t.get("battery_current") or 0.0)
+                            bat_pwr = float(t.get("battery_power_kw") or 0.0)
+                            conv_hw = str(t.get("conversion_hardware") or "").upper()
+                            aut_h = float(t.get("battery_autonomy_hours") or 0.0)
+                            grid_avail = int(t.get("grid_available", 1) or 1)
+                            raw_fuel = t.get("generator_fuel_level")
+                            fuel = float(raw_fuel) if raw_fuel not in (None, "", "None") else None
+                            topologia = str(t.get("site_topology") or "").upper()
+
+                            # 1. Gateway Edge HyNet
+                            if offline == 1:
+                                detected_events.append({
+                                    "code": "ALM-HNT-001",
+                                    "title": "Controlador Edge Offline",
+                                    "subsystem": "Enlace HyNet Gateway",
+                                    "detail": "Pérdida de enlace y comunicación remota con el controlador del sitio",
+                                    "metrics": {"edge_offline_alarm": "1 (OFFLINE)"}
+                                })
+                            if bat_low == 1:
+                                detected_events.append({
+                                    "code": "ALM-HNT-003",
+                                    "title": "BMS / LVD Local Batería Baja",
+                                    "subsystem": "Controlador de Baterías BMS",
+                                    "detail": "Señal física de pre-desconexión de carga por batería baja emitida en sitio",
+                                    "metrics": {"battery_low_alarm": "1 (ACTIVA)"}
+                                })
+
+                            # 2. Banco de Baterías 48V
+                            if 0 < soc < 15.0:
+                                detected_events.append({
+                                    "code": "ALM-BAT-001",
+                                    "title": "SOC Crítico Telecom",
+                                    "subsystem": "Banco Baterías 48V Telecom",
+                                    "detail": f"Nivel de carga por debajo del límite crítico: {soc:.1f}% (Umbral: < 15%)",
+                                    "metrics": {"battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.1f} V"}
+                                })
+                            if 20.0 < vbat < 47.0:
+                                detected_events.append({
+                                    "code": "ALM-BAT-003",
+                                    "title": "Subtensión Severa Bus DC 48V",
+                                    "subsystem": "Bus DC 48V",
+                                    "detail": f"Subtensión en bus DC: {vbat:.2f} V (Límite crítico: < 47.0 V)",
+                                    "metrics": {"battery_voltage": f"{vbat:.2f} V", "battery_soc": f"{soc:.1f}%"}
+                                })
+                            if vbat > 57.6:
+                                detected_events.append({
+                                    "code": "ALM-BAT-005",
+                                    "title": "Sobretensión Bus DC 48V",
+                                    "subsystem": "Bus DC 48V",
+                                    "detail": f"Sobretensión en bus DC: {vbat:.2f} V (Límite crítico: > 57.6 V)",
+                                    "metrics": {"battery_voltage": f"{vbat:.2f} V"}
+                                })
+                            if temp > 45.0:
+                                detected_events.append({
+                                    "code": "ALM-BAT-006",
+                                    "title": "Sobretemperatura Crítica en Baterías",
+                                    "subsystem": "Climatización Gabinete",
+                                    "detail": f"Temperatura de baterías: {temp:.1f} °C (Límite crítico: > 45.0 °C)",
+                                    "metrics": {"temp_bateria_max": f"{temp:.1f} °C"}
+                                })
+                            # ALM-BAT-009: Autonomía Restante Crítica
+                            # Falla CRÍTICA multivariable de autonomía solo si:
+                            # 1) Autonomía residual proyectada < 2.0 h
+                            # 2) Banco en agotamiento real: soc < 25.0% o vbat < 48.0V (si soc > 50% no hay riesgo inminente)
+                            # 3) Ausencia de fuentes externas de energía activa (red, diésel o solar suficiente)
+                            has_active_generation = (grid_avail == 1 and grid_kw > 0.1) or (dg_kw > 0.1) or (solar_kw >= 0.3 * max(0.1, load_kw))
+                            is_bess_depleted = (0 < soc < 25.0) or (20.0 < vbat < 48.0)
+                            if 0 < aut_h < 2.0 and not has_active_generation and is_bess_depleted:
+                                detected_events.append({
+                                    "code": "ALM-BAT-009",
+                                    "title": "Autonomía Restante Crítica",
+                                    "subsystem": "Autonomía de Sitio",
+                                    "detail": f"Autonomía estimada crítica: {aut_h:.1f} h (SOC: {soc:.1f}%, sin red, diésel ni solar suficiente)",
+                                    "metrics": {"battery_autonomy_hours": f"{aut_h:.1f} h", "battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.2f} V"}
+                                })
+
+                            # 3. Carga BTS Telecom
+                            if 0 < load_kw < 0.05:
+                                detected_events.append({
+                                    "code": "ALM-LOD-001",
+                                    "title": "Caída Anómala de Carga Telecom",
+                                    "subsystem": "Carga BTS Telecom",
+                                    "detail": f"Consumo de carga en {load_kw:.3f} kW (Posible apagado de radios o corte LVD)",
+                                    "metrics": {"load_power_kw": f"{load_kw:.3f} kW"}
+                                })
+
+                            # 4. Rectificadores AC/DC y Planta de Fuerza Telecom
+                            # Tensión efectiva del bus DC de fuerza (usar sensor de rectificador si existe y > 10V; sino bus DC / batería)
+                            v_dc_sys = rect_volt if rect_volt > 10.0 else (ld_v if ld_v > 10.0 else vbat)
+
+                            # ALM-REC-002: Tensión fuera de rango en bus DC / Rectificadores
+                            # Valida contra tensión real del bus de fuerza para evitar falsos positivos por falta de sensor terminal
+                            if rect_kw > 0.1 and v_dc_sys > 20.0:
+                                if v_dc_sys < 47.0 or v_dc_sys > 57.6:
+                                    detected_events.append({
+                                        "code": "ALM-REC-002",
+                                        "title": "Tensión Rectificadores / Bus DC Fuera de Rango",
+                                        "subsystem": "Rectificadores AC/DC",
+                                        "detail": f"Tensión del bus de fuerza anormal: {v_dc_sys:.1f} V (Rango seguro: 48.0V - 57.5V)",
+                                        "metrics": {"dc_bus_voltage": f"{v_dc_sys:.1f} V", "rectifier_power_kw": f"{rect_kw:.2f} kW"}
+                                    })
+
+                            # 4. Rectificadores AC/DC vs Inversor/Cargador AC (Conversión de Potencia)
+                            ac_power = max(grid_kw, dg_kw)
+                            is_inverter_site = (conv_hw == "INVERSOR_CARGADOR") or (d_name in {
+                                "ARENAL - HN794", "AGUA CALIENTE - HN801", "BUENOS AIRES II SPS - HN682",
+                                "CAMPO LIMONES LOS ENCUENTROS - HN493", "CAMALOTE - HN2013"
+                            }) or ("INVERTER" in topologia) or (abs(inv_kw) > 0.05 and rect_kw == 0.0 and rect_volt == 0.0)
+
+                            # CASO A: Sitios con Planta de Rectificadores DC (West End, Dixon Hill, West Bay, French Harbor, COR9007)
+                            # ALM-REC-001: Falla de Rectificadores con Fuente AC Presente
+                            # Falla CRÍTICA: Hay fuente AC disponible (Red o DG > 0.4 kW), rectificadores entregan <= 0.05 kW,
+                            # no hay soporte solar (< 0.15 kW), y la batería está en descarga real (bat_curr < 0.2 A o bat_pwr <= 0.0) con SOC < 50% o Vbat < 49.5V.
+                            if not is_inverter_site and ac_power > 0.4 and rect_kw <= 0.05:
+                                if solar_kw < 0.15 and (bat_curr < 0.2 or bat_pwr <= 0.0) and (soc < 50.0 or vbat < 49.5):
+                                    detected_events.append({
+                                        "code": "ALM-REC-001",
+                                        "title": "Falla de Rectificadores con Fuente AC Presente",
+                                        "subsystem": "Rectificadores AC/DC (Planta de Fuerza)",
+                                        "detail": f"Fuente AC activa ({ac_power:.2f} kW) pero rectificadores en {rect_kw:.2f} kW; batería en descarga ({bat_curr:.1f} A, SOC: {soc:.1f}%)",
+                                        "metrics": {"grid_or_dg_power": f"{ac_power:.2f} kW", "rectifier_power_kw": f"{rect_kw:.2f} kW", "battery_current": f"{bat_curr:.1f} A", "battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.2f} V"}
+                                    })
+
+                            # CASO B: Sitios con Inversor/Cargador AC Bidireccional (Arenal, Agua Caliente, Buenos Aires, Campo Limones, Camalote)
+                            # ALM-INV-001: Falla de Cargador en Inversor con Fuente AC Presente
+                            # Falla CRÍTICA: Hay fuente AC disponible (Red o DG > 0.4 kW) y sin soporte solar (< 0.15 kW),
+                            # pero el cargador del inversor no está asistiendo la recarga, provocando que la batería se descargue (bat_curr < -1.0 A o bat_pwr < -0.05 kW)
+                            # bajo nivel bajo de reserva (SOC < 50.0% o Vbat < 48.5V).
+                            if is_inverter_site and ac_power > 0.4 and solar_kw < 0.15:
+                                if (bat_curr < -1.0 or bat_pwr < -0.05) and (soc < 50.0 or vbat < 48.5):
+                                    detected_events.append({
+                                        "code": "ALM-INV-001",
+                                        "title": "Falla de Cargador en Inversor con Fuente AC Presente",
+                                        "subsystem": "Inversor / Cargador AC",
+                                        "detail": f"Fuente AC activa ({ac_power:.2f} kW) pero el inversor/cargador no asume la recarga; batería en descarga activa ({bat_curr:.1f} A, SOC: {soc:.1f}%)",
+                                        "metrics": {"grid_or_dg_power": f"{ac_power:.2f} kW", "inverter_power_kw": f"{inv_kw:.2f} kW", "battery_current": f"{bat_curr:.1f} A", "battery_soc": f"{soc:.1f}%", "battery_voltage": f"{vbat:.2f} V"}
+                                    })
+
+                            # 5. Generador Diésel
+                            if fuel is not None and 0.0 < fuel < 15.0:
+                                detected_events.append({
+                                    "code": "ALM-GEN-001",
+                                    "title": "Nivel Crítico de Combustible Diésel",
+                                    "subsystem": "Generador Diésel",
+                                    "detail": f"Nivel de combustible en tanque: {fuel:.1f}% (Límite crítico: < 15.0%)",
+                                    "metrics": {"generator_fuel_level": f"{fuel:.1f}%"}
+                                })
+
+                        # ================= SITIO GAORI (BESS & SOLAR) =================
+                        else:
+                            soc = float(t.get("bess_soc") or t.get("soc_promedio") or 0.0)
+                            delta_v = float(t.get("delta_v_celdas_mv") or 0.0)
+                            temp = float(t.get("temp_bateria_max") or t.get("temp1") or 0.0)
+                            freq = float(t.get("frecuencia_red_hz") or 0.0)
+                            temp_igbt = float(t.get("temp_igbt") or 0.0)
+
+                            if 0 < soc < 15.0:
+                                detected_events.append({
+                                    "code": "ALM-BMS-001",
+                                    "title": "SOC Crítico BESS Gaori",
+                                    "subsystem": "Banco BESS Central",
+                                    "detail": f"Nivel de carga del contenedor BESS crítico: {soc:.1f}% (Umbral: < 15%)",
+                                    "metrics": {"bess_soc": f"{soc:.1f}%"}
+                                })
+                            if delta_v > 60.0:
+                                detected_events.append({
+                                    "code": "ALM-BMS-003",
+                                    "title": "Desbalance Severo Celdas BESS",
+                                    "subsystem": "Sistema BMS Gaori",
+                                    "detail": f"Diferencia de tensión entre celdas: {delta_v:.1f} mV (Límite: > 60 mV)",
+                                    "metrics": {"delta_v_celdas_mv": f"{delta_v:.1f} mV"}
+                                })
+                            if temp > 45.0:
+                                detected_events.append({
+                                    "code": "ALM-BMS-005",
+                                    "title": "Sobretemperatura Baterías BESS",
+                                    "subsystem": "Contenedor BESS Gaori",
+                                    "detail": f"Temperatura en racks de baterías: {temp:.1f} °C (Límite: > 45.0 °C)",
+                                    "metrics": {"temp_bateria_max": f"{temp:.1f} °C"}
+                                })
+                            if temp_igbt > 85.0:
+                                detected_events.append({
+                                    "code": "ALM-PCS-001",
+                                    "title": "Sobretemperatura IGBTs PCS",
+                                    "subsystem": "Inversores Centrales PCS",
+                                    "detail": f"Temperatura en semiconductores IGBT: {temp_igbt:.1f} °C (Límite: > 85.0 °C)",
+                                    "metrics": {"temp_igbt": f"{temp_igbt:.1f} °C"}
+                                })
+                            if freq > 0 and (freq < 58.5 or freq > 61.5):
+                                detected_events.append({
+                                    "code": "ALM-GRD-001",
+                                    "title": "Desviación Frecuencia AC",
+                                    "subsystem": "Barra AC Gaori",
+                                    "detail": f"Frecuencia de red fuera de banda normativa: {freq:.2f} Hz",
+                                    "metrics": {"frecuencia_red_hz": f"{freq:.2f} Hz"}
+                                })
+
+                            # Hardware ATESS Inversores Centrales (PCS-01, PCS-02, PCS-03)
+                            raw_faults = t.get("fault_history_json", "")
+                            if raw_faults:
+                                try:
+                                    f_list = json.loads(raw_faults)
+                                    for f in f_list:
+                                        if f.get("status") == "ACTIVA" and f.get("severity") in ("CRITICA", "CRITICAL"):
+                                            f_code = f.get("code", "HW-FLT")
+                                            f_desc = f.get("desc", "Falla de hardware ATESS")
+                                            f_sub = f.get("subsystem", "Inversor PCS ATESS")
+                                            detected_events.append({
+                                                "code": f"ALM-ATESS-{f_code}",
+                                                "title": f"Falla Inversor ATESS ({f_code})",
+                                                "subsystem": f_sub,
+                                                "detail": f"{f_desc} en {f_sub}",
+                                                "metrics": {"fault_code": f_code, "subsystem": f_sub}
+                                            })
+                                except Exception:
+                                    pass
+
+                        # Despachar eventos críticos detectados (con cooldown anti-spam de 10 min)
+                        for ev in detected_events:
+                            ev_code = ev["code"]
+                            ev_title = ev["title"]
+                            ev_sub = ev["subsystem"]
+                            ev_detail = ev["detail"]
+                            ev_metrics = ev.get("metrics", {})
+
+                            cooldown_key = f"matrix_crit:{d_name}:{ev_code}"
+                            if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 600:
+                                continue
+
+                            event_time = max_ts if max_ts > 0 else int(now_ts * 1000)
+                            tz_info = format_multizone_time(event_time, site_country=site_country)
+
+                            metrics_lines = ""
+                            for mk, mv in ev_metrics.items():
+                                metrics_lines += f"• *{mk}:* `{mv}`\n"
+
+                            msg_text = (
+                                "🚨 *ALERTA CRÍTICA — HYVISION SCADA*\n"
+                                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                                f"📍 *Sitio:* `{d_name}` ({country_label} {country_flag})\n"
+                                f"⚙️ *Subsistema:* `{ev_sub}`\n"
+                                f"⚠️ *Alarma:* *{ev_code} — {ev_title}*\n"
+                                f"🔴 *Severidad:* `CRITICAL`\n"
+                                f"{tz_info['time_block']}\n"
+                                f"📝 *Detalle:* {ev_detail}\n"
+                            )
+                            if metrics_lines:
+                                msg_text += f"\n📊 *Telemetría:*\n{metrics_lines}"
+                            msg_text += (
+                                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                                "👉 [Abrir SCADA HyVision en Vivo](http://localhost:8082)\n"
+                            )
+
+                            ok, send_res = send_telegram_message(bot_token, chat_id, msg_text)
+                            if ok:
+                                alert_cooldown[cooldown_key] = now_ts
+                                print(f"[Telegram Dispatch] Alerta Crítica (Matriz {d_type}) despachada: {d_name} - {ev_code}", flush=True)
+                            else:
+                                print(f"[Telegram Error] Falla al despachar: {send_res}", flush=True)
+
+                except Exception as e_dev:
+                    pass
+
+        except Exception as e_loop:
+            print(f"Error en monitor de alarmas críticas: {e_loop}")
 
 # Background scheduler thread for automated recurring reports
 def scheduler_worker():
@@ -1342,16 +1875,43 @@ class BrandingHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(res).encode("utf-8"))
                 return
 
-            device_name = alert_data.get("deviceName", "Dispositivo BESS")
+            severity = (alert_data.get("severity") or "CRITICAL").strip().upper()
+            
+            # FILTRO ESTRICTO: Despachar ÚNICAMENTE alarmas CRÍTICAS a Telegram
+            if severity != "CRITICAL":
+                res = {
+                    "status": "ignored",
+                    "message": f"Alerta con severidad '{severity}' descartada: HyVision está configurado para despachar ÚNICAMENTE alertas de nivel CRITICAL a Telegram."
+                }
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self._send_cors()
+                self.end_headers()
+                self.wfile.write(json.dumps(res).encode("utf-8"))
+                return
+
+            device_name = alert_data.get("deviceName", "Dispositivo HyVision")
             alarm_type = alert_data.get("alarmType", "Alerta Crítica")
-            severity = alert_data.get("severity", "CRITICAL")
             details = alert_data.get("details", "")
-            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            # Detección Multi-Zona del Sitio
+            raw_country = alert_data.get("country", "")
+            if not raw_country:
+                is_hn = ("HN" in device_name.upper()) or ("ROATAN" in device_name.upper()) or ("HONDURAS" in device_name.upper())
+                site_country = "HN" if is_hn else "CO"
+            else:
+                site_country = raw_country
+
+            country_label = "Honduras" if site_country.upper() == "HN" else "Colombia"
+            country_flag = "🇭🇳" if site_country.upper() == "HN" else "🇨🇴"
+
+            event_time = alert_data.get("timestamp") or alert_data.get("ts")
+            tz_info = format_multizone_time(event_time, site_country=site_country)
 
             cooldown_key = f"{device_name}:{alarm_type}"
             now_ts = time.time()
-            if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 300:
-                res = {"status": "throttled", "message": "Alerta suprimida por enfriamiento anti-spam (5 min)"}
+            if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 600:
+                res = {"status": "throttled", "message": "Alerta suprimida por enfriamiento anti-spam (10 min)"}
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json; charset=utf-8")
                 self._send_cors()
@@ -1368,12 +1928,12 @@ class BrandingHandler(BaseHTTPRequestHandler):
                     telemetry_lines += f"• *{k}:* `{v}`\n"
 
             msg_text = (
-                "🚨 *ALERTA CRÍTICA — HYVISION SOLAR*\n"
+                "🚨 *ALERTA CRÍTICA — HYVISION SCADA*\n"
                 "━━━━━━━━━━━━━━━━━━━━━━\n"
-                f"📍 *Dispositivo:* `{device_name}`\n"
+                f"📍 *Sitio:* `{device_name}` ({country_label} {country_flag})\n"
                 f"⚠️ *Alarma:* *{alarm_type}*\n"
-                f"🔴 *Severidad:* `{severity}`\n"
-                f"🕒 *Hora:* `{now_str}`\n"
+                f"🔴 *Severidad:* `CRITICAL`\n"
+                f"{tz_info['time_block']}\n"
             )
             if details:
                 msg_text += f"📝 *Detalle:* {details}\n"
@@ -1478,20 +2038,23 @@ class BrandingHandler(BaseHTTPRequestHandler):
             bot_token = data.get("botToken") or current.get("telegramBotToken", "")
             chat_id = data.get("chatId") or current.get("telegramChatId", "")
 
-            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            tz_info = format_multizone_time()
             test_msg = (
                 "☀️ *HYVISION IOT — NOTIFICACIÓN DE PRUEBA*\n"
                 "━━━━━━━━━━━━━━━━━━━━━━\n"
                 "✅ *Conexión con Telegram Exitosa*\n"
                 "🤖 *Bot:* Vinculado y operativo 24/7\n"
-                "🏢 *Instalación:* Hybrico Solar / Parque BESS\n"
-                f"🕒 *Fecha y Hora:* `{now_str}`\n"
+                "🏢 *Plataforma:* HyVision SCADA Suite Multi-Región\n"
                 "━━━━━━━━━━━━━━━━━━━━━━\n"
-                "🔔 *A partir de ahora, las alertas críticas de telemetría y fallas de planta se notificarán de forma inmediata en este chat.*"
+                "🕒 *Horarios de Operación LatAm:*\n"
+                f"🇨🇴 *Colombia / Perú (UTC-5):* `{tz_info['cot']}`\n"
+                f"🇭🇳🇬🇹 *Honduras / Guatemala (UTC-6):* `{tz_info['cst']}`\n"
+                "━━━━━━━━━━━━━━━━━━━━━━\n"
+                "🔔 *A partir de ahora, ÚNICAMENTE las alertas CRÍTICAS de telemetría y fallas de planta se notificarán de forma inmediata en este chat.*"
             )
             success, msg = send_telegram_message(bot_token, chat_id, test_msg)
             if success:
-                res = {"status": "ok", "message": "¡Mensaje de prueba enviado con éxito a Telegram!"}
+                res = {"status": "ok", "message": "¡Mensaje de prueba multi-zona enviado con éxito a Telegram!"}
                 self.send_response(200)
             else:
                 res = {"status": "error", "message": f"Error de Telegram: {msg}"}
@@ -1552,6 +2115,10 @@ def run():
     # Start background scheduler
     sched_thread = threading.Thread(target=scheduler_worker, daemon=True)
     sched_thread.start()
+
+    # Start background critical alarms monitor
+    alarm_thread = threading.Thread(target=critical_alarms_monitor_worker, daemon=True)
+    alarm_thread.start()
 
     try:
         httpd.serve_forever()

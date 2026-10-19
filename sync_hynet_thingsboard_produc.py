@@ -104,8 +104,41 @@ class MaestroCoordinatesLoader:
             print(f"[!] Error al cargar archivo maestro: {e}")
 
 
+def resolver_perfil_sitio(alias, maestro_site):
+    """Determina el perfil modular de ThingsBoard según la topología física del sitio."""
+    SITES_TOPOLOGY_EXPLICIT = {
+        "ARENAL - HN794": "HYBRICO_TELCO_HIBRIDO",
+        "AGUA CALIENTE - HN801": "HYBRICO_TELCO_HIBRIDO",
+        "CAMPO LIMONES LOS ENCUENTROS - HN493": "HYBRICO_TELCO_HIBRIDO",
+        "CAMALOTE - HN2013": "HYBRICO_TELCO_HIBRIDO",
+        "PALACIOS": "HYBRICO_TELCO_OFFGRID",
+        "CUN7016": "HYBRICO_TELCO_OFFGRID",
+        "ANT7086": "HYBRICO_TELCO_OFFGRID",
+        "CHO7151": "HYBRICO_TELCO_OFFGRID",
+        "BOY7014": "HYBRICO_TELCO_OFFGRID",
+        "WEST_END_II": "HYBRICO_TELCO_ONGRID",
+        "DIXON_HILL": "HYBRICO_TELCO_ONGRID",
+        "WEST_BAY": "HYBRICO_TELCO_ONGRID",
+        "FRENCH_HARBOR_ESTE": "HYBRICO_TELCO_ONGRID",
+        "BUENOS AIRES II SPS - HN682": "HYBRICO_TELCO_ONGRID",
+        "COR9007": "HYBRICO_TELCO_ONGRID"
+    }
+    if alias in SITES_TOPOLOGY_EXPLICIT:
+        return SITES_TOPOLOGY_EXPLICIT[alias]
+
+    top = (maestro_site.get("topologia") or "").lower()
+    solar_cap = float(maestro_site.get("capacidad_solar_kwp") or 0.0)
+    if "off-grid" in top or "offgrid" in top or "aislado" in top:
+        return "HYBRICO_TELCO_OFFGRID"
+    elif "hibrido" in top or "híbrido" in top or "diesel" in top or "diésel" in top or "dg" in top:
+        return "HYBRICO_TELCO_HIBRIDO" if solar_cap > 0 else "HYBRICO_TELCO_BACKUP_DG"
+    elif "on-grid" in top or "ongrid" in top or "red" in top:
+        return "HYBRICO_TELCO_ONGRID" if solar_cap > 0 else "HYBRICO_TELCO_BACKUP_DG"
+    return "HYBRICO_TELCO_ONGRID" if solar_cap > 0 else "HYBRICO_TELCO_BACKUP_DG"
+
+
 def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
-    """Garantiza que los 15 dispositivos existan y tengan sus atributos de latitud/longitud."""
+    """Garantiza que los dispositivos existan, tengan su perfil modular asignado y sus coordenadas."""
     try:
         r_login = requests.post(f"{THINGSBOARD_HOST}/api/auth/login", json={"username": TB_USER, "password": TB_PASS}, timeout=8)
         if r_login.status_code != 200:
@@ -113,36 +146,57 @@ def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
             return
         tb_token = r_login.json()["token"]
         tb_headers = {"X-Authorization": f"Bearer {tb_token}"}
-        
+
+        # Consultar perfiles disponibles
+        r_profs = requests.get(f"{THINGSBOARD_HOST}/api/deviceProfiles?pageSize=50&page=0", headers=tb_headers, timeout=8)
+        profile_map = {p["name"]: p["id"]["id"] for p in r_profs.json().get("data", [])} if r_profs.status_code == 200 else {}
+
         r_devs = requests.get(f"{THINGSBOARD_HOST}/api/tenant/devices?pageSize=100&page=0", headers=tb_headers, timeout=8)
         existing = {d['name']: d for d in r_devs.json().get('data', [])}
-        
+
         for s in sites_list:
             alias = s["nombre_alias"]
             ps_id = s["ps_id"]
             m = maestro_data.sites.get(ps_id, {})
             token = s["device_token"]
-            
+            target_profile = resolver_perfil_sitio(alias, m)
+            target_profile_id = profile_map.get(target_profile)
+
             dev_id = existing.get(alias, {}).get("id", {}).get("id")
-            # Si no existe, crear
+            # Si no existe, crear con el Device Profile adecuado
             if alias not in existing:
-                dev_res = requests.post(f"{THINGSBOARD_HOST}/api/device", headers=tb_headers, json={
+                dev_payload = {
                     "name": alias,
-                    "type": "HYBRICO_MICROGRID",
+                    "type": target_profile,
                     "label": f"{alias} ({s.get('region_code', '').upper()})"
-                }, timeout=8)
+                }
+                if target_profile_id:
+                    dev_payload["deviceProfileId"] = {"entityType": "DEVICE_PROFILE", "id": target_profile_id}
+
+                dev_res = requests.post(f"{THINGSBOARD_HOST}/api/device", headers=tb_headers, json=dev_payload, timeout=8)
                 if dev_res.status_code == 200:
-                    dev_id = dev_res.json()["id"]["id"]
+                    dev_data = dev_res.json()
+                    dev_id = dev_data["id"]["id"]
+                    existing[alias] = dev_data
                     # Configurar token
                     r_cred = requests.get(f"{THINGSBOARD_HOST}/api/device/{dev_id}/credentials", headers=tb_headers)
                     if r_cred.status_code == 200:
                         cred = r_cred.json()
                         cred["credentialsId"] = token
                         requests.post(f"{THINGSBOARD_HOST}/api/device/credentials", headers=tb_headers, json=cred)
+            else:
+                # Si ya existe pero tiene un tipo/perfil desactualizado, sincronizarlo
+                dev_obj = existing[alias]
+                curr_type = dev_obj.get("type")
+                curr_p_id = dev_obj.get("deviceProfileId", {}).get("id")
+                if target_profile_id and (curr_type != target_profile or curr_p_id != target_profile_id) and curr_type != "BESS":
+                    dev_obj["type"] = target_profile
+                    dev_obj["deviceProfileId"] = {"entityType": "DEVICE_PROFILE", "id": target_profile_id}
+                    requests.post(f"{THINGSBOARD_HOST}/api/device", headers=tb_headers, json=dev_obj, timeout=8)
 
             # Auto-purgar variables fantasma en ThingsBoard si el sitio es Off-Grid por Maestro
             m_top = (m.get("topologia") or "").strip().lower()
-            if dev_id and ("off-grid" in m_top or "offgrid" in m_top):
+            if dev_id and ("off-grid" in m_top or "offgrid" in m_top or target_profile == "HYBRICO_TELCO_OFFGRID"):
                 try:
                     requests.delete(
                         f"{THINGSBOARD_HOST}/api/plugins/telemetry/DEVICE/{dev_id}/timeseries/delete?keys=tension_fase_u,tension_fase_v,tension_fase_w,frecuencia_red_hz,grid_voltage,grid_frequency,grid_current&deleteAllDataForKeys=true",
@@ -151,13 +205,15 @@ def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
                     )
                 except Exception:
                     pass
-            
+
             # Enviar atributos fijos con coordenadas DEL ARCHIVO MAESTRO
             lat = m.get("latitud") or s.get("latitude") or 0.0
             lon = m.get("longitud") or s.get("longitude") or 0.0
             attrs = {
                 "latitude": float(lat),
                 "longitude": float(lon),
+                "device_profile": target_profile,
+                "conversion_hardware": "INVERSOR_CARGADOR" if alias in {"ARENAL - HN794", "AGUA CALIENTE - HN801", "BUENOS AIRES II SPS - HN682", "CAMPO LIMONES LOS ENCUENTROS - HN493", "CAMALOTE - HN2013"} else ("SOLO_SOLAR_BESS" if target_profile == "HYBRICO_TELCO_OFFGRID" else "RECTIFICADOR_DC"),
                 "solar_topology": m.get("variable_solar") or s.get("solar_topology") or "solarChargerPower",
                 "master_topology": m.get("topologia", ""),
                 "solar_capacity_kwp": m.get("capacidad_solar_kwp", 0.0),
@@ -169,8 +225,8 @@ def asegurar_dispositivos_thingsboard(sites_list, maestro_data):
                 "source": "STELLAR_NSR_SYNC"
             }
             requests.post(f"{THINGSBOARD_HOST}/api/v1/{token}/attributes", json=attrs, timeout=5)
-            
-        print("[*] Verificación de 15 dispositivos, atributos de coordenadas y purga de topología completada.")
+
+        print("[*] Verificación de dispositivos, perfiles modulares y atributos completada con éxito.")
     except Exception as e:
         print(f"[!] Error al asegurar dispositivos: {e}")
 
@@ -372,7 +428,9 @@ def sincronizar_un_sitio(site_config, maestro_info):
         grid_energy_kwh = round(max(0.0, float(raw_grid_e)), 2)
 
         # ── 6. INVERSORES Y RECTIFICADORES ──
-        inv_kw = round(max(0.0, float(pt.get("inverterPower") or 0.0)), 3)
+        # El inversor/cargador es bidireccional: positivo = inyección AC a cargas; negativo = recarga de batería desde AC
+        raw_inv_p = pt.get("inverterPower")
+        inv_kw = round(float(raw_inv_p), 3) if raw_inv_p is not None else 0.0
         inv_v = round(float(pt.get("inverterVoltage")), 1) if pt.get("inverterVoltage") is not None else None
         inv_hz = round(float(pt.get("inverterFrequency")), 2) if pt.get("inverterFrequency") is not None else None
         inv_energy_kwh = round(max(0.0, float(pt.get("inverterEnergy") or 0.0)), 3)
@@ -463,6 +521,21 @@ def sincronizar_un_sitio(site_config, maestro_info):
         else:
             site_top_class = "OFF_GRID_100_SOLAR"
 
+        # Hardware de Conversión de Potencia Real (Inversor/Cargador AC vs Rectificador DC)
+        SITES_INVERTER_CHARGER = {
+            "ARENAL - HN794",
+            "AGUA CALIENTE - HN801",
+            "BUENOS AIRES II SPS - HN682",
+            "CAMPO LIMONES LOS ENCUENTROS - HN493",
+            "CAMALOTE - HN2013"
+        }
+        if alias in SITES_INVERTER_CHARGER or "inverter" in topologia.lower():
+            conversion_hw = "INVERSOR_CARGADOR"
+        elif site_top_class == "OFF_GRID_100_SOLAR":
+            conversion_hw = "SOLO_SOLAR_BESS"
+        else:
+            conversion_hw = "RECTIFICADOR_DC"
+
         # APLICACIÓN DE REGLAS SEGÚN TOPOLOGÍA (CERO VALORES FALSOS O ASUMIDOS)
         if site_top_class == "OFF_GRID_100_SOLAR":
             # 100% Fotovoltaico Autónomo con BESS: Red y Generador NO existen físicamente
@@ -545,13 +618,18 @@ def sincronizar_un_sitio(site_config, maestro_info):
 
         autonomy_hours = None
         if soc_val is not None and load_kw > 0.05:
-            bat_cap_nominal = maestro_info.get("capacidad_carga_kw") or 15.0
-            autonomy_hours = round((bat_cap_nominal * (soc_val / 100.0)) / load_kw, 1)
+            # En telecomunicaciones 48V, el banco BESS se dimensiona contractualmente para 8 a 10 horas de respaldo.
+            # No confundir capacidad_carga_kw (potencia demandada en kW) con capacidad de almacenamiento (kWh).
+            carga_nom_kw = float(maestro_info.get("capacidad_carga_kw") or 2.5)
+            bat_cap_nominal_kwh = max(15.0, carga_nom_kw * 8.0)
+            autonomy_hours = round((bat_cap_nominal_kwh * (soc_val / 100.0)) / max(0.5, load_kw), 1)
 
         # ── CONSTRUCCIÓN DEL PAYLOAD A THINGSBOARD ──
         payload = {
-            # Topología Real
+            # Topología Real y Hardware de Conversión
             "site_topology": site_top_class,
+            "conversion_hardware": conversion_hw,
+            "inverter_mode": "CHARGING" if inv_kw < -0.05 else ("INVERTING" if inv_kw > 0.05 else "STANDBY"),
             # Solar
             "solar_power_kw": solar_kw,
             "solar_charger_power_kw": sc_kw,
