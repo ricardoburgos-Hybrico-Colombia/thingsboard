@@ -74,10 +74,7 @@ with urllib.request.urlopen(create_req) as resp:
     print(f"Widget type created/updated successfully! ID: {new_wid}")
 
 # 4. Migrate the 15 Telecom Dashboards
-with open("c:/Users/PC/Documents/AI_Engineer/20.LEER_DATA_API_ENERCLO/sitios_provisionados_thingsboard.json", "r", encoding="utf-8") as f:
-    sites = json.load(f)
-
-# Find dashboards for all 15 sites
+# Find dashboards for all telecom sites
 d_list_req = urllib.request.Request("http://localhost:8082/api/tenant/dashboards?pageSize=50&page=0", headers=headers)
 with urllib.request.urlopen(d_list_req) as resp:
     all_dashboards = json.loads(resp.read().decode("utf-8")).get("data", [])
