@@ -63,7 +63,9 @@ descriptor = target_widget_obj.get("descriptor", {})
 descriptor["templateHtml"] = gaori_html
 descriptor["templateCss"] = gaori_css
 descriptor["controllerScript"] = gaori_js
+descriptor["resources"] = []
 target_widget_obj["descriptor"] = descriptor
+target_widget_obj["resources"] = []
 
 save_w_req = urllib.request.Request(
     "http://localhost:8082/api/widgetType",

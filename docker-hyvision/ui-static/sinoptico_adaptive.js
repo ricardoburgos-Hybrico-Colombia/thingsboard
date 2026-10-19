@@ -162,7 +162,7 @@ self.onDataUpdated = function() {
   }
 
   // DETECCIÓN ESTRICTA DE MODO OPERATIVO
-  var isIndustrial = (vdc > 200.0) && hasPcsData;
+  var isIndustrial = (vdc > 200.0) || hasPcsData || (siteTopology.indexOf('BESS') !== -1) || (siteTopology.indexOf('INDUSTRIAL') !== -1);
   if (vdc > 0 && vdc < 100.0) {
     isIndustrial = false; // Imposible ser industrial con bus telecom 48V
   }

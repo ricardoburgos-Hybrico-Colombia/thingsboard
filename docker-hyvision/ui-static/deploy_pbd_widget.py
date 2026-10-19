@@ -32,7 +32,9 @@ descriptor = w_data.get("descriptor", {})
 descriptor["templateHtml"] = new_html
 descriptor["templateCss"] = new_css
 descriptor["controllerScript"] = new_js
+descriptor["resources"] = []
 w_data["descriptor"] = descriptor
+w_data["resources"] = []
 
 save_req = urllib.request.Request(
     "http://localhost:8082/api/widgetType",

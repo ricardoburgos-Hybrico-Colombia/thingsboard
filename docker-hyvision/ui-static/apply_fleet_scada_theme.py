@@ -231,7 +231,11 @@ def push_widget_types(token: str) -> int:
         live_desc["templateHtml"] = html
         live_desc["templateCss"] = css
         live_desc["controllerScript"] = js
+        if not live_desc.get("resources"):
+            live_desc["resources"] = []
         live["descriptor"] = live_desc
+        if not live.get("resources"):
+            live["resources"] = []
 
         try:
             api_request("/api/widgetType", method="POST", body=live, token=token)
