@@ -63,10 +63,10 @@ tb-login,
 }
 
 .hyvision-login-header .hyvision-main-title {
-  font-family: 'Titillium Web', 'Montserrat', 'Roboto', sans-serif !important;
+  font-family: 'Adria Grotesk', 'Titillium Web', 'Montserrat', sans-serif !important;
   font-size: 58px !important;
-  font-weight: 800 !important;
-  letter-spacing: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.00001em !important;
   color: #ffffff !important;
   text-transform: uppercase !important;
   margin: 0 !important;
