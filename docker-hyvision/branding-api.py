@@ -1332,6 +1332,10 @@ def critical_alarms_monitor_worker():
                         if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 600:
                             continue
 
+                        # Si la alarma de ThingsBoard tiene más de 15 minutos (900 s), es histórica y se omite
+                        if (now_ts - (created_time / 1000.0)) > 900:
+                            continue
+
                         is_hn = ("HN" in orig_name.upper()) or ("ROATAN" in orig_name.upper()) or ("HONDURAS" in orig_name.upper())
                         site_country = "HN" if is_hn else "CO"
                         country_label = "Honduras" if is_hn else "Colombia"
@@ -1398,12 +1402,43 @@ def critical_alarms_monitor_worker():
                         raw_data = json.loads(resp_t.read().decode("utf-8"))
                         t = {}
                         max_ts = 0
+                        heartbeat_max_ts = 0
+
+                        # Claves operativas / físicas requeridas para considerar un sitio ONLINE
+                        HEARTBEAT_KEYS = {
+                            "generacion_solar_kw", "solar_power_kw", "solar_charger_power_kw", "epv_hoy_kwh", "solar_energy_kwh",
+                            "soc_promedio", "battery_soc", "vbat_promedio", "battery_voltage", "rectifier_voltage",
+                            "demanda_carga_kw", "load_power_kw", "load_dc_power_kw", "grid_power_kw", "potencia_bess_kw",
+                            "battery_power_kw", "temp_bateria_max", "battery_temperature", "ambient_temperature",
+                            "battery_current", "bess_soc", "frecuencia_red_hz", "delta_v_celdas_mv", "temp_igbt"
+                        }
+
                         for k, pts in raw_data.items():
                             if pts and len(pts) > 0:
                                 t[k] = pts[0]["value"]
                                 ts_pt = pts[0].get("ts", 0)
                                 if ts_pt > max_ts:
                                     max_ts = ts_pt
+                                if k in HEARTBEAT_KEYS and ts_pt > heartbeat_max_ts:
+                                    heartbeat_max_ts = ts_pt
+
+                        # =========================================================================
+                        # FILTRO ESTRICTO DE CONECTIVIDAD Y ESTADO EN VIVO (ONLINE CHECK)
+                        # Requisito de usuario: Si el sitio está OFFLINE, NO DEBEN llegar notificaciones a Telegram.
+                        # =========================================================================
+                        # 1. Sin telemetría operativa o telemetría congelada / obsoleta (> 15 minutos = 900 s)
+                        if heartbeat_max_ts <= 0:
+                            continue
+                        hb_age_s = now_ts - (heartbeat_max_ts / 1000.0)
+                        if hb_age_s > 900:
+                            continue
+
+                        # 2. Indicadores explícitos de sitio desconectado o alarma edge offline activa
+                        edge_offline = int(t.get("edge_offline_alarm", 0) or 0)
+                        estado_sistema = str(t.get("estado_sistema", "")).strip().upper()
+                        site_health = str(t.get("site_health_status", "")).strip().upper()
+                        if edge_offline == 1 or estado_sistema == "OFFLINE" or site_health == "OFFLINE":
+                            continue
 
                         detected_events = []
 
@@ -1651,7 +1686,7 @@ def critical_alarms_monitor_worker():
                             if cooldown_key in alert_cooldown and (now_ts - alert_cooldown[cooldown_key]) < 600:
                                 continue
 
-                            event_time = max_ts if max_ts > 0 else int(now_ts * 1000)
+                            event_time = heartbeat_max_ts if heartbeat_max_ts > 0 else (max_ts if max_ts > 0 else int(now_ts * 1000))
                             tz_info = format_multizone_time(event_time, site_country=site_country)
 
                             metrics_lines = ""
