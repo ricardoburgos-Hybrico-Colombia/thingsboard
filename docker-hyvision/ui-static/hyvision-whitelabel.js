@@ -10,6 +10,12 @@
 (function() {
   'use strict';
 
+  if (!window.echarts && !document.querySelector('script[src*="echarts"]')) {
+    var echartsScript = document.createElement('script');
+    echartsScript.src = '/echarts.min.js';
+    document.head.appendChild(echartsScript);
+  }
+
   var currentConfig = {
     appTitle: "HYVISION",
     appSubtitle: "POWERED BY HYBRICO ENERGY",
@@ -156,15 +162,43 @@
     }
     if (isCust) {
       roleStyle.textContent = `
-        body.hyv-role-customer [data-widget-id="052de3af-13b9-f603-76bb-59e4a5e4805d"],
-        body.hyv-role-customer [data-widget-id="db18c56e-f0d6-f699-c3ae-e93cae4bb739"],
-        body.hyv-role-customer tb-dashboard-widget:has([data-widget-id="052de3af-13b9-f603-76bb-59e4a5e4805d"]),
-        body.hyv-role-customer tb-dashboard-widget:has([data-widget-id="db18c56e-f0d6-f699-c3ae-e93cae4bb739"]) {
+        body.hyv-role-customer gridster-item:has(#alarm-card),
+        body.hyv-role-customer tb-dashboard-widget:has(#alarm-card),
+        body.hyv-role-customer gridster-item:has(.alarm-card-container),
+        body.hyv-role-customer tb-dashboard-widget:has(.alarm-card-container),
+        body.hyv-role-customer gridster-item:has(tb-timeseries-table-widget),
+        body.hyv-role-customer tb-dashboard-widget:has(tb-timeseries-table-widget),
+        body.hyv-role-customer gridster-item:has(.scada-fault-history),
+        body.hyv-role-customer tb-dashboard-widget:has(.scada-fault-history),
+        body.hyv-role-customer gridster-item:has(.scada-telemetry-table),
+        body.hyv-role-customer tb-dashboard-widget:has(.scada-telemetry-table),
+        body.hyv-role-customer .hyv-tenant-only {
           display: none !important;
         }
       `;
+      // Direct DOM traversal fallback
+      var elAlarm = document.querySelector('#alarm-card, .alarm-card-container');
+      if (elAlarm) {
+        var gItem = elAlarm.closest('gridster-item') || elAlarm.closest('tb-dashboard-widget');
+        if (gItem) gItem.style.setProperty('display', 'none', 'important');
+      }
+      var elTable = document.querySelector('tb-timeseries-table-widget');
+      if (elTable) {
+        var gTable = elTable.closest('gridster-item') || elTable.closest('tb-dashboard-widget');
+        if (gTable) gTable.style.setProperty('display', 'none', 'important');
+      }
     } else {
       roleStyle.textContent = '';
+      var elAlarm = document.querySelector('#alarm-card, .alarm-card-container');
+      if (elAlarm) {
+        var gItem = elAlarm.closest('gridster-item') || elAlarm.closest('tb-dashboard-widget');
+        if (gItem && gItem.style.display === 'none') gItem.style.removeProperty('display');
+      }
+      var elTable = document.querySelector('tb-timeseries-table-widget');
+      if (elTable) {
+        var gTable = elTable.closest('gridster-item') || elTable.closest('tb-dashboard-widget');
+        if (gTable && gTable.style.display === 'none') gTable.style.removeProperty('display');
+      }
     }
   }
 
