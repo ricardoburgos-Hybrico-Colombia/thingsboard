@@ -134,6 +134,40 @@
     }
   }
 
+  function syncUserRoleClass() {
+    if (!isLoggedIn()) {
+      document.body.classList.remove('hyv-role-tenant', 'hyv-role-customer');
+      return;
+    }
+    var isCust = !isAuthorizedAdmin();
+    if (!isCust) {
+      document.body.classList.add('hyv-role-tenant');
+      document.body.classList.remove('hyv-role-customer');
+    } else {
+      document.body.classList.add('hyv-role-customer');
+      document.body.classList.remove('hyv-role-tenant');
+    }
+
+    var roleStyle = document.getElementById('hyv-role-visibility-style');
+    if (!roleStyle) {
+      roleStyle = document.createElement('style');
+      roleStyle.id = 'hyv-role-visibility-style';
+      document.head.appendChild(roleStyle);
+    }
+    if (isCust) {
+      roleStyle.textContent = `
+        body.hyv-role-customer [data-widget-id="052de3af-13b9-f603-76bb-59e4a5e4805d"],
+        body.hyv-role-customer [data-widget-id="db18c56e-f0d6-f699-c3ae-e93cae4bb739"],
+        body.hyv-role-customer tb-dashboard-widget:has([data-widget-id="052de3af-13b9-f603-76bb-59e4a5e4805d"]),
+        body.hyv-role-customer tb-dashboard-widget:has([data-widget-id="db18c56e-f0d6-f699-c3ae-e93cae4bb739"]) {
+          display: none !important;
+        }
+      `;
+    } else {
+      roleStyle.textContent = '';
+    }
+  }
+
   function isLoggedIn() {
     return !!localStorage.getItem('jwt_token') && !isLoginPage();
   }
@@ -2525,6 +2559,7 @@
   }
 
   function hyvisionAppBootstrap() {
+    syncUserRoleClass();
     loadInitialConfig();
     installHyvisionRouteListener();
     syncHyvisionDocumentRouteClasses();
@@ -2538,6 +2573,7 @@
     startFleetHubDomObserver();
 
     setInterval(function() {
+      syncUserRoleClass();
       syncHyvisionDocumentRouteClasses();
       patchSinopticoFleetColors();
       patchWidgetAvoidDoubleAccent();

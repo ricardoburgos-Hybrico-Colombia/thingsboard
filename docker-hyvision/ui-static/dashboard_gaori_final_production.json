@@ -1,0 +1,1924 @@
+{
+  "id": {
+    "entityType": "DASHBOARD",
+    "id": "8b81f730-be69-11f1-a395-4fe608e17de1"
+  },
+  "createdTime": 1790949594659,
+  "tenantId": {
+    "entityType": "TENANT",
+    "id": "db80e5d0-be68-11f1-a395-4fe608e17de1"
+  },
+  "title": "EPM_GAORI",
+  "name": "EPM_GAORI",
+  "image": "tb-image;/api/images/tenant/logo 10 años hybrico.jpeg",
+  "mobileHide": false,
+  "mobileOrder": null,
+  "assignedCustomers": [
+    {
+      "customerId": {
+        "entityType": "CUSTOMER",
+        "id": "3467b860-be80-11f1-a395-4fe608e17de1"
+      },
+      "title": "Customer A",
+      "public": false
+    },
+    {
+      "customerId": {
+        "entityType": "CUSTOMER",
+        "id": "e44c1c00-be6a-11f1-a395-4fe608e17de1"
+      },
+      "title": "Public",
+      "public": true
+    },
+    {
+      "customerId": {
+        "entityType": "CUSTOMER",
+        "id": "3ea52920-cd5d-11f1-bd57-9f45b80f9ffd"
+      },
+      "title": "EPM GAORI",
+      "public": false
+    }
+  ],
+  "configuration": {
+    "entityAliases": {
+      "68411acd-78fd-4271-bed2-9f5df57811e5": {
+        "id": "68411acd-78fd-4271-bed2-9f5df57811e5",
+        "alias": "BESS_EPM_GAORI",
+        "filter": {
+          "type": "singleEntity",
+          "singleEntity": {
+            "entityType": "DEVICE",
+            "id": "64af58e0-be6a-11f1-a395-4fe608e17de1"
+          },
+          "resolveMultiple": false
+        }
+      }
+    },
+    "filters": {},
+    "widgets": {
+      "db97d99e-8e24-6ed2-c516-077ea5ee7ff5": {
+        "typeFullFqn": "system.range_chart",
+        "type": "timeseries",
+        "sizeX": 16,
+        "sizeY": 10,
+        "row": 0,
+        "col": 2,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "dataKeys": [
+                {
+                  "name": "soc_promedio",
+                  "type": "timeseries",
+                  "label": "soc_promedio",
+                  "color": "#2196f3",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              },
+              "latestDataKeys": []
+            }
+          ],
+          "showTitle": true,
+          "backgroundColor": "transparent",
+          "color": "#cbd5e1",
+          "padding": "0px",
+          "settings": {
+            "dataZoom": true,
+            "rangeColors": [
+              {
+                "from": null,
+                "to": 10,
+                "color": "#EF4444"
+              },
+              {
+                "from": 10,
+                "to": 20,
+                "color": "#F59E0B"
+              },
+              {
+                "from": 20,
+                "to": null,
+                "color": "#22C55E"
+              }
+            ],
+            "outOfRangeColor": "#ccc",
+            "fillArea": true,
+            "showLegend": true,
+            "legendPosition": "top",
+            "legendLabelFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "legendLabelColor": "#94a3b8",
+            "showTooltip": true,
+            "tooltipValueFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "500",
+              "lineHeight": "16px"
+            },
+            "tooltipValueColor": "#94A3B8",
+            "tooltipShowDate": true,
+            "tooltipDateFormat": {
+              "format": null,
+              "lastUpdateAgo": false,
+              "custom": false,
+              "auto": true,
+              "autoDateFormatSettings": {}
+            },
+            "tooltipDateFont": {
+              "family": "Roboto",
+              "size": 11,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "tooltipDateColor": "#94A3B8",
+            "tooltipBackgroundColor": "rgba(255, 255, 255, 0.76)",
+            "tooltipBackgroundBlur": 4,
+            "background": {
+              "type": "color",
+              "color": "transparent",
+              "overlay": {
+                "enabled": false,
+                "color": "rgba(255,255,255,0.72)",
+                "blur": 3
+              },
+              "imageUrl": null
+            },
+            "tooltipDateInterval": true,
+            "showRangeThresholds": true,
+            "rangeThreshold": {
+              "type": "constant",
+              "yAxisId": "default",
+              "units": null,
+              "decimals": 0,
+              "lineColor": "#37383b",
+              "lineType": "dashed",
+              "lineWidth": 1,
+              "startSymbol": "circle",
+              "startSymbolSize": 5,
+              "endSymbol": "arrow",
+              "endSymbolSize": 7,
+              "showLabel": true,
+              "labelPosition": "insideEndTop",
+              "labelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "400",
+                "lineHeight": "1"
+              },
+              "labelColor": "#37383b",
+              "enableLabelBackground": true,
+              "labelBackground": "rgba(255,255,255,0.56)"
+            },
+            "fillAreaOpacity": 0.7,
+            "showLine": true,
+            "step": false,
+            "stepType": "start",
+            "smooth": false,
+            "lineType": "solid",
+            "lineWidth": 2,
+            "showPoints": false,
+            "showPointLabel": false,
+            "pointLabelPosition": "top",
+            "pointLabelFont": {
+              "family": "Roboto",
+              "size": 11,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "1"
+            },
+            "pointLabelColor": "rgba(0, 0, 0, 0.76)",
+            "enablePointLabelBackground": false,
+            "pointLabelBackground": "rgba(255,255,255,0.56)",
+            "pointShape": "emptyCircle",
+            "pointSize": 4,
+            "grid": {
+              "show": false,
+              "backgroundColor": null,
+              "borderWidth": 1,
+              "borderColor": "#ccc"
+            },
+            "yAxis": {
+              "show": true,
+              "label": "",
+              "labelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "600",
+                "lineHeight": "1"
+              },
+              "labelColor": "#94a3b8",
+              "position": "left",
+              "showTickLabels": true,
+              "tickLabelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "400",
+                "lineHeight": "1"
+              },
+              "tickLabelColor": "#94a3b8",
+              "showTicks": false,
+              "ticksColor": "rgba(0, 0, 0, 0.54)",
+              "showLine": false,
+              "lineColor": "rgba(0, 0, 0, 0.54)",
+              "showSplitLines": true,
+              "splitLinesColor": "rgba(100, 184, 86, 0.08)",
+              "units": null,
+              "decimals": 0,
+              "ticksFormatter": null,
+              "ticksGenerator": null,
+              "interval": null,
+              "splitNumber": null,
+              "min": {
+                "type": "constant",
+                "value": null,
+                "entityAlias": null
+              },
+              "max": {
+                "type": "constant",
+                "value": null,
+                "entityAlias": null
+              }
+            },
+            "xAxis": {
+              "show": true,
+              "label": "",
+              "labelFont": {
+                "family": "Roboto",
+                "size": 12,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "600",
+                "lineHeight": "1"
+              },
+              "labelColor": "#94a3b8",
+              "position": "bottom",
+              "showTickLabels": true,
+              "tickLabelFont": {
+                "family": "Roboto",
+                "size": 10,
+                "sizeUnit": "px",
+                "style": "normal",
+                "weight": "400",
+                "lineHeight": "1"
+              },
+              "tickLabelColor": "#94a3b8",
+              "showTicks": true,
+              "ticksColor": "rgba(100, 184, 86, 0.2)",
+              "showLine": true,
+              "lineColor": "rgba(100, 184, 86, 0.2)",
+              "showSplitLines": false,
+              "splitLinesColor": "rgba(0, 0, 0, 0.12)",
+              "ticksFormat": {}
+            },
+            "thresholds": [],
+            "animation": {
+              "animation": true,
+              "animationThreshold": 2000,
+              "animationDuration": 500,
+              "animationEasing": "cubicOut",
+              "animationDelay": 0,
+              "animationDurationUpdate": 300,
+              "animationEasingUpdate": "cubicOut",
+              "animationDelayUpdate": 0
+            },
+            "tooltipLabelFont": {
+              "family": "Roboto",
+              "size": 12,
+              "sizeUnit": "px",
+              "style": "normal",
+              "weight": "400",
+              "lineHeight": "16px"
+            },
+            "tooltipLabelColor": "#94A3B8",
+            "padding": "12px"
+          },
+          "title": "SOC BANCO BESS GAORI (%)",
+          "dropShadow": true,
+          "enableFullscreen": true,
+          "titleStyle": null,
+          "mobileHeight": null,
+          "configMode": "advanced",
+          "actions": {},
+          "showTitleIcon": false,
+          "titleIcon": "thermostat",
+          "iconColor": "#1F6BDD",
+          "useDashboardTimewindow": true,
+          "titleFont": {
+            "size": 16,
+            "sizeUnit": "px",
+            "family": "Roboto",
+            "weight": "500",
+            "style": "normal",
+            "lineHeight": "24px"
+          },
+          "titleColor": "#f1f5f9",
+          "titleTooltip": "",
+          "widgetStyle": {
+            "background": "linear-gradient(160deg, rgba(14, 25, 16, 0.95) 0%, rgba(8, 15, 9, 0.98) 100%)",
+            "border": "1px solid rgba(100, 184, 86, 0.22)",
+            "borderTop": "3.5px solid #64B856",
+            "borderRadius": "10px",
+            "boxShadow": "0 10px 30px rgba(0, 0, 0, 0.45)"
+          },
+          "widgetCss": "",
+          "pageSize": 1024,
+          "units": "%",
+          "decimals": 0,
+          "noDataDisplayMessage": "",
+          "margin": "0px",
+          "borderRadius": "10px",
+          "iconSize": "0px",
+          "timewindowStyle": {
+            "showIcon": false,
+            "iconSize": "24px",
+            "icon": null,
+            "iconPosition": "left",
+            "font": {
+              "size": 12,
+              "sizeUnit": "px",
+              "family": "Roboto",
+              "weight": "400",
+              "style": "normal",
+              "lineHeight": "16px"
+            },
+            "color": "rgba(0, 0, 0, 0.38)",
+            "displayTypePrefix": true
+          }
+        },
+        "id": "db97d99e-8e24-6ed2-c516-077ea5ee7ff5"
+      },
+      "84c0eca6-e17c-48e6-cbe0-745bec95bfb7": {
+        "typeFullFqn": "tenant.generacion_solar_card",
+        "type": "latest",
+        "sizeX": 7,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "generacion_solar_kw",
+                  "type": "timeseries",
+                  "label": "generacion_solar_kw",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "epv_hoy_kwh",
+                  "type": "timeseries",
+                  "label": "epv_hoy_kwh",
+                  "color": "#4caf50",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Generación Solar",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "84c0eca6-e17c-48e6-cbe0-745bec95bfb7"
+      },
+      "90ea4fdf-2231-417f-5639-d31e1194db60": {
+        "typeFullFqn": "tenant.demanda_carga_card",
+        "type": "latest",
+        "sizeX": 7,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "demanda_carga_kw",
+                  "type": "timeseries",
+                  "label": "demanda_carga_kw",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "eload_hoy_kwh",
+                  "type": "timeseries",
+                  "label": "eload_hoy_kwh",
+                  "color": "#4caf50",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Demanda de Carga",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "90ea4fdf-2231-417f-5639-d31e1194db60"
+      },
+      "60552401-8cfd-dd1d-c01c-53af3ba7ac4c": {
+        "typeFullFqn": "tenant.almacenamiento_bess_card_dyn",
+        "type": "latest",
+        "sizeX": 8,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "soc_promedio",
+                  "type": "timeseries",
+                  "label": "soc_promedio",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "potencia_bess_kw",
+                  "type": "timeseries",
+                  "label": "potencia_bess_kw",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "estado_bess",
+                  "type": "timeseries",
+                  "label": "estado_bess",
+                  "color": "#f44336",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Almacenamiento BESS Dinamico",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "60552401-8cfd-dd1d-c01c-53af3ba7ac4c"
+      },
+      "a73d9a4a-3235-e5a0-f90b-2dc451e6065d": {
+        "typeFullFqn": "tenant.respaldo_dg_card",
+        "type": "latest",
+        "sizeX": 8,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "dg_potencia_activa_kw",
+                  "type": "timeseries",
+                  "label": "dg_potencia_activa_kw",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "estado_generador",
+                  "type": "timeseries",
+                  "label": "estado_generador",
+                  "color": "#4caf50",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Respaldo DG",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "a73d9a4a-3235-e5a0-f90b-2dc451e6065d"
+      },
+      "6c3094d4-1628-a188-2f5b-85682588c8e7": {
+        "typeFullFqn": "tenant.balance_planta_card",
+        "type": "latest",
+        "sizeX": 8,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "energia_solar_hoy",
+                  "type": "timeseries",
+                  "label": "Solar",
+                  "color": "#F59E0B",
+                  "settings": {}
+                },
+                {
+                  "name": "ebat_carga_hoy_kwh",
+                  "type": "timeseries",
+                  "label": "BESS In",
+                  "color": "#A855F7",
+                  "settings": {}
+                },
+                {
+                  "name": "ebat_descarga_hoy_kwh",
+                  "type": "timeseries",
+                  "label": "BESS Out",
+                  "color": "#06B6D4",
+                  "settings": {}
+                },
+                {
+                  "name": "energia_carga_hoy",
+                  "type": "timeseries",
+                  "label": "Carga",
+                  "color": "#10B981",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "BALANCE DE ENERGÍA DIARIO (kWh)",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "6c3094d4-1628-a188-2f5b-85682588c8e7"
+      },
+      "d9cde2ca-cb04-83f6-9acf-0d9fa0ee5ca8": {
+        "typeFullFqn": "tenant.estado_general_card",
+        "type": "latest",
+        "sizeX": 8,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "modo_operacion",
+                  "type": "timeseries",
+                  "label": "modo_operacion",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "fuente_activa",
+                  "type": "timeseries",
+                  "label": "fuente_activa",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "estado_sistema",
+                  "type": "timeseries",
+                  "label": "estado_sistema",
+                  "color": "#f44336",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Estado General",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "d9cde2ca-cb04-83f6-9acf-0d9fa0ee5ca8"
+      },
+      "0323c11a-06a2-5d91-f1e3-a08cd882995a": {
+        "typeFullFqn": "tenant.perfil_termico_pcs_scada",
+        "type": "latest",
+        "sizeX": 12,
+        "sizeY": 4.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "temp_igbt_pcs1",
+                  "type": "timeseries",
+                  "label": "temp_igbt_pcs1",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_igbt_pcs2",
+                  "type": "timeseries",
+                  "label": "temp_igbt_pcs2",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_igbt_pcs3",
+                  "type": "timeseries",
+                  "label": "temp_igbt_pcs3",
+                  "color": "#f44336",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_amb_pcs1",
+                  "type": "timeseries",
+                  "label": "temp_amb_pcs1",
+                  "color": "#ffc107",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_amb_pcs2",
+                  "type": "timeseries",
+                  "label": "temp_amb_pcs2",
+                  "color": "#607d8b",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_amb_pcs3",
+                  "type": "timeseries",
+                  "label": "temp_amb_pcs3",
+                  "color": "#9c27b0",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Perfil Térmico Inversores",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "0323c11a-06a2-5d91-f1e3-a08cd882995a"
+      },
+      "052de3af-13b9-f603-76bb-59e4a5e4805d": {
+        "typeFullFqn": "tenant.registro_eventos_fallas_gaori2",
+        "type": "latest",
+        "sizeX": 12,
+        "sizeY": 4.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "alarmas_activas_total",
+                  "type": "timeseries",
+                  "label": "alarmas_activas_total",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "faults_30d_total",
+                  "type": "timeseries",
+                  "label": "faults_30d_total",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "warnings_30d_total",
+                  "type": "timeseries",
+                  "label": "warnings_30d_total",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "fault_history_json",
+                  "type": "timeseries",
+                  "label": "fault_history_json",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "bess_soc",
+                  "type": "timeseries",
+                  "label": "bess_soc",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "soc_promedio",
+                  "type": "timeseries",
+                  "label": "soc_promedio",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "delta_v_celdas_mv",
+                  "type": "timeseries",
+                  "label": "delta_v_celdas_mv",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "max_volt_celda_mv",
+                  "type": "timeseries",
+                  "label": "max_volt_celda_mv",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "min_volt_celda_mv",
+                  "type": "timeseries",
+                  "label": "min_volt_celda_mv",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_bateria_max",
+                  "type": "timeseries",
+                  "label": "temp_bateria_max",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_bateria_min",
+                  "type": "timeseries",
+                  "label": "temp_bateria_min",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "delta_temp_bateria",
+                  "type": "timeseries",
+                  "label": "delta_temp_bateria",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_igbt_max",
+                  "type": "timeseries",
+                  "label": "temp_igbt_max",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "frecuencia_red_hz",
+                  "type": "timeseries",
+                  "label": "frecuencia_red_hz",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "generacion_solar_kw",
+                  "type": "timeseries",
+                  "label": "generacion_solar_kw",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "demanda_carga_kw",
+                  "type": "timeseries",
+                  "label": "demanda_carga_kw",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "potencia_bess",
+                  "type": "timeseries",
+                  "label": "potencia_bess",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "dg_potencia_activa_kw",
+                  "type": "timeseries",
+                  "label": "dg_potencia_activa_kw",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_bus_voltage",
+                  "type": "timeseries",
+                  "label": "pbd_bus_voltage",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_matrix_json",
+                  "type": "timeseries",
+                  "label": "pbd_matrix_json",
+                  "color": "#64B856",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "SCADA GAORI - Registro de Eventos y Fallas",
+          "dropShadow": false
+        },
+        "row": 0,
+        "col": 0,
+        "id": "052de3af-13b9-f603-76bb-59e4a5e4805d",
+        "typeId": {
+          "entityType": "WIDGET_TYPE",
+          "id": "5d3700a0-cbde-11f1-bd57-9f45b80f9ffd"
+        }
+      },
+      "9dd08064-4544-9977-9a67-378b60ff1129": {
+        "typeFullFqn": "tenant.soc_racks_linear_scada",
+        "type": "latest",
+        "sizeX": 12,
+        "sizeY": 4.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "soc_pcs1",
+                  "type": "timeseries",
+                  "label": "soc_pcs1",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "soc_pcs2",
+                  "type": "timeseries",
+                  "label": "soc_pcs2",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "soc_pcs3",
+                  "type": "timeseries",
+                  "label": "soc_pcs3",
+                  "color": "#f44336",
+                  "settings": {}
+                },
+                {
+                  "name": "delta_v_celdas_mv",
+                  "type": "timeseries",
+                  "label": "delta_v_celdas_mv",
+                  "color": "#ec4899",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "SOC por Rack de Baterías",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "9dd08064-4544-9977-9a67-378b60ff1129"
+      },
+      "f2501c3a-d82d-edd2-7bcf-ebbd988a07f9": {
+        "typeFullFqn": "tenant.tendencia_voltaje_corriente_scada",
+        "type": "timeseries",
+        "sizeX": 12,
+        "sizeY": 5.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "vbat_promedio",
+                  "type": "timeseries",
+                  "label": "vbat_promedio",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "ibat_total",
+                  "type": "timeseries",
+                  "label": "ibat_total",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "demanda_carga_kw",
+                  "type": "timeseries",
+                  "label": "demanda_carga_kw",
+                  "color": "#ff9800",
+                  "settings": {}
+                },
+                {
+                  "name": "min_volt_celda_mv",
+                  "type": "timeseries",
+                  "label": "Voltaje Mínimo Celda (mV)",
+                  "color": "#ec4899",
+                  "settings": {
+                    "showLines": true,
+                    "fillLines": false,
+                    "showPoints": false
+                  }
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Tendencia Tensión y Corriente BESS",
+          "dropShadow": false,
+          "useDashboardTimewindow": true
+        },
+        "row": 0,
+        "col": 0,
+        "id": "f2501c3a-d82d-edd2-7bcf-ebbd988a07f9"
+      },
+      "2b74186e-820d-216a-f2bd-1edf6a3b619f": {
+        "typeFullFqn": "tenant.tendencia_dispersion_termica_scada",
+        "type": "timeseries",
+        "sizeX": 12,
+        "sizeY": 5.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "temp_bateria_max",
+                  "type": "timeseries",
+                  "label": "temp_bateria_max",
+                  "color": "#2196f3",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_bateria_min",
+                  "type": "timeseries",
+                  "label": "temp_bateria_min",
+                  "color": "#4caf50",
+                  "settings": {}
+                },
+                {
+                  "name": "delta_temp_bateria",
+                  "type": "timeseries",
+                  "label": "delta_temp_bateria",
+                  "color": "#f44336",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Tendencia Dispersión Térmica BESS",
+          "dropShadow": false,
+          "useDashboardTimewindow": true
+        },
+        "row": 0,
+        "col": 0,
+        "id": "2b74186e-820d-216a-f2bd-1edf6a3b619f"
+      },
+      "743bfd18-efaa-5b84-3df8-74ebd640012a": {
+        "typeFullFqn": "tenant.pbd_tableros_dc_scada",
+        "type": "latest",
+        "sizeX": 12,
+        "sizeY": 4.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "pbd_matrix_json",
+                  "type": "timeseries",
+                  "label": "pbd_matrix_json",
+                  "color": "#f7d048",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_bus_voltage",
+                  "type": "timeseries",
+                  "label": "pbd_bus_voltage",
+                  "color": "#f7d048",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_disconnect_status",
+                  "type": "timeseries",
+                  "label": "pbd_disconnect_status",
+                  "color": "#f7d048",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_potencia_dc_kw",
+                  "type": "timeseries",
+                  "label": "pbd_potencia_dc_kw",
+                  "color": "#f7d048",
+                  "settings": {}
+                },
+                {
+                  "name": "string_1_corriente_a",
+                  "type": "timeseries",
+                  "label": "string_1_corriente_a",
+                  "color": "#f7d048",
+                  "settings": {}
+                },
+                {
+                  "name": "string_2_corriente_a",
+                  "type": "timeseries",
+                  "label": "string_2_corriente_a",
+                  "color": "#f7d048",
+                  "settings": {}
+                },
+                {
+                  "name": "string_3_corriente_a",
+                  "type": "timeseries",
+                  "label": "string_3_corriente_a",
+                  "color": "#f7d048",
+                  "settings": {}
+                },
+                {
+                  "name": "string_4_corriente_a",
+                  "type": "timeseries",
+                  "label": "string_4_corriente_a",
+                  "color": "#f7d048",
+                  "settings": {}
+                },
+                {
+                  "name": "string_5_corriente_a",
+                  "type": "timeseries",
+                  "label": "string_5_corriente_a",
+                  "color": "#f7d048",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Tableros DC y Strings Solares",
+          "dropShadow": false,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "743bfd18-efaa-5b84-3df8-74ebd640012a"
+      },
+      "dd61b573-72ae-8820-8d30-08d4e0f35a57": {
+        "typeFullFqn": "tenant.sinoptico_microrred_scada",
+        "type": "latest",
+        "sizeX": 24,
+        "sizeY": 10,
+        "config": {
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "generacion_solar_kw",
+                  "type": "timeseries",
+                  "label": "generacion_solar_kw",
+                  "color": "#f59e0b",
+                  "settings": {}
+                },
+                {
+                  "name": "epv_hoy_kwh",
+                  "type": "timeseries",
+                  "label": "epv_hoy_kwh",
+                  "color": "#f59e0b",
+                  "settings": {}
+                },
+                {
+                  "name": "soc_promedio",
+                  "type": "timeseries",
+                  "label": "soc_promedio",
+                  "color": "#10b981",
+                  "settings": {}
+                },
+                {
+                  "name": "potencia_bess_kw",
+                  "type": "timeseries",
+                  "label": "potencia_bess_kw",
+                  "color": "#10b981",
+                  "settings": {}
+                },
+                {
+                  "name": "estado_bess",
+                  "type": "timeseries",
+                  "label": "estado_bess",
+                  "color": "#10b981",
+                  "settings": {}
+                },
+                {
+                  "name": "vbat_promedio",
+                  "type": "timeseries",
+                  "label": "vbat_promedio",
+                  "color": "#38bdf8",
+                  "settings": {}
+                },
+                {
+                  "name": "ibat_total",
+                  "type": "timeseries",
+                  "label": "ibat_total",
+                  "color": "#10b981",
+                  "settings": {}
+                },
+                {
+                  "name": "demanda_carga_kw",
+                  "type": "timeseries",
+                  "label": "demanda_carga_kw",
+                  "color": "#00a8ff",
+                  "settings": {}
+                },
+                {
+                  "name": "eload_hoy_kwh",
+                  "type": "timeseries",
+                  "label": "eload_hoy_kwh",
+                  "color": "#00a8ff",
+                  "settings": {}
+                },
+                {
+                  "name": "carga_pcs1",
+                  "type": "timeseries",
+                  "label": "carga_pcs1",
+                  "color": "#38bdf8",
+                  "settings": {}
+                },
+                {
+                  "name": "carga_pcs2",
+                  "type": "timeseries",
+                  "label": "carga_pcs2",
+                  "color": "#38bdf8",
+                  "settings": {}
+                },
+                {
+                  "name": "carga_pcs3",
+                  "type": "timeseries",
+                  "label": "carga_pcs3",
+                  "color": "#38bdf8",
+                  "settings": {}
+                },
+                {
+                  "name": "frecuencia_red_hz",
+                  "type": "timeseries",
+                  "label": "frecuencia_red_hz",
+                  "color": "#06b6d4",
+                  "settings": {}
+                },
+                {
+                  "name": "tension_fase_u",
+                  "type": "timeseries",
+                  "label": "tension_fase_u",
+                  "color": "#06b6d4",
+                  "settings": {}
+                },
+                {
+                  "name": "dg_potencia_activa_kw",
+                  "type": "timeseries",
+                  "label": "dg_potencia_activa_kw",
+                  "color": "#a855f7",
+                  "settings": {}
+                },
+                {
+                  "name": "estado_generador",
+                  "type": "timeseries",
+                  "label": "estado_generador",
+                  "color": "#a855f7",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "settings": {},
+          "title": "Sinóptico Animado Microrred",
+          "dropShadow": false
+        },
+        "row": 0,
+        "col": 0,
+        "id": "dd61b573-72ae-8820-8d30-08d4e0f35a57"
+      },
+      "db18c56e-f0d6-f699-c3ae-e93cae4bb739": {
+        "typeFullFqn": "system.cards.timeseries_table",
+        "type": "timeseries",
+        "sizeX": 16,
+        "sizeY": 13,
+        "row": 0,
+        "col": 2,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "dataKeys": [
+                {
+                  "name": "generacion_solar_kw",
+                  "label": "Generación Solar",
+                  "type": "timeseries",
+                  "color": "#2196f3",
+                  "settings": {},
+                  "units": "kW"
+                },
+                {
+                  "name": "soc_promedio",
+                  "type": "timeseries",
+                  "label": "SOC Baterías",
+                  "color": "#4caf50",
+                  "settings": {},
+                  "units": "%",
+                  "decimals": 0
+                },
+                {
+                  "name": "demanda_carga_kw",
+                  "type": "timeseries",
+                  "label": "Carga equipos",
+                  "color": "#f44336",
+                  "settings": {},
+                  "units": "kW",
+                  "decimals": 0
+                },
+                {
+                  "name": "eload_hoy_kwh",
+                  "type": "timeseries",
+                  "label": "Energía consumida en todo el día",
+                  "color": "#607d8b",
+                  "settings": {},
+                  "units": "kWh",
+                  "decimals": 0
+                },
+                {
+                  "name": "epv_hoy_kwh",
+                  "type": "timeseries",
+                  "label": "Energía generada",
+                  "color": "#ffc107",
+                  "settings": {},
+                  "units": "kWh",
+                  "decimals": 0
+                }
+              ],
+              "latestDataKeys": []
+            }
+          ],
+          "showTitle": true,
+          "backgroundColor": "transparent",
+          "color": "#cbd5e1",
+          "padding": "8px",
+          "settings": {
+            "enableSearch": true,
+            "enableSelectColumnDisplay": true,
+            "enableStickyHeader": true,
+            "enableStickyAction": true,
+            "showCellActionsMenu": true,
+            "reserveSpaceForHiddenAction": "true",
+            "showTimestamp": true,
+            "dateFormat": {
+              "format": "yyyy-MM-dd HH:mm:ss"
+            },
+            "displayPagination": true,
+            "useEntityLabel": false,
+            "defaultPageSize": 30,
+            "pageStepCount": 3,
+            "pageStepIncrement": 10,
+            "hideEmptyLines": false,
+            "disableStickyHeader": false,
+            "useRowStyleFunction": false,
+            "rowStyleFunction": "",
+            "sortOrder": {
+              "property": "createdTime",
+              "direction": "DESC"
+            }
+          },
+          "title": "Tabla de datos históricos",
+          "dropShadow": true,
+          "enableFullscreen": true,
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400,
+            "padding": "5px 10px 5px 10px"
+          },
+          "useDashboardTimewindow": false,
+          "showLegend": false,
+          "widgetStyle": {
+            "background": "linear-gradient(160deg, rgba(14, 25, 16, 0.95) 0%, rgba(8, 15, 9, 0.98) 100%)",
+            "border": "1px solid rgba(100, 184, 86, 0.22)",
+            "borderTop": "3.5px solid #64B856",
+            "borderRadius": "10px",
+            "boxShadow": "0 10px 30px rgba(0, 0, 0, 0.45)"
+          },
+          "actions": {},
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "configMode": "basic",
+          "titleFont": null,
+          "titleColor": "#f1f5f9",
+          "titleIcon": null,
+          "timewindow": {
+            "selectedTab": 0,
+            "realtime": {
+              "realtimeType": 0,
+              "timewindowMs": 2592000000
+            },
+            "aggregation": {
+              "type": "NONE",
+              "limit": 25000
+            }
+          },
+          "displayTimewindow": true,
+          "titleTooltip": "",
+          "widgetCss": "\n.mat-mdc-table, table.mat-table {\n  background: transparent !important;\n}\n.mat-mdc-header-row, tr.mat-header-row {\n  background: rgba(18, 34, 20, 0.85) !important;\n  border-bottom: 1px solid rgba(100, 184, 86, 0.25) !important;\n}\n.mat-mdc-header-cell, th.mat-header-cell {\n  color: #a4c4a1 !important;\n  font-weight: 700 !important;\n  font-size: 11.5px !important;\n  letter-spacing: 0.6px !important;\n}\n.mat-mdc-cell, td.mat-cell {\n  color: #cbd5e1 !important;\n  font-size: 12.5px !important;\n  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;\n}\n.mat-mdc-row:hover, tr.mat-row:hover {\n  background: rgba(100, 184, 86, 0.08) !important;\n}\n.mat-mdc-paginator, .mat-paginator {\n  background: transparent !important;\n  color: #94a3b8 !important;\n  border-top: 1px solid rgba(100, 184, 86, 0.15) !important;\n}\n.mat-mdc-paginator .mat-mdc-select-value, .mat-paginator .mat-select-value {\n  color: #cbd5e1 !important;\n}\n.tb-widget-title, .tb-widget-title-text {\n  color: #f1f5f9 !important;\n  font-weight: 700 !important;\n}\n",
+          "pageSize": 1024,
+          "noDataDisplayMessage": "",
+          "borderRadius": "10px",
+          "className": "hyv-hybrico-only"
+        },
+        "id": "db18c56e-f0d6-f699-c3ae-e93cae4bb739"
+      },
+      "fd2c4410-2377-4baf-a954-a1d6a6ae359f": {
+        "isSystemType": false,
+        "type": "timeseries",
+        "typeFullFqn": "tenant.scada_solar_carga_bess_chart",
+        "sizeX": 12,
+        "sizeY": 8,
+        "row": 23,
+        "col": 0,
+        "config": {
+          "title": "Generación Solar vs Demanda de Carga & BESS",
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "useDashboardTimewindow": true,
+          "datasources": [
+            {
+              "type": "device",
+              "dataKeys": [
+                {
+                  "name": "generacion_solar_kw",
+                  "type": "timeseries",
+                  "label": "Solar Total (kW)",
+                  "color": "#F59E0B",
+                  "settings": {}
+                },
+                {
+                  "name": "demanda_carga_kw",
+                  "type": "timeseries",
+                  "label": "Demanda Carga (kW)",
+                  "color": "#FFFFFF",
+                  "settings": {}
+                },
+                {
+                  "name": "potencia_bess_kw",
+                  "type": "timeseries",
+                  "label": "Potencia BESS (kW)",
+                  "color": "#A855F7",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              },
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "name": ""
+            }
+          ],
+          "settings": {}
+        },
+        "id": "fd2c4410-2377-4baf-a954-a1d6a6ae359f"
+      },
+      "d2267920-fec4-40e1-91f2-f05cce7962d0": {
+        "isSystemType": false,
+        "type": "timeseries",
+        "typeFullFqn": "tenant.scada_potencia_pcs_temporal",
+        "sizeX": 12,
+        "sizeY": 7,
+        "row": 31,
+        "col": 0,
+        "config": {
+          "title": "Dispersión de Potencia Activa por Inversor PCS",
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "useDashboardTimewindow": true,
+          "datasources": [
+            {
+              "type": "device",
+              "dataKeys": [
+                {
+                  "name": "pac_pcs1",
+                  "type": "timeseries",
+                  "label": "PCS-01 (12136)",
+                  "color": "#3B82F6",
+                  "settings": {}
+                },
+                {
+                  "name": "pac_pcs2",
+                  "type": "timeseries",
+                  "label": "PCS-02 (12135)",
+                  "color": "#10B981",
+                  "settings": {}
+                },
+                {
+                  "name": "pac_pcs3",
+                  "type": "timeseries",
+                  "label": "PCS-03 (12134)",
+                  "color": "#F59E0B",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              },
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "name": ""
+            }
+          ],
+          "settings": {}
+        },
+        "id": "d2267920-fec4-40e1-91f2-f05cce7962d0"
+      },
+      "640cb438-e27d-44e7-b857-846dba787048": {
+        "isSystemType": false,
+        "type": "timeseries",
+        "typeFullFqn": "tenant.scada_potencia_pbd_temporal",
+        "sizeX": 12,
+        "sizeY": 7,
+        "row": 31,
+        "col": 12,
+        "config": {
+          "title": "Potencia Activa Temporal por Tablero Solar (PBD-01 a PBD-12)",
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "dropShadow": false,
+          "enableFullscreen": true,
+          "useDashboardTimewindow": true,
+          "datasources": [
+            {
+              "type": "device",
+              "dataKeys": [
+                {
+                  "name": "pbd_01_kw",
+                  "type": "timeseries",
+                  "label": "PBD-01",
+                  "color": "#38BDF8",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_02_kw",
+                  "type": "timeseries",
+                  "label": "PBD-02",
+                  "color": "#0284C7",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_03_kw",
+                  "type": "timeseries",
+                  "label": "PBD-03",
+                  "color": "#34D399",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_04_kw",
+                  "type": "timeseries",
+                  "label": "PBD-04",
+                  "color": "#059669",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_05_kw",
+                  "type": "timeseries",
+                  "label": "PBD-05",
+                  "color": "#FBBF24",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_06_kw",
+                  "type": "timeseries",
+                  "label": "PBD-06",
+                  "color": "#D97706",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_07_kw",
+                  "type": "timeseries",
+                  "label": "PBD-07",
+                  "color": "#F87171",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_08_kw",
+                  "type": "timeseries",
+                  "label": "PBD-08",
+                  "color": "#DC2626",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_09_kw",
+                  "type": "timeseries",
+                  "label": "PBD-09",
+                  "color": "#C084FC",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_10_kw",
+                  "type": "timeseries",
+                  "label": "PBD-10",
+                  "color": "#9333EA",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_11_kw",
+                  "type": "timeseries",
+                  "label": "PBD-11",
+                  "color": "#2DD4BF",
+                  "settings": {}
+                },
+                {
+                  "name": "pbd_12_kw",
+                  "type": "timeseries",
+                  "label": "PBD-12",
+                  "color": "#F43F5E",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              },
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "name": ""
+            }
+          ],
+          "settings": {}
+        },
+        "id": "640cb438-e27d-44e7-b857-846dba787048"
+      }
+    },
+    "states": {
+      "default": {
+        "name": "EPM_GAORI",
+        "root": true,
+        "layouts": {
+          "main": {
+            "widgets": {
+              "db97d99e-8e24-6ed2-c516-077ea5ee7ff5": {
+                "row": 15,
+                "col": 0,
+                "sizeX": 24,
+                "sizeY": 8
+              },
+              "84c0eca6-e17c-48e6-cbe0-745bec95bfb7": {
+                "row": 12,
+                "col": 15,
+                "sizeX": 5,
+                "sizeY": 3
+              },
+              "90ea4fdf-2231-417f-5639-d31e1194db60": {
+                "row": 12,
+                "col": 10,
+                "sizeX": 5,
+                "sizeY": 3
+              },
+              "60552401-8cfd-dd1d-c01c-53af3ba7ac4c": {
+                "row": 12,
+                "col": 5,
+                "sizeX": 5,
+                "sizeY": 3
+              },
+              "a73d9a4a-3235-e5a0-f90b-2dc451e6065d": {
+                "row": 12,
+                "col": 20,
+                "sizeX": 4,
+                "sizeY": 3
+              },
+              "6c3094d4-1628-a188-2f5b-85682588c8e7": {
+                "row": 44,
+                "col": 0,
+                "sizeX": 12,
+                "sizeY": 6
+              },
+              "d9cde2ca-cb04-83f6-9acf-0d9fa0ee5ca8": {
+                "row": 12,
+                "col": 0,
+                "sizeX": 5,
+                "sizeY": 3
+              },
+              "0323c11a-06a2-5d91-f1e3-a08cd882995a": {
+                "row": 44,
+                "col": 12,
+                "sizeX": 12,
+                "sizeY": 6
+              },
+              "052de3af-13b9-f603-76bb-59e4a5e4805d": {
+                "row": 10,
+                "col": 0,
+                "sizeX": 24,
+                "sizeY": 2
+              },
+              "9dd08064-4544-9977-9a67-378b60ff1129": {
+                "row": 38,
+                "col": 12,
+                "sizeX": 12,
+                "sizeY": 6
+              },
+              "f2501c3a-d82d-edd2-7bcf-ebbd988a07f9": {
+                "row": 23,
+                "col": 12,
+                "sizeX": 12,
+                "sizeY": 8
+              },
+              "2b74186e-820d-216a-f2bd-1edf6a3b619f": {
+                "row": 50,
+                "col": 0,
+                "sizeX": 24,
+                "sizeY": 5
+              },
+              "743bfd18-efaa-5b84-3df8-74ebd640012a": {
+                "row": 38,
+                "col": 0,
+                "sizeX": 12,
+                "sizeY": 6
+              },
+              "dd61b573-72ae-8820-8d30-08d4e0f35a57": {
+                "sizeX": 24,
+                "sizeY": 10,
+                "row": 0,
+                "col": 0
+              },
+              "db18c56e-f0d6-f699-c3ae-e93cae4bb739": {
+                "row": 55,
+                "col": 0,
+                "sizeX": 24,
+                "sizeY": 9
+              },
+              "fd2c4410-2377-4baf-a954-a1d6a6ae359f": {
+                "row": 23,
+                "col": 0,
+                "sizeX": 12,
+                "sizeY": 8
+              },
+              "d2267920-fec4-40e1-91f2-f05cce7962d0": {
+                "row": 31,
+                "col": 0,
+                "sizeX": 12,
+                "sizeY": 7
+              },
+              "640cb438-e27d-44e7-b857-846dba787048": {
+                "row": 31,
+                "col": 12,
+                "sizeX": 12,
+                "sizeY": 7
+              }
+            },
+            "gridSettings": {
+              "layoutType": "scada",
+              "backgroundColor": "#070d07",
+              "columns": 24,
+              "margin": 10,
+              "outerMargin": true,
+              "backgroundSizeMode": "100%",
+              "minColumns": 24,
+              "viewFormat": "grid",
+              "autoFillHeight": false,
+              "rowHeight": 70,
+              "mobileAutoFillHeight": false,
+              "mobileRowHeight": 70,
+              "backgroundImageUrl": null
+            }
+          }
+        }
+      }
+    },
+    "timewindow": {
+      "selectedTab": 0,
+      "realtime": {
+        "realtimeType": 0,
+        "timewindowMs": 259200000
+      },
+      "aggregation": {
+        "type": "NONE",
+        "limit": 50000
+      }
+    },
+    "settings": {
+      "stateControllerId": "entity",
+      "showTitle": false,
+      "showDashboardsSelect": true,
+      "showEntitiesSelect": true,
+      "showDashboardTimewindow": true,
+      "showDashboardExport": true,
+      "toolbarAlwaysOpen": true,
+      "titleColor": "rgba(0,0,0,0.870588)",
+      "showDashboardLogo": true,
+      "dashboardLogoUrl": "tb-image;/api/images/tenant/logo 10 años hybrico.jpeg",
+      "hideToolbar": false,
+      "showFilters": true,
+      "showUpdateDashboardImage": true
+    }
+  },
+  "resources": null,
+  "version": 25,
+  "externalId": null
+}

@@ -183,6 +183,18 @@ mat-sidenav-content .tb-primary-toolbar.mat-toolbar.mat-primary {{
   background-color: #2b4926 !important;
 }}
 
+/* Vista Cliente EPM: Ocultar registros de auditoria forense y tablas de datos brutos */
+body.hyv-role-customer .hyv-hybrico-only,
+body.hyv-role-customer [data-hyv-role="hybrico-only"],
+body.hyv-role-customer .mat-mdc-card:has(#alarm-card),
+body.hyv-role-customer .mat-mdc-card:has(tb-timeseries-table-widget),
+body.hyv-role-customer [data-widget-id="052de3af-13b9-f603-76bb-59e4a5e4805d"],
+body.hyv-role-customer [data-widget-id="db18c56e-f0d6-f699-c3ae-e93cae4bb739"],
+body.hyv-role-customer tb-dashboard-widget:has([data-widget-id="052de3af-13b9-f603-76bb-59e4a5e4805d"]),
+body.hyv-role-customer tb-dashboard-widget:has([data-widget-id="db18c56e-f0d6-f699-c3ae-e93cae4bb739"]) {
+  display: none !important;
+}
+
 /* Custom user CSS overrides */
 {custom_css}
 """
@@ -2120,6 +2132,13 @@ class BrandingHandler(BaseHTTPRequestHandler):
             try:
                 new_config = json.loads(body)
                 current = load_config()
+                # Proteger credenciales de Telegram si vienen vacías desde el formulario web
+                if not new_config.get("telegramBotToken") and current.get("telegramBotToken"):
+                    new_config["telegramBotToken"] = current["telegramBotToken"]
+                if not new_config.get("telegramChatId") and current.get("telegramChatId"):
+                    new_config["telegramChatId"] = current["telegramChatId"]
+                if "telegramEnabled" not in new_config:
+                    new_config["telegramEnabled"] = current.get("telegramEnabled", False)
                 current.update(new_config)
                 if save_config(current):
                     res = {"status": "ok", "message": "Configuración guardada correctamente", "config": current}
