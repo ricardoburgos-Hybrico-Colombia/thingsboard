@@ -1839,3 +1839,287 @@ tb-dashboard-widget mat-card {
 .hyv-kpi-sub.danger {
   color: #ef4444 !important;
 }
+
+/* ============================================================
+   Analítica avanzada + hamburger (cambios locales, no pisar estética original)
+   ============================================================ */
+.hyvision-sidebar-gerencia-item {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hyvision-gerencia-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(8, 18, 8, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.hyvision-gerencia-dialog {
+  width: min(640px, 100%);
+  background: #1b2f1b;
+  border: 1px solid rgba(163, 224, 153, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  padding: 24px;
+  color: #e8f5e6;
+}
+
+.hyvision-gerencia-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.hyvision-gerencia-dialog-head h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.hyvision-gerencia-close {
+  border: 0;
+  background: transparent;
+  color: #e8f5e6;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hyvision-gerencia-dialog-lead {
+  margin: 0 0 20px;
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+.hyvision-gerencia-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hyvision-gerencia-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(163, 224, 153, 0.28);
+  background: rgba(100, 184, 86, 0.08);
+  color: inherit;
+  border-radius: 10px;
+  padding: 16px 18px;
+  cursor: pointer;
+}
+
+.hyvision-gerencia-card:hover {
+  background: rgba(100, 184, 86, 0.18);
+}
+
+.hyvision-gerencia-card-kicker {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.hyvision-gerencia-card-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.hyvision-gerencia-card-hint {
+  font-size: 13px;
+  color: #a3e099;
+}
+
+.hyvision-sidebar-gerencia-item > a,
+.hyvision-sidebar-gerencia-item > button,
+.hyvision-gerencia-dash-link {
+  color: inherit !important;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  user-select: none;
+}
+
+.hyvision-sidebar-gerencia-item > a:hover,
+.hyvision-sidebar-gerencia-item > button:hover,
+.hyvision-gerencia-dash-link:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.hyv-gerencia-dash mat-sidenav a[href*="/dashboards"]:not(.hyvision-gerencia-nav-btn):not(.hyvision-gerencia-dash-link),
+.hyv-gerencia-dash mat-sidenav a[href*="/dashboards"]:not(.hyvision-gerencia-nav-btn):not(.hyvision-gerencia-dash-link).active,
+.hyv-gerencia-dash mat-sidenav a[href*="/dashboards"]:not(.hyvision-gerencia-nav-btn):not(.hyvision-gerencia-dash-link).tb-active {
+  background-color: transparent !important;
+}
+
+.hyvision-sidebar-gerencia-item.active > a,
+.hyvision-sidebar-gerencia-item.active > button,
+.hyvision-gerencia-subitem.active .hyvision-gerencia-dash-link {
+  background-color: rgba(100, 184, 86, 0.28) !important;
+  color: #c8f7c5 !important;
+}
+
+.hyvision-gerencia-chevron {
+  transition: transform 0.15s ease;
+}
+
+.hyvision-sidebar-gerencia-item.open .hyvision-gerencia-chevron {
+  transform: rotate(180deg);
+}
+
+.hyvision-gerencia-subitem {
+  display: none;
+  list-style: none;
+}
+
+.hyvision-sidebar-gerencia-item.open ~ .hyvision-gerencia-subitem {
+  display: list-item;
+}
+
+.hyvision-gerencia-dash-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  padding: 0 16px 0 56px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.hyvision-sidenav-toggle {
+  position: static;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 8px 0 24px !important;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  box-shadow: none;
+  color: #ffffff;
+  cursor: pointer;
+  z-index: 5;
+}
+
+body:not(.hyv-sidenav-collapsed) mat-sidenav mat-toolbar,
+body:not(.hyv-sidenav-collapsed) mat-sidenav .mat-toolbar {
+  padding-left: 12px !important;
+}
+
+.hyvision-sidenav-toggle.in-mainbar {
+  margin: 0 12px 0 16px !important;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hyvision-sidenav-toggle.is-floating {
+  position: fixed;
+  top: 10px;
+  left: 16px;
+  z-index: 13000;
+  margin: 0;
+  background: #436A3C;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+body.hyv-sidenav-collapsed:has(.hyvision-sidenav-toggle.is-floating) mat-sidenav-content > mat-toolbar,
+body.hyv-sidenav-collapsed:has(.hyvision-sidenav-toggle.is-floating) .mat-drawer-content > mat-toolbar {
+  padding-left: 56px !important;
+}
+
+.hyvision-sidenav-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hyvision-sidenav-toggle .material-icons {
+  font-size: 26px;
+  line-height: 1;
+}
+
+body.hyv-sidenav-collapsed mat-sidenav.mat-sidenav,
+body.hyv-sidenav-collapsed mat-sidenav {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(-110%) !important;
+}
+
+body.hyv-sidenav-collapsed mat-sidenav-content,
+body.hyv-sidenav-collapsed .mat-drawer-content {
+  margin-left: 0 !important;
+}
+
+body.hyv-gerencia-dash tb-dashboard-page,
+body.hyv-gerencia-dash .tb-dashboard-container,
+body.hyv-gerencia-dash .tb-dashboard-layout,
+body.hyv-gerencia-dash gridster,
+body.hyv-gerencia-dash gridster-item,
+body.hyv-gerencia-dash tb-dashboard-widget,
+body.hyv-gerencia-dash tb-dashboard-widget mat-card,
+body.hyv-gerencia-dash tb-dashboard-widget .mat-mdc-card,
+body.hyv-gerencia-dash .tb-widget,
+body.hyv-gerencia-dash .tb-widget-content,
+body.hyv-gerencia-dash .tb-widget-container,
+body.hyv-gerencia-dash tb-html-widget,
+body.hyv-gerencia-dash iframe {
+  background: #0d1a0d !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+body.hyv-gerencia-dash tb-dashboard-widget mat-card,
+body.hyv-gerencia-dash tb-dashboard-widget .mat-mdc-card,
+body.hyv-gerencia-dash .tb-widget,
+body.hyv-gerencia-dash .tb-widget-content,
+body.hyv-gerencia-dash gridster-item {
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+body.hyv-gerencia-dash,
+body.hyv-gerencia-dash * {
+  scrollbar-width: thin;
+  scrollbar-color: #2b4926 #0d1a0d;
+}
+
+body.hyv-gerencia-dash ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background: #0d1a0d;
+}
+
+body.hyv-gerencia-dash ::-webkit-scrollbar-track,
+body.hyv-gerencia-dash ::-webkit-scrollbar-corner {
+  background: #0d1a0d;
+}
+
+body.hyv-gerencia-dash ::-webkit-scrollbar-thumb {
+  background: #2b4926;
+  border-radius: 8px;
+  border: 2px solid #0d1a0d;
+}
+
+body.hyv-gerencia-dash ::-webkit-scrollbar-thumb:hover {
+  background: #436A3C;
+}

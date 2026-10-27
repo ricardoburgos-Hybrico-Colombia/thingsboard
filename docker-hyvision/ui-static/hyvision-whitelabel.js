@@ -36,6 +36,71 @@
   var selectedReportDays = 7;
   window.hyvisionConfig = currentConfig;
 
+  var GERENCIA_LABEL = 'Analítica avanzada';
+  var GERENCIA_DASHBOARDS = [
+    {
+      title: 'SMART NOC HCO',
+      id: '5e2460c0-c913-11f1-9c41-afc3f2e31070'
+    }
+  ];
+  var gerenciaChromeObserver = null;
+
+  function isGerenciaRoute() {
+    var path = (window.location.pathname || '').toLowerCase();
+    for (var k = 0; k < GERENCIA_DASHBOARDS.length; k++) {
+      var g = GERENCIA_DASHBOARDS[k];
+      if (g.id && path.indexOf(String(g.id).toLowerCase()) !== -1) return true;
+    }
+    return false;
+  }
+
+  function isGerenciaDashboard(title, id) {
+    var t = (title || '').toLowerCase();
+    var i = (id || '').toString().toLowerCase();
+    if (t.indexOf('smart noc') !== -1) return true;
+    for (var k = 0; k < GERENCIA_DASHBOARDS.length; k++) {
+      var g = GERENCIA_DASHBOARDS[k];
+      if (g.id && i && String(g.id).toLowerCase() === i) return true;
+      if (g.title && t && t.indexOf(String(g.title).toLowerCase()) !== -1) return true;
+    }
+    return false;
+  }
+
+  function markGerenciaPage() {
+    if (!document.body) return;
+    if (isGerenciaRoute()) {
+      document.body.classList.add('hyv-gerencia-dash');
+    } else {
+      document.body.classList.remove('hyv-gerencia-dash');
+    }
+  }
+
+  function relabelGerenciaChrome() {
+    if (!isGerenciaRoute() || !document.body) return;
+    var skipSel = 'mat-sidenav, tb-side-menu, ul.tb-side-menu, .hyvision-sidebar-gerencia-item, .hyvision-gerencia-subitem, .hyvision-sidebar-reports-item';
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    var node;
+    while ((node = walker.nextNode())) {
+      var parent = node.parentElement;
+      if (!parent || (parent.closest && parent.closest(skipSel))) continue;
+      var value = node.nodeValue;
+      if (!value) continue;
+      var trimmed = value.replace(/\s+/g, ' ').trim();
+      if (trimmed === 'Sistemas de energía' || trimmed === 'Sistema de energía' || trimmed === 'Tableros' || trimmed === 'Tablero' || trimmed === 'Dashboards' || trimmed === 'Dashboard' || trimmed === 'Gerencia') {
+        node.nodeValue = value.replace(trimmed, GERENCIA_LABEL);
+      }
+    }
+  }
+
+  function watchGerenciaChrome() {
+    if (gerenciaChromeObserver || !document.body) return;
+    gerenciaChromeObserver = new MutationObserver(function() {
+      markGerenciaPage();
+      if (isGerenciaRoute()) relabelGerenciaChrome();
+    });
+    gerenciaChromeObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+
   // 1. Fetch Config once on load
   function loadInitialConfig() {
     fetch('/api/hyvision/branding?t=' + Date.now())
@@ -181,15 +246,16 @@
     sideLinks.forEach(function(a) {
       var href = a.getAttribute('href') || a.getAttribute('routerlink') || '';
       var span = a.querySelector('.tb-link-title, span:not(.mat-icon)');
+      var isCustomGerencia = !!(a.closest && a.closest('.hyvision-sidebar-gerencia-item, .hyvision-gerencia-subitem'));
       if (span) {
         var t = span.innerText.trim();
         if (t === 'Tableros' || t === 'Dashboards') {
           span.innerText = 'Sistemas de energía';
         }
       }
-      if (href.indexOf('/dashboards') !== -1 && span) {
+      if (href.indexOf('/dashboards') !== -1 && span && !isCustomGerencia) {
         var curr = span.innerText.trim();
-        if (curr === 'Tableros' || curr === 'Dashboards' || curr === 'tableros') {
+        if (curr === 'Tableros' || curr === 'Dashboards' || curr === 'tableros' || curr === GERENCIA_LABEL) {
           span.innerText = 'Sistemas de energía';
         }
       }
@@ -197,10 +263,14 @@
 
     // Breadcrumbs & top navigation headers
     var breadcrumbs = document.querySelectorAll('.tb-breadcrumb-item, .mat-mdc-button span, .mat-mdc-card-title, .tb-dashboard-title, .tb-navigation-title');
+    var skipGerenciaMenuSel = 'mat-sidenav, tb-side-menu, ul.tb-side-menu, .hyvision-sidebar-gerencia-item, .hyvision-gerencia-subitem, .hyvision-sidebar-reports-item';
     breadcrumbs.forEach(function(el) {
+      if (el.closest && el.closest(skipGerenciaMenuSel)) return;
       if (el.children.length === 0) {
         var t = el.innerText.trim();
-        if (t === 'Tableros' || t === 'Dashboards') {
+        if (isGerenciaRoute() && (t === 'Sistemas de energía' || t === 'Tableros' || t === 'Dashboards' || t === 'Sistema de energía' || t === 'Tablero' || t === 'Dashboard' || t === 'Gerencia')) {
+          el.innerText = GERENCIA_LABEL;
+        } else if (t === 'Tableros' || t === 'Dashboards') {
           el.innerText = 'Sistemas de energía';
         } else if (t === 'Tablero' || t === 'Dashboard') {
           el.innerText = 'Sistema de energía';
@@ -213,6 +283,8 @@
     inputs.forEach(function(inp) {
       inp.placeholder = inp.placeholder.replace(/tableros/gi, 'sistemas de energía').replace(/dashboards/gi, 'sistemas de energía');
     });
+
+    relabelGerenciaChrome();
 
     var titledElements = document.querySelectorAll('[aria-label*="tablero" i], [mattooltip*="tablero" i], [title*="tablero" i], [aria-label*="dashboard" i], [mattooltip*="dashboard" i], [title*="dashboard" i]');
     titledElements.forEach(function(el) {
@@ -364,6 +436,164 @@
   }
 
   // 8. Filter Customer Sidebar (Hide "Entidades" & "Instancias de edge" strictly for Customer Users)
+  function closeGerenciaPanel() {
+    var panel = document.querySelector('.hyvision-gerencia-overlay');
+    if (panel) panel.remove();
+  }
+
+  function openGerenciaDashboard(dashId, title) {
+    var go = function(id) {
+      if (!id) return;
+      closeGerenciaPanel();
+      window.location.replace(window.location.origin + '/dashboards/' + id);
+    };
+    var token = localStorage.getItem('jwt_token');
+    if (!token || !title) {
+      go(dashId);
+      return;
+    }
+    fetch('/api/tenant/dashboards?pageSize=100&page=0', {
+      headers: { 'X-Authorization': 'Bearer ' + token }
+    })
+      .then(function(r) { return r.ok ? r.json() : { data: [] }; })
+      .then(function(json) {
+        var list = (json && json.data) || [];
+        var needle = String(title).toLowerCase();
+        var found = list.find(function(d) {
+          return (d.title || '').toLowerCase() === needle || (d.title || '').toLowerCase().indexOf('smart noc') !== -1;
+        });
+        var id = found && found.id && found.id.id ? found.id.id : (found && found.id);
+        go(id || dashId);
+      })
+      .catch(function() { go(dashId); });
+  }
+
+  function openGerenciaPanel() {
+    closeGerenciaPanel();
+    var overlay = document.createElement('div');
+    overlay.className = 'hyvision-gerencia-overlay';
+    var cards = GERENCIA_DASHBOARDS.map(function(d) {
+      return '<button type="button" class="hyvision-gerencia-card" data-dashboard-id="' + d.id + '" data-dashboard-title="' + d.title + '">' +
+        '<span class="hyvision-gerencia-card-kicker">Dashboard gerencial</span>' +
+        '<span class="hyvision-gerencia-card-title">' + d.title + '</span>' +
+        '<span class="hyvision-gerencia-card-hint">Abrir tablero</span>' +
+        '</button>';
+    }).join('');
+    overlay.innerHTML =
+      '<div class="hyvision-gerencia-dialog" role="dialog" aria-label="' + GERENCIA_LABEL + '">' +
+        '<div class="hyvision-gerencia-dialog-head">' +
+          '<h2>' + GERENCIA_LABEL + '</h2>' +
+          '<button type="button" class="hyvision-gerencia-close" aria-label="Cerrar">×</button>' +
+        '</div>' +
+        '<p class="hyvision-gerencia-dialog-lead">Tableros ejecutivos. No forman parte de Sistemas de energía.</p>' +
+        '<div class="hyvision-gerencia-cards">' + cards + '</div>' +
+      '</div>';
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeGerenciaPanel();
+    });
+    overlay.querySelector('.hyvision-gerencia-close').addEventListener('click', closeGerenciaPanel);
+    overlay.querySelectorAll('.hyvision-gerencia-card').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        openGerenciaDashboard(btn.getAttribute('data-dashboard-id'), btn.getAttribute('data-dashboard-title'));
+      });
+    });
+    document.body.appendChild(overlay);
+  }
+
+  function injectSidebarGerenciaMenu() {
+    if (isLoginPage() || !isLoggedIn()) return;
+
+    var sideMenu = document.querySelector('ul.tb-side-menu, mat-sidenav .tb-side-menu, tb-side-menu ul');
+    if (!sideMenu) return;
+
+    var gerenciaLi = document.querySelector('.hyvision-sidebar-gerencia-item');
+    if (!gerenciaLi) {
+      var anchorLi = document.querySelector('.hyvision-sidebar-reports-item');
+      if (!anchorLi) {
+        var allLinks = sideMenu.querySelectorAll('a');
+        for (var i = 0; i < allLinks.length; i++) {
+          var href = allLinks[i].getAttribute('href') || allLinks[i].getAttribute('routerlink') || '';
+          var txt = (allLinks[i].innerText || '').toLowerCase();
+          if (href.indexOf('/dashboards') !== -1 || txt.indexOf('sistemas de energía') !== -1) {
+            anchorLi = allLinks[i].closest('li') || allLinks[i];
+            break;
+          }
+        }
+      }
+      if (!anchorLi || !anchorLi.parentNode) return;
+
+      gerenciaLi = document.createElement('li');
+      gerenciaLi.className = 'hyvision-sidebar-gerencia-item';
+      gerenciaLi.innerHTML =
+        '<tb-menu-link>' +
+          '<a class="mat-mdc-button mat-unthemed mat-mdc-button-base hyvision-gerencia-nav-btn" ' +
+          'style="width:100%;display:flex;align-items:center;cursor:pointer;text-decoration:none;padding:0 16px;height:48px;border-radius:0;" ' +
+          'title="' + GERENCIA_LABEL + '">' +
+            '<tb-icon class="mat-icon material-icons notranslate mat-icon-no-color" ' +
+            'style="margin-right:16px;font-size:24px;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;color:inherit;">leaderboard</tb-icon>' +
+            '<span class="tb-link-title" style="flex:1;text-align:left;font-size:14px;font-weight:500;letter-spacing:0;">' + GERENCIA_LABEL + '</span>' +
+            '<tb-icon class="mat-icon material-icons hyvision-gerencia-chevron" style="font-size:20px;width:20px;height:20px;">expand_more</tb-icon>' +
+          '</a>' +
+        '</tb-menu-link>';
+
+      gerenciaLi.querySelector('.hyvision-gerencia-nav-btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        gerenciaLi.classList.toggle('open');
+      });
+
+      if (anchorLi.nextSibling) {
+        anchorLi.parentNode.insertBefore(gerenciaLi, anchorLi.nextSibling);
+      } else {
+        anchorLi.parentNode.appendChild(gerenciaLi);
+      }
+    }
+
+    var gerenciaTitle = gerenciaLi.querySelector('.tb-link-title');
+    if (gerenciaTitle && gerenciaTitle.textContent.trim() !== GERENCIA_LABEL) {
+      gerenciaTitle.textContent = GERENCIA_LABEL;
+    }
+    var gerenciaNav = gerenciaLi.querySelector('.hyvision-gerencia-nav-btn');
+    if (gerenciaNav) gerenciaNav.setAttribute('title', GERENCIA_LABEL);
+
+    GERENCIA_DASHBOARDS.forEach(function(d) {
+      if (document.querySelector('.hyvision-gerencia-subitem[data-dashboard-id="' + d.id + '"]')) return;
+      var sub = document.createElement('li');
+      sub.className = 'hyvision-gerencia-subitem';
+      sub.setAttribute('data-dashboard-id', d.id);
+      sub.innerHTML =
+        '<a class="mat-mdc-button mat-unthemed mat-mdc-button-base hyvision-gerencia-dash-link" ' +
+        'style="width:100%;display:flex;align-items:center;cursor:pointer;text-decoration:none;border-radius:0;">' +
+        '<span class="tb-link-title">' + d.title + '</span></a>';
+      sub.querySelector('a').addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openGerenciaDashboard(d.id, d.title);
+      });
+      var ref = gerenciaLi;
+      var next = gerenciaLi.nextSibling;
+      while (next && next.classList && next.classList.contains('hyvision-gerencia-subitem')) {
+        ref = next;
+        next = next.nextSibling;
+      }
+      if (ref.nextSibling) {
+        ref.parentNode.insertBefore(sub, ref.nextSibling);
+      } else {
+        ref.parentNode.appendChild(sub);
+      }
+    });
+
+    if (isGerenciaRoute()) {
+      gerenciaLi.classList.add('open', 'active');
+      document.querySelectorAll('.hyvision-gerencia-subitem').forEach(function(li) {
+        var id = li.getAttribute('data-dashboard-id') || '';
+        if (id && (window.location.pathname || '').indexOf(id) !== -1) {
+          li.classList.add('active');
+        }
+      });
+    }
+  }
+
   function filterCustomerSidebar() {
     if (isLoginPage() || !isLoggedIn()) return;
 
@@ -384,6 +614,8 @@
     var lis = sideMenu.querySelectorAll('li');
     lis.forEach(function(li) {
       if (li.classList.contains('hyvision-sidebar-reports-item')) return;
+      if (li.classList.contains('hyvision-sidebar-gerencia-item')) return;
+      if (li.classList.contains('hyvision-gerencia-subitem')) return;
 
       var txt = (li.innerText || '').toLowerCase();
       var a = li.querySelector('a');
@@ -1467,7 +1699,10 @@
       var now = Date.now();
       var deviceAssignments = hyvAssignDevicesToDashboards(dashList, telemetries);
 
-      var mappedSites = dashList.map(function(d, index) {
+      var mappedSites = dashList.filter(function(d) {
+        var id = d.id && d.id.id ? d.id.id : d.id;
+        return !isGerenciaDashboard(d.title, id);
+      }).map(function(d, index) {
         var id = d.id && d.id.id ? d.id.id : d.id;
         var title = d.title || 'Sistema de energía';
         var isEpm = title.toLowerCase().indexOf('epm') !== -1 || title.toLowerCase().indexOf('gaori') !== -1;
@@ -2558,6 +2793,69 @@
     obs.observe(root, { childList: true, subtree: true });
   }
 
+  function placeSidenavToggle(btn) {
+    if (!btn) return;
+    var collapsed = document.body.classList.contains('hyv-sidenav-collapsed');
+    if (collapsed) {
+      var contentHeader = document.querySelector(
+        'mat-sidenav-content > mat-toolbar, .mat-drawer-content > mat-toolbar, mat-sidenav-content mat-toolbar, .mat-drawer-content mat-toolbar'
+      );
+      if (contentHeader) {
+        btn.classList.remove('is-floating');
+        btn.classList.add('in-mainbar');
+        if (btn.parentElement !== contentHeader) {
+          contentHeader.insertBefore(btn, contentHeader.firstChild);
+        }
+        return;
+      }
+      btn.classList.remove('in-mainbar');
+      btn.classList.add('is-floating');
+      if (btn.parentElement !== document.body) document.body.appendChild(btn);
+      return;
+    }
+    btn.classList.remove('is-floating');
+    btn.classList.remove('in-mainbar');
+    var header = document.querySelector('mat-sidenav mat-toolbar, mat-sidenav .mat-toolbar');
+    if (header && btn.parentElement !== header) {
+      header.insertBefore(btn, header.firstChild);
+    }
+  }
+
+  function applySidenavCollapsed(collapsed) {
+    document.body.classList.toggle('hyv-sidenav-collapsed', !!collapsed);
+    try { sessionStorage.setItem('hyv-sidenav-collapsed', collapsed ? '1' : '0'); } catch (e) {}
+    placeSidenavToggle(document.querySelector('.hyvision-sidenav-toggle'));
+  }
+
+  function injectSidenavToggle() {
+    if (isLoginPage() || !isLoggedIn()) {
+      var gone = document.querySelector('.hyvision-sidenav-toggle');
+      if (gone) gone.remove();
+      return;
+    }
+    try {
+      if (sessionStorage.getItem('hyv-sidenav-collapsed') === '1') {
+        document.body.classList.add('hyv-sidenav-collapsed');
+      }
+    } catch (e) {}
+    var btn = document.querySelector('.hyvision-sidenav-toggle');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'hyvision-sidenav-toggle';
+      btn.setAttribute('aria-label', 'Mostrar u ocultar menú');
+      btn.title = 'Mostrar u ocultar menú';
+      btn.innerHTML = '<span class="material-icons" aria-hidden="true">menu</span>';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        applySidenavCollapsed(!document.body.classList.contains('hyv-sidenav-collapsed'));
+      });
+      document.body.appendChild(btn);
+    }
+    placeSidenavToggle(btn);
+  }
+
   function hyvisionAppBootstrap() {
     syncUserRoleClass();
     loadInitialConfig();
@@ -2566,11 +2864,16 @@
     updateTriggerVisibility();
     updateSidebarTranslations();
     injectSidebarReportsLink();
+    injectSidebarGerenciaMenu();
     filterCustomerSidebar();
     applyHomeNavigationPolicy();
     syncFleetListChrome();
     scheduleFleetInject();
     startFleetHubDomObserver();
+    watchGerenciaChrome();
+    markGerenciaPage();
+    relabelGerenciaChrome();
+    injectSidenavToggle();
 
     setInterval(function() {
       syncUserRoleClass();
@@ -2581,9 +2884,12 @@
       updateTriggerVisibility();
       updateSidebarTranslations();
       injectSidebarReportsLink();
+      injectSidebarGerenciaMenu();
       applyHomeNavigationPolicy();
       filterCustomerSidebar();
       scheduleFleetInject();
+      injectSidenavToggle();
+      markGerenciaPage();
     }, 800);
   }
 
