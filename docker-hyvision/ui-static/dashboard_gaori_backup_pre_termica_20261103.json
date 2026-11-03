@@ -1697,6 +1697,64 @@
           "settings": {}
         },
         "id": "640cb438-e27d-44e7-b857-846dba787048"
+      },
+      "2b74186e-820d-216a-f2bd-1edf6a3b619f": {
+        "id": "2b74186e-820d-216a-f2bd-1edf6a3b619f",
+        "type": "timeseries",
+        "typeFullFqn": "tenant.scada_dispersion_termica_gaori",
+        "typeId": {
+          "entityType": "WIDGET_TYPE",
+          "id": "3b98e230-d7df-11f1-bd57-9f45b80f9ffd"
+        },
+        "sizeX": 24,
+        "sizeY": 6,
+        "row": 0,
+        "col": 0,
+        "config": {
+          "title": "Tendencia Dispersión Térmica BESS (ΔT)",
+          "showTitle": false,
+          "backgroundColor": "transparent",
+          "color": "rgba(255, 255, 255, 0.87)",
+          "padding": "0px",
+          "dropShadow": false,
+          "useDashboardTimewindow": true,
+          "settings": {},
+          "datasources": [
+            {
+              "type": "device",
+              "name": "",
+              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "dataKeys": [
+                {
+                  "name": "delta_temp_bateria",
+                  "type": "timeseries",
+                  "label": "delta_temp_bateria",
+                  "color": "#64B856",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_bateria_max",
+                  "type": "timeseries",
+                  "label": "temp_bateria_max",
+                  "color": "#ef4444",
+                  "settings": {}
+                },
+                {
+                  "name": "temp_bateria_min",
+                  "type": "timeseries",
+                  "label": "temp_bateria_min",
+                  "color": "#38bdf8",
+                  "settings": {}
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ]
+        }
       }
     },
     "states": {
@@ -1785,7 +1843,7 @@
                 "col": 0
               },
               "db18c56e-f0d6-f699-c3ae-e93cae4bb739": {
-                "row": 50,
+                "row": 56,
                 "col": 0,
                 "sizeX": 24,
                 "sizeY": 9
@@ -1807,6 +1865,12 @@
                 "col": 12,
                 "sizeX": 12,
                 "sizeY": 7
+              },
+              "2b74186e-820d-216a-f2bd-1edf6a3b619f": {
+                "row": 50,
+                "col": 0,
+                "sizeX": 24,
+                "sizeY": 6
               }
             },
             "gridSettings": {
@@ -1856,6 +1920,6 @@
     }
   },
   "resources": null,
-  "version": 34,
+  "version": 35,
   "externalId": null
 }

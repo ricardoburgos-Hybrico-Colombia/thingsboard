@@ -373,7 +373,7 @@ self.onDataUpdated = function() {
           }
         }
       }
-    ],
+    },
     yAxis: {
       type: 'value',
       position: 'left',
