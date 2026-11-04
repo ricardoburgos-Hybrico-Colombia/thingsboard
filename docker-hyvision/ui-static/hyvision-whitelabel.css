@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    HyVision White-Labeling Module Styles
    ============================================================ */
 
@@ -2523,4 +2523,44 @@ mat-paginator.mat-mdc-paginator,
 .mat-mdc-paginator-navigation-next[disabled],
 .mat-mdc-paginator-navigation-previous[disabled] {
   color: rgba(148, 163, 184, 0.3) !important;
+}
+
+/* ============================================================
+   Supresión de Atribución para Marca Blanca Industrial (White-Label)
+   ============================================================ */
+section.tb-powered-by-footer,
+tb-footer,
+.tb-footer,
+.tb-footer-version,
+.tb-powered-by {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Indicadores de Estado Luminiscentes SCADA para Filtros */
+.hyv-dot-online {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6be35b;
+  box-shadow: 0 0 6px rgba(107, 227, 91, 0.6);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.hyv-dot-offline {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+  margin-right: 6px;
+  vertical-align: middle;
 }

@@ -512,13 +512,13 @@
         ${isAdmin ? `
           <div class="hyvision-wl-tabs">
             <button class="hyvision-wl-tab-btn active" data-tab="tab-reports">
-              <span>📑</span> Reportes Ejecutivos
+              <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span> Reportes Ejecutivos
             </button>
             <button class="hyvision-wl-tab-btn" data-tab="tab-branding" id="tab-btn-branding">
-              <span>🎨</span> Marca Blanca
+              <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"/></svg></span> Marca Blanca
             </button>
             <button class="hyvision-wl-tab-btn" data-tab="tab-telegram" id="tab-btn-telegram">
-              <span>📲</span> Alertas Telegram
+              <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Alertas Telegram
             </button>
           </div>
         ` : ''}
@@ -530,7 +530,7 @@
             <!-- On-demand Generation -->
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
-                <span>⚡</span> Generación de Reportes Bajo Demanda
+                <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span> Generación de Reportes Bajo Demanda
               </div>
               <p style="font-size:12px; color:#8ea38b; margin-top:-8px; margin-bottom:12px;">
                 Selecciona el periodo de análisis para generar y descargar los informes energéticos del activo <strong>BESS_EPM_GAORI</strong>:
@@ -547,20 +547,20 @@
               <!-- Action Buttons -->
               <div class="hyv-report-actions-grid" style="${isAdmin ? '' : 'grid-template-columns: repeat(2, 1fr);'}">
                 <div class="hyv-rep-action-card" id="btn-rep-pdf">
-                  <div class="hyv-rep-action-icon">📄</div>
+                  <div class="hyv-rep-action-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div class="hyv-rep-action-title">PDF Ejecutivo</div>
                   <div class="hyv-rep-action-desc">Informe visual A4 con gráficos vectoriales, KPIs y formato de impresión</div>
                 </div>
 
                 <div class="hyv-rep-action-card" id="btn-rep-excel">
-                  <div class="hyv-rep-action-icon">📊</div>
+                  <div class="hyv-rep-action-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
                   <div class="hyv-rep-action-title">Excel (.xlsx)</div>
                   <div class="hyv-rep-action-desc">Libro multicapa con resumen, telemetría diaria y bitácora de eventos</div>
                 </div>
 
                 ${isAdmin ? `
                   <div class="hyv-rep-action-card" id="btn-rep-tg">
-                    <div class="hyv-rep-action-icon">📲</div>
+                    <div class="hyv-rep-action-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
                     <div class="hyv-rep-action-title">Despacho Telegram</div>
                     <div class="hyv-rep-action-desc">Enviar resumen ejecutivo y enlaces de descarga directa al chat del equipo</div>
                   </div>
@@ -573,7 +573,7 @@
             ${isAdmin ? `
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
-                <span>⏱️</span> Programación de Informes Recurrentes
+                <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Programación de Informes Recurrentes
               </div>
               <div class="hyvision-wl-form-grid">
                 <div class="hyvision-wl-field hyvision-wl-form-full" style="flex-direction:row; align-items:center; gap:10px;">
@@ -599,7 +599,7 @@
 
                 <div class="hyvision-wl-field hyvision-wl-form-full" style="margin-top:4px; display:flex; flex-direction:row; gap:12px; align-items:center;">
                   <button type="button" class="hyvision-wl-btn" id="btn-save-schedule" style="background:#5a5f4d; color:#ffffff; padding:9px 18px; font-size:13px;">
-                    💾 Guardar Programación
+                    Guardar Programación
                   </button>
                   <span id="sched-save-result" style="font-size:12px; font-weight:500;"></span>
                 </div>
@@ -614,7 +614,7 @@
             <!-- Identidad de Marca -->
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
-                <span>🏷️</span> Identidad de Marca
+                <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span> Identidad de Marca
               </div>
               <div class="hyvision-wl-form-grid">
                 <div class="hyvision-wl-field">
@@ -635,7 +635,7 @@
             <!-- Colores & Apariencia -->
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
-                <span>🎨</span> Paleta de Colores Corporativos
+                <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"/></svg></span> Paleta de Colores Corporativos
               </div>
               <div class="hyvision-wl-form-grid">
                 <div class="hyvision-wl-field">
@@ -684,7 +684,7 @@
             <!-- Logos -->
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
-                <span>🖼️</span> Logotipo & Favicon
+                <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span> Logotipo & Favicon
               </div>
               <div class="hyvision-wl-form-grid">
                 <div class="hyvision-wl-field hyvision-wl-form-full">
@@ -703,7 +703,7 @@
             <!-- CSS Personalizado -->
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
-                <span>💻</span> CSS Personalizado Avanzado
+                <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span> CSS Personalizado Avanzado
               </div>
               <div class="hyvision-wl-field">
                 <label class="hyvision-wl-label">Reglas CSS adicionales (opcional)</label>
@@ -716,7 +716,7 @@
           <div class="hyvision-wl-tab-pane" id="tab-telegram">
             <div class="hyvision-wl-section">
               <div class="hyvision-wl-section-title">
-                <span>📲</span> Notificaciones Críticas por Telegram (24/7 Gratis)
+                <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notificaciones Críticas por Telegram (24/7 Gratis)
               </div>
               <div class="hyvision-wl-form-grid">
                 <div class="hyvision-wl-field hyvision-wl-form-full" style="flex-direction:row; align-items:center; gap:10px;">
@@ -728,7 +728,7 @@
 
                 <div class="hyvision-wl-field hyvision-wl-form-full" style="background:rgba(20,40,18,0.6); border:1px solid rgba(100,184,86,0.3); border-radius:6px; padding:10px 14px; font-size:12px; line-height:1.5; color:#cde3cb;">
                   <div style="font-weight:700; color:#85db76; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-                    <span>🛡️</span> Política de Despacho Multi-Zona LatAm (24/7)
+                    <span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> Política de Despacho Multi-Zona LatAm (24/7)
                   </div>
                   <div>• <strong style="color:#ff6b6b;">Filtro Estricto:</strong> Se despachan <strong>ÚNICAMENTE alertas CRÍTICAS</strong> (bloqueo automático de advertencias y spam).</div>
                   <div>• <strong style="color:#64B856;">Zonas Horarias Automáticas:</strong> Reporta la hora local del sitio (<strong>Colombia/Perú UTC-5</strong> o <strong>Honduras/Guatemala UTC-6</strong>) con referencia regional cruzada.</div>
@@ -749,7 +749,7 @@
 
                 <div class="hyvision-wl-field hyvision-wl-form-full" style="margin-top:4px; display:flex; flex-direction:row; gap:12px; align-items:center;">
                   <button type="button" class="hyvision-wl-btn" id="wl-btn-telegram-test" style="background:rgba(100,184,86,0.2); border:1px solid #9fa68b; color:#a3e099; padding:8px 16px; font-size:12.5px;">
-                    🧪 Probar Conexión con Telegram
+                    Probar Conexión con Telegram
                   </button>
                   <span id="wl-telegram-test-result" style="font-size:12px; font-weight:500;"></span>
                 </div>
@@ -836,16 +836,16 @@
         .then(function(data) {
           if (data.status === 'ok') {
             statusEl.style.color = '#9fa68b';
-            statusEl.innerText = '✅ ¡Reporte despachado exitosamente a Telegram!';
+            statusEl.innerText = '● Reporte despachado exitosamente a Telegram';
             showToast('¡Reporte enviado a Telegram!');
           } else {
             statusEl.style.color = '#ff8a80';
-            statusEl.innerText = '❌ ' + (data.message || 'Error al despachar reporte');
+            statusEl.innerText = '● Error: ' + (data.message || 'Error al despachar reporte');
           }
         })
         .catch(function(err) {
           statusEl.style.color = '#ff8a80';
-          statusEl.innerText = '❌ Error de conexión: ' + err.message;
+          statusEl.innerText = '● Error de conexión: ' + err.message;
         });
       });
     }
@@ -894,7 +894,7 @@
 
         if (!botToken || !chatId) {
           resSpan.style.color = '#ff8a80';
-          resSpan.innerText = '⚠️ Ingresa el Bot Token y Chat ID primero.';
+          resSpan.innerText = '● Ingresa el Bot Token y Chat ID primero.';
           return;
         }
 
@@ -915,20 +915,20 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
           btn.disabled = false;
-          btn.innerText = '🧪 Probar Conexión con Telegram';
+          btn.innerText = 'Probar Conexión con Telegram';
           if (data.status === 'ok') {
             resSpan.style.color = '#9fa68b';
-            resSpan.innerText = '✅ ' + data.message;
+            resSpan.innerText = '● ' + data.message;
           } else {
             resSpan.style.color = '#ff8a80';
-            resSpan.innerText = '❌ ' + (data.message || 'Error al conectar');
+            resSpan.innerText = '● Error: ' + (data.message || 'Error al conectar');
           }
         })
         .catch(function(err) {
           btn.disabled = false;
-          btn.innerText = '🧪 Probar Conexión con Telegram';
+          btn.innerText = 'Probar Conexión con Telegram';
           resSpan.style.color = '#ff8a80';
-          resSpan.innerText = '❌ Error de red: ' + err.message;
+          resSpan.innerText = '● Error de red: ' + err.message;
         });
       });
 
@@ -959,22 +959,22 @@
         .then(function(r) { return r.json(); })
         .then(function(data) {
           sBtn.disabled = false;
-          sBtn.innerText = '💾 Guardar Programación';
+          sBtn.innerText = 'Guardar Programación';
           if (data.status === 'ok') {
             resSpan.style.color = '#9fa68b';
-            resSpan.innerText = '✅ ¡Programación guardada!';
+            resSpan.innerText = '● ¡Programación guardada!';
             currentConfig.reportSchedule = schedData;
             showToast('Programación de reportes guardada');
           } else {
             resSpan.style.color = '#ff8a80';
-            resSpan.innerText = '❌ ' + data.message;
+            resSpan.innerText = '● ' + data.message;
           }
         })
         .catch(function(err) {
           sBtn.disabled = false;
-          sBtn.innerText = '💾 Guardar Programación';
+          sBtn.innerText = 'Guardar Programación';
           resSpan.style.color = '#ff8a80';
-          resSpan.innerText = '❌ ' + err.message;
+          resSpan.innerText = '● ' + err.message;
         });
       });
 
@@ -1810,11 +1810,11 @@
     var chipAll = hub.querySelector('[data-filter="all"]');
     if (chipAll) chipAll.innerText = 'Todos (' + totalSites + ')';
     var chipNorm = hub.querySelector('[data-filter="normal"]');
-    if (chipNorm) chipNorm.innerText = '🟢 Operativos (' + onlineCount + ')';
+    if (chipNorm) chipNorm.innerText = '<span class="hyv-dot-online"></span> Operativos (' + onlineCount + ')';
     var chipAlert = hub.querySelector('[data-filter="alert"]');
-    if (chipAlert) chipAlert.innerText = '🔴 Fuera de línea (' + offlineCount + ')';
+    if (chipAlert) chipAlert.innerText = '<span class="hyv-dot-offline"></span> Fuera de línea (' + offlineCount + ')';
     var chipBess = hub.querySelector('[data-filter="bess"]');
-    if (chipBess) chipBess.innerText = '🔋 Con BESS (' + bessActiveSites.length + ')';
+    if (chipBess) chipBess.innerText = '<span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="11" rx="2"/><line x1="21" y1="11" x2="21" y2="14"/></svg>Con BESS</span> (' + bessActiveSites.length + ')';
   }
 
   function renderFleetHubContent(hub) {
@@ -1829,7 +1829,7 @@
       if (sites.length === 0) {
         html += `
           <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #8dae8a; font-size: 15px;">
-            <div style="font-size: 32px; margin-bottom: 12px;">⚡</div>
+            <div style="font-size: 32px; margin-bottom: 12px;"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#6be35b" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
             No se encontraron sistemas de energía bajo este filtro.
             ${isAdmin ? '<div style="margin-top:16px;"><button class="hyv-btn-scada" id="btn-add-from-empty" style="display:inline-flex;">+ Añadir sistema de energía</button></div>' : ''}
           </div>
@@ -1853,26 +1853,26 @@
                 <div style="display:flex; align-items:center; gap:6px;">
                   <span class="hyv-card-type-tag ${s.isOnline ? 'online' : 'offline'}">${s.isOnline ? 'ONLINE' : 'OFFLINE'}</span>
                   <span class="hyv-card-type-tag">${s.type}</span>
-                  ${isAdmin ? `<button class="hyv-btn-delete hyv-trigger-delete" data-id="${s.id}" data-title="${s.title}" title="Eliminar sistema de energía">🗑</button>` : ''}
+                  ${isAdmin ? `<button class="hyv-btn-delete hyv-trigger-delete" data-id="${s.id}" data-title="${s.title}" title="Eliminar sistema de energía"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
                 </div>
               </div>
 
-              ${s.isOnline ? '' : `<div class="hyv-offline-banner" title="${s.offlineHint || ''}">📡 ${s.offlineHint || 'Sin telemetría en vivo'}</div>`}
+              ${s.isOnline ? '' : `<div class="hyv-offline-banner" title="${s.offlineHint || ''}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg> ${s.offlineHint || 'Sin telemetría en vivo'}</div>`}
 
               <!-- Power Triad: Solar, BESS, Load -->
               <div class="hyv-power-triad ${s.isOnline ? '' : 'hyv-power-triad-muted'}">
                 <div class="hyv-triad-item">
-                  <span class="hyv-triad-label">☀️ Solar</span>
+                  <span class="hyv-triad-label"><span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>Solar</span></span>
                   <span class="hyv-triad-val solar ${s.isOnline ? '' : 'hyv-no-data'}">${ui.solarKw || '—'}</span>
                   <span class="hyv-triad-extra">${s.solarTodayKwh}</span>
                 </div>
                 <div class="hyv-triad-item">
-                  <span class="hyv-triad-label">🔋 BESS</span>
+                  <span class="hyv-triad-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#6be35b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><rect x="2" y="7" width="16" height="11" rx="2"/><line x1="21" y1="11" x2="21" y2="14"/></svg>BESS</span>
                   <span class="hyv-triad-val bess ${s.isOnline ? '' : 'hyv-no-data'}">${ui.bessMain || '—'}</span>
                   <span class="hyv-triad-extra">${ui.bessSub || '—'}</span>
                 </div>
                 <div class="hyv-triad-item">
-                  <span class="hyv-triad-label">💡 Carga</span>
+                  <span class="hyv-triad-label"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:3px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Carga</span>
                   <span class="hyv-triad-val load ${s.isOnline ? '' : 'hyv-no-data'}">${ui.loadKw || '—'}</span>
                   <span class="hyv-triad-extra">${s.isOnline ? 'Activa' : 'Sin señal'}</span>
                 </div>
@@ -1898,18 +1898,18 @@
 
               <!-- Technical SLA & Health Row -->
               <div class="hyv-card-metrics-row">
-                <span>⚡ SLA: <strong style="color:#ffffff;">${s.uptime}</strong></span>
-                <span>🌡 Temp BESS: <strong style="color:#ffffff;">${s.temp}</strong></span>
-                <span>🔄 Ciclos: <strong style="color:#ffffff;">${s.cycles}</strong></span>
+                <span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#8ce47e" stroke-width="2" style="vertical-align:-1px; margin-right:3px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>SLA: <strong style="color:#ffffff;">${s.uptime}</strong></span>
+                <span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#92b08f" stroke-width="2" style="vertical-align:-1px; margin-right:3px;"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>Temp BESS: <strong style="color:#ffffff;">${s.temp}</strong></span>
+                <span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#92b08f" stroke-width="2" style="vertical-align:-1px; margin-right:3px;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Ciclos: <strong style="color:#ffffff;">${s.cycles}</strong></span>
               </div>
 
               <!-- Action Buttons -->
               <div class="hyv-card-actions">
                 <a class="hyv-btn-scada" href="${targetUrl}">
-                  <span>⚡ Abrir SCADA</span>
+                  <span><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Abrir SCADA</span>
                 </a>
                 <button class="hyv-btn-report hyv-trigger-report" data-title="${s.title}">
-                  <span>📄 Reporte</span>
+                  <span><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Reporte</span>
                 </button>
               </div>
             </div>
@@ -2051,7 +2051,7 @@
         <div class="hyv-map-container-card">
           <div class="hyv-map-header-bar">
             <div class="hyv-map-header-title">
-              <span style="font-size:18px;">📍</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               <div>
                 <h3>Distribución Geográfica y Posicionamiento GPS</h3>
                 <span>${filteredMapSites.length} Sistemas de Energía con Telemetría Activa</span>
@@ -2059,13 +2059,13 @@
             </div>
             <div class="hyv-map-nav-tabs">
               <button class="hyv-map-tab-btn ${currentMode === 'reg' ? 'active' : ''}" data-mode="reg">
-                <span>🌎</span> Latinoamérica (${allFleetSites.length})
+                Latinoamérica (${allFleetSites.length})
               </button>
               <button class="hyv-map-tab-btn ${currentMode === 'co' ? 'active' : ''}" data-mode="co">
-                <span>🇨🇴</span> Colombia (${coCount})
+                Colombia (${coCount})
               </button>
               <button class="hyv-map-tab-btn ${currentMode === 'hn' ? 'active' : ''}" data-mode="hn">
-                <span>🇭🇳</span> Honduras (${hnCount})
+                Honduras (${hnCount})
               </button>
             </div>
           </div>
@@ -2098,14 +2098,14 @@
                 <a class="hyv-float-title" href="/dashboards/${selectedSite.id}">${selectedSite.title}</a>
                 <span class="hyv-float-badge">${selectedSite.type}</span>
               </div>
-              <div class="hyv-float-sub">📍 ${selectedSite.region} • GPS: ${selectedSite.lat.toFixed(4)}°, ${selectedSite.lng.toFixed(4)}°</div>
+              <div class="hyv-float-sub">${selectedSite.region} • GPS: ${selectedSite.lat.toFixed(4)}°, ${selectedSite.lng.toFixed(4)}°</div>
               <div class="hyv-float-grid">
-                <div>☀️ Solar: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#f7d048' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.solarKw) || '—'}</strong></div>
-                <div>🔋 BESS: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#6be35b' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.bessMain) || '—'}</strong></div>
-                <div>💡 Carga: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#62c3f5' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.loadKw) || '—'}</strong></div>
-                <div>⚡ SLA: <strong style="color:#ffffff;">${selectedSite.uptime}</strong></div>
+                <div><span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>Solar</span>: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#f7d048' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.solarKw) || '—'}</strong></div>
+                <div>BESS: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#6be35b' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.bessMain) || '—'}</strong></div>
+                <div>Carga: <strong class="${selectedSite.isOnline ? '' : 'hyv-no-data'}" style="color:${selectedSite.isOnline ? '#62c3f5' : '#64748b'};">${(selectedSite.ui && selectedSite.ui.loadKw) || '—'}</strong></div>
+                <div>SLA: <strong style="color:#ffffff;">${selectedSite.uptime}</strong></div>
               </div>
-              <a class="hyv-float-scada-btn" href="/dashboards/${selectedSite.id}">${selectedSite.isOnline ? '⚡ Abrir SCADA en Vivo' : '📂 Abrir SCADA (histórico)'}</a>
+              <a class="hyv-float-scada-btn" href="/dashboards/${selectedSite.id}">${selectedSite.isOnline ? 'Abrir SCADA en Vivo' : 'Abrir SCADA (histórico)'}</a>
             </div>
           </div>
         </div>
@@ -2149,9 +2149,9 @@
                 <th>Sistema de Energía</th>
                 <th>Tipo / Tecnología</th>
                 <th>Región</th>
-                <th>☀️ Solar (kW)</th>
-                <th>🔋 BESS (SOC)</th>
-                <th>💡 Carga (kW)</th>
+                <th><span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>Solar</span> (kW)</th>
+                <th>BESS (SOC)</th>
+                <th>Carga (kW)</th>
                 <th>SLA Uptime</th>
                 <th>Acciones</th>
               </tr>
@@ -2198,9 +2198,9 @@
               <td><strong style="color:${s.isOnline ? '#ffffff' : '#94a3b8'};">${s.uptime}</strong></td>
               <td>
                 <div style="display:flex; gap:6px; align-items:center;">
-                  <a class="hyv-btn-scada" style="padding:4px 8px; font-size:11px;" href="${targetUrl}">⚡ SCADA</a>
-                  <button class="hyv-btn-report hyv-trigger-report" data-title="${s.title}" style="padding:4px 8px; font-size:11px;">📄 Reporte</button>
-                  ${isAdmin ? `<button class="hyv-btn-delete hyv-trigger-delete" data-id="${s.id}" data-title="${s.title}" style="padding:4px 8px; font-size:11px;" title="Eliminar">🗑</button>` : ''}
+                  <a class="hyv-btn-scada" style="padding:4px 8px; font-size:11px;" href="${targetUrl}">SCADA</a>
+                  <button class="hyv-btn-report hyv-trigger-report" data-title="${s.title}" style="padding:4px 8px; font-size:11px;">Reporte</button>
+                  ${isAdmin ? `<button class="hyv-btn-delete hyv-trigger-delete" data-id="${s.id}" data-title="${s.title}" style="padding:4px 8px; font-size:11px;" title="Eliminar"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
                 </div>
               </td>
             </tr>
@@ -2343,7 +2343,7 @@
         banner.style.cssText = 'position:fixed; top:75px; right:30px; z-index:9999;';
         banner.innerHTML = `
           <button class="hyv-btn-scada" style="box-shadow:0 8px 24px rgba(0,0,0,0.6); border:1px solid #8ce47e; padding:10px 18px;">
-            ⚡ Volver al Centro de Mando HyVision
+            ← Volver al Centro de Mando HyVision
           </button>
         `;
         banner.querySelector('button').addEventListener('click', function() {
@@ -2407,16 +2407,16 @@
               <span>⊞</span> Tarjetas
             </button>
             <button class="hyv-view-btn ${fleetHubState.activeView === 'map' ? 'active' : ''}" data-view="map">
-              <span>🗺</span> Mapa
+              <span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span> Mapa
             </button>
             <button class="hyv-view-btn ${fleetHubState.activeView === 'table' ? 'active' : ''}" data-view="table">
-              <span>☰</span> SCADA
+              <span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> SCADA
             </button>
           </div>
 
           <!-- Classic Mode Toggle for Admin/Management -->
           <button class="hyv-btn-toggle-classic" id="btn-toggle-classic" title="Alternar a la vista administrativa clásica">
-            <span>⚙</span> Modo Clásico
+            <span><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Modo Clásico
           </button>
         </div>
       </div>
@@ -2426,7 +2426,7 @@
         <div class="hyv-kpi-card">
           <div class="hyv-kpi-header">
             <span class="hyv-kpi-label">Potencia Activa Total</span>
-            <span class="hyv-kpi-icon">⚡</span>
+            <span class="hyv-kpi-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6be35b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
           </div>
           <div class="hyv-kpi-value" id="hyv-kpi-power">--<span>kW</span></div>
           <div class="hyv-kpi-sub positive" id="hyv-kpi-power-sub">Demanda de carga activa consolidada</div>
@@ -2435,7 +2435,7 @@
         <div class="hyv-kpi-card">
           <div class="hyv-kpi-header">
             <span class="hyv-kpi-label">Generación Solar Hoy</span>
-            <span class="hyv-kpi-icon">☀️</span>
+            <span class="hyv-kpi-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#f7d048" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg></span>
           </div>
           <div class="hyv-kpi-value" id="hyv-kpi-energy">--<span>MWh</span></div>
           <div class="hyv-kpi-sub" id="hyv-kpi-energy-sub">Total fotovoltaico acumulado hoy</div>
@@ -2444,7 +2444,7 @@
         <div class="hyv-kpi-card">
           <div class="hyv-kpi-header">
             <span class="hyv-kpi-label">Estado de la Flota</span>
-            <span class="hyv-kpi-icon">🛡</span>
+            <span class="hyv-kpi-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8ce47e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
           </div>
           <div class="hyv-kpi-value" id="hyv-kpi-fleet" style="color:#6be35b;">--%</div>
           <div class="hyv-kpi-sub positive" id="hyv-kpi-fleet-sub">● Calculando telemetría...</div>
@@ -2453,7 +2453,7 @@
         <div class="hyv-kpi-card">
           <div class="hyv-kpi-header">
             <span class="hyv-kpi-label">BESS Promedio</span>
-            <span class="hyv-kpi-icon">🔋</span>
+            <span class="hyv-kpi-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6be35b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="11" rx="2"/><line x1="21" y1="11" x2="21" y2="14"/><line x1="6" y1="11" x2="6" y2="14"/><line x1="10" y1="11" x2="10" y2="14"/></svg></span>
           </div>
           <div class="hyv-kpi-value" id="hyv-kpi-bess">--<span>% SOC</span></div>
           <div class="hyv-kpi-sub" id="hyv-kpi-bess-sub">Salud celdas SOH: 99.5%</div>
@@ -2462,7 +2462,7 @@
         <div class="hyv-kpi-card">
           <div class="hyv-kpi-header">
             <span class="hyv-kpi-label">Disponibilidad SLA</span>
-            <span class="hyv-kpi-icon">📶</span>
+            <span class="hyv-kpi-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
           </div>
           <div class="hyv-kpi-value" id="hyv-kpi-sla">--<span>%</span></div>
           <div class="hyv-kpi-sub" id="hyv-kpi-sla-sub">Telemetría continua 24/7</div>
@@ -2472,17 +2472,17 @@
       <!-- Search & Real-time Filter Bar (Optimized for hundreds of sites) -->
       <div class="hyv-fleet-filters-row">
         <div class="hyv-search-box">
-          <span class="hyv-search-icon">🔍</span>
+          <span class="hyv-search-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
           <input type="text" class="hyv-search-input" id="hyv-fleet-search" placeholder="Buscar por nombre de sitio, tecnología o región..." value="${fleetHubState.searchTerm}" />
         </div>
 
         <div class="hyv-filter-chips">
           <div class="hyv-chip ${fleetHubState.activeFilter === 'all' ? 'active' : ''}" data-filter="all">Todos</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'normal' ? 'active' : ''}" data-filter="normal">🟢 Operativos</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'alert' ? 'active' : ''}" data-filter="alert">🔴 Fuera de línea</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'bess' ? 'active' : ''}" data-filter="bess">🔋 Con BESS</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'solar' ? 'active' : ''}" data-filter="solar">☀️ Solar</div>
-          <div class="hyv-chip ${fleetHubState.activeFilter === 'hybrid' ? 'active' : ''}" data-filter="hybrid">⚙ Híbridos</div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'normal' ? 'active' : ''}" data-filter="normal"><span class="hyv-dot-online"></span> Operativos</div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'alert' ? 'active' : ''}" data-filter="alert"><span class="hyv-dot-offline"></span> Fuera de línea</div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'bess' ? 'active' : ''}" data-filter="bess"><span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="11" rx="2"/><line x1="21" y1="11" x2="21" y2="14"/></svg>Con BESS</span></div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'solar' ? 'active' : ''}" data-filter="solar"><span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>Solar</span></div>
+          <div class="hyv-chip ${fleetHubState.activeFilter === 'hybrid' ? 'active' : ''}" data-filter="hybrid"><span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Híbridos</span></div>
         </div>
       </div>
 
