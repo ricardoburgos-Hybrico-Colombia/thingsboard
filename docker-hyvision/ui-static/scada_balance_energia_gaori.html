@@ -1,0 +1,56 @@
+<div class="trend-card-container elec energy-balance-card">
+  <div class="trend-header">
+    <div class="trend-title">
+      <span class="trend-icon">⚡</span>
+      <span id="eb-trend-title">BALANCE DE ENERGÍA DIARIO Y FLUJO DE MICRORRED</span>
+    </div>
+    <div id="eb-trend-badge" class="trend-badge">AUTONOMÍA 100%</div>
+  </div>
+
+  <div class="trend-kpi-bar">
+    <div class="kpi-col">
+      <span class="kpi-lbl">☀️ SOLAR GENERADA</span>
+      <div class="kpi-val-group">
+        <span id="eb-val-solar" class="kpi-num" style="color: #F59E0B;">0.0</span>
+        <span class="kpi-unit">kWh</span>
+      </div>
+      <span id="eb-sub-solar" class="kpi-sub">Acumulado Hoy</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">⚡ ALMACENADA BESS</span>
+      <div class="kpi-val-group">
+        <span id="eb-val-bess-chg" class="kpi-num" style="color: #A855F7;">0.0</span>
+        <span class="kpi-unit">kWh</span>
+      </div>
+      <span id="eb-sub-bess-chg" class="kpi-sub">Carga BESS</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">🔋 DESCARGADA BESS</span>
+      <div class="kpi-val-group">
+        <span id="eb-val-bess-dis" class="kpi-num" style="color: #06B6D4;">0.0</span>
+        <span class="kpi-unit">kWh</span>
+      </div>
+      <span id="eb-sub-bess-dis" class="kpi-sub">Descarga BESS</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-col">
+      <span class="kpi-lbl">🏢 CARGA CONSUMIDA</span>
+      <div class="kpi-val-group">
+        <span id="eb-val-load" class="kpi-num" style="color: #10B981;">0.0</span>
+        <span class="kpi-unit">kWh</span>
+      </div>
+      <span id="eb-sub-load" class="kpi-sub">Demanda Planta</span>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <div id="echarts-energy-balance" style="width: 100%; height: 100%;"></div>
+  </div>
+
+  <div class="trend-footer">
+    <span id="eb-axis-foot">Eje: <strong style="color:#F59E0B;">Solar</strong> · <strong style="color:#10B981;">Carga</strong> · <strong style="color:#A855F7;">BESS In</strong> · <strong style="color:#06B6D4;">BESS Out (kWh)</strong></span>
+    <span>Balance: <strong id="eb-balance-text" style="color:#10B981;">100% Renovable</strong></span>
+  </div>
+</div>

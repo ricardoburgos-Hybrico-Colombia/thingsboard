@@ -35,3 +35,4 @@ if all_ok:
     print("\n>>> ALL 18 WIDGETS PERFECTLY HOMOLOGATED AND VALIDATED! <<<")
 else:
     print("\n>>> SOME CHECKS FAILED! <<<")
+

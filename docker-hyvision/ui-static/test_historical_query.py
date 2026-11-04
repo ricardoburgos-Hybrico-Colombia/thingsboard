@@ -64,3 +64,4 @@ for name, start_ts, end_ts in test_windows:
     assert any(len(data.get(k, [])) > 0 for k in keys_to_test), f"Sin datos en ventana {name}"
 
 print("\n>>> TODAS LAS VENTANAS TEMPORALES DEVUELVEN TELEMETRÍA CORRECTAMENTE! <<<")
+

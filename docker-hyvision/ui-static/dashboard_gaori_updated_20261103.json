@@ -583,14 +583,15 @@
         "id": "a73d9a4a-3235-e5a0-f90b-2dc451e6065d"
       },
       "6c3094d4-1628-a188-2f5b-85682588c8e7": {
-        "typeFullFqn": "tenant.balance_planta_card",
-        "type": "latest",
+        "typeFullFqn": "tenant.scada_balance_energia_gaori",
+        "type": "timeseries",
         "sizeX": 8,
         "sizeY": 3.5,
         "config": {
           "datasources": [
             {
               "type": "entity",
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
               "dataKeys": [
                 {
                   "name": "energia_solar_hoy",
@@ -626,7 +627,6 @@
                   "ACTIVE"
                 ]
               },
-              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
               "latestDataKeys": []
             }
           ],
@@ -635,13 +635,14 @@
           "color": "rgba(255, 255, 255, 0.87)",
           "padding": "0px",
           "settings": {},
-          "title": "BALANCE DE ENERGÍA DIARIO (kWh)",
+          "title": "BALANCE DE ENERGÍA DIARIO Y FLUJO DE MICRORRED",
           "dropShadow": false,
           "enableFullscreen": false,
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -1920,6 +1921,6 @@
     }
   },
   "resources": null,
-  "version": 36,
+  "version": 37,
   "externalId": null
 }
