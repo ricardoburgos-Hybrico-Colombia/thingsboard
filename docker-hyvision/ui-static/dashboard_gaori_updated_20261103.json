@@ -641,7 +641,7 @@
           "settings": {},
           "title": "BALANCE DE ENERGÍA DIARIO Y FLUJO DE MICRORRED",
           "dropShadow": false,
-          "enableFullscreen": false,
+          "enableFullscreen": true,
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
@@ -1093,7 +1093,8 @@
           "settings": {},
           "title": "Tendencia Tensión y Corriente BESS",
           "dropShadow": false,
-          "useDashboardTimewindow": true
+          "useDashboardTimewindow": true,
+          "enableFullscreen": true
         },
         "row": 0,
         "col": 0,
@@ -1764,7 +1765,8 @@
               "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
               "latestDataKeys": []
             }
-          ]
+          ],
+          "enableFullscreen": true
         }
       }
     },
@@ -1931,6 +1933,6 @@
     }
   },
   "resources": null,
-  "version": 38,
+  "version": 39,
   "externalId": null
 }
