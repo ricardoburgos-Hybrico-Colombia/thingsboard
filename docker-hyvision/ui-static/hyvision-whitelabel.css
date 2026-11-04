@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    HyVision White-Labeling Module Styles
    ============================================================ */
 
@@ -1838,4 +1838,591 @@ tb-dashboard-widget mat-card {
 }
 .hyv-kpi-sub.danger {
   color: #ef4444 !important;
+}
+
+
+/* ========================================================================== */
+/* HYVISION SCADA THEME: MODAL VENTANA DE TIEMPO (TIMEWINDOW POPUP)           */
+/* ========================================================================== */
+.cdk-overlay-pane.tb-timewindow-panel,
+.tb-timewindow-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+tb-timewindow-panel,
+.tb-timewindow-panel tb-timewindow-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  background: linear-gradient(165deg, rgba(16, 29, 18, 0.98) 0%, rgba(9, 17, 10, 0.99) 100%) !important;
+  border: 1px solid rgba(100, 184, 86, 0.38) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(100, 184, 86, 0.18) !important;
+  color: #e5ede4 !important;
+  padding: 14px 18px !important;
+  box-sizing: border-box !important;
+}
+
+/* Encabezados y Paneles Internos */
+tb-timewindow-panel .tb-timewindow-form,
+tb-timewindow-panel .tb-timewindow-form-header,
+tb-timewindow-panel .tb-timewindow-form-content,
+tb-timewindow-panel .tb-form-panel {
+  background: transparent !important;
+  color: #e5ede4 !important;
+}
+
+tb-timewindow-panel .tb-form-panel.stroked {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(100, 184, 86, 0.22) !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
+}
+
+tb-timewindow-panel .tb-form-panel-title,
+tb-timewindow-panel .tb-timewindow-form-title,
+tb-timewindow-panel .tb-form-row > div:first-child,
+tb-timewindow-panel .fixed-title-width-180 {
+  color: #92b08f !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+/* Pestañas Principales: Tiempo Real / Historial (Toggle Select) */
+tb-timewindow-panel tb-toggle-select .mat-button-toggle-group,
+tb-timewindow-panel .tb-toggle-select-container,
+tb-timewindow-panel .tb-toggle-container {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(100, 184, 86, 0.25) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+}
+
+tb-timewindow-panel mat-button-toggle,
+tb-timewindow-panel .mat-button-toggle-button {
+  background: transparent !important;
+  color: #94a3b8 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+tb-timewindow-panel mat-button-toggle.mat-button-toggle-checked,
+tb-timewindow-panel mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
+  background: linear-gradient(135deg, #355a30 0%, #20381d 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+tb-timewindow-panel .mat-button-toggle-label-content {
+  line-height: 28px !important;
+  padding: 0 14px !important;
+}
+
+/* Sub-pestañas (Últimos / Rango / Relativo) */
+tb-timewindow-panel tb-toggle-select[appearance="stroked"] .mat-button-toggle-group {
+  border: 1px solid rgba(100, 184, 86, 0.3) !important;
+}
+tb-timewindow-panel tb-toggle-select[appearance="stroked"] mat-button-toggle.mat-button-toggle-checked,
+tb-timewindow-panel tb-toggle-select[appearance="stroked"] mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
+  background: rgba(100, 184, 86, 0.22) !important;
+  color: #8ce47e !important;
+}
+
+/* Chip de Zona Horaria (UTC-05:00) */
+tb-timewindow-panel .tb-timezone-button,
+tb-timewindow-panel .mat-mdc-button-outlined,
+tb-timewindow-panel button[formcontrolname="timezone"],
+tb-timewindow-panel [class*="timezone"] {
+  background: rgba(100, 184, 86, 0.1) !important;
+  border: 1px solid rgba(100, 184, 86, 0.4) !important;
+  color: #8ce47e !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  border-radius: 6px !important;
+}
+
+/* Inputs, Selects y Menús Desplegables */
+tb-timewindow-panel .mat-mdc-form-field-flex,
+tb-timewindow-panel .mat-mdc-text-field-wrapper {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(100, 184, 86, 0.25) !important;
+  border-radius: 6px !important;
+}
+
+tb-timewindow-panel .mat-mdc-form-field-focus-overlay {
+  background: transparent !important;
+}
+
+tb-timewindow-panel .mat-mdc-select-value,
+tb-timewindow-panel .mat-mdc-select-value-text,
+tb-timewindow-panel .mat-mdc-input-element,
+tb-timewindow-panel input {
+  color: #e5ede4 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+tb-timewindow-panel .mat-mdc-select-arrow svg,
+tb-timewindow-panel .mat-mdc-select-arrow {
+  color: #8ce47e !important;
+  fill: #8ce47e !important;
+}
+
+tb-timewindow-panel .mat-mdc-floating-label,
+tb-timewindow-panel label {
+  color: #92b08f !important;
+}
+
+/* Slider de Valores Máximos */
+tb-timewindow-panel .mat-mdc-slider,
+tb-timewindow-panel mat-slider {
+  --mdc-slider-handle-color: #64B856 !important;
+  --mdc-slider-focus-handle-color: #4ade80 !important;
+  --mdc-slider-hover-handle-color: #4ade80 !important;
+  --mdc-slider-active-track-color: #64B856 !important;
+  --mdc-slider-inactive-track-color: rgba(100, 184, 86, 0.25) !important;
+  --mdc-slider-with-tick-marks-active-container-color: #64B856 !important;
+}
+
+/* Casilla de Verificación (Checkbox) */
+tb-timewindow-panel mat-checkbox,
+tb-timewindow-panel .mat-mdc-checkbox,
+tb-timewindow-panel .tb-timewindow-form-checkbox {
+  --mdc-checkbox-selected-icon-color: #ffffff !important;
+  --mdc-checkbox-selected-checkmark-color: #ffffff !important;
+  --mdc-checkbox-selected-focus-icon-color: #4ade80 !important;
+  --mdc-checkbox-selected-hover-icon-color: #4ade80 !important;
+  --mdc-checkbox-selected-container-color: #3b6534 !important;
+  --mdc-checkbox-unselected-icon-color: rgba(100, 184, 86, 0.5) !important;
+}
+
+tb-timewindow-panel mat-checkbox label,
+tb-timewindow-panel .mdc-label,
+tb-timewindow-panel .tb-timewindow-form-checkbox label,
+tb-timewindow-panel .tb-timewindow-form-checkbox .mdc-label {
+  color: #cbd5e1 !important;
+  font-size: 11.5px !important;
+}
+
+/* Botonera Inferior: Cancelar y Actualizar */
+tb-timewindow-panel .tb-panel-actions,
+tb-timewindow-panel .tb-timewindow-actions,
+tb-timewindow-panel .mat-mdc-dialog-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid rgba(100, 184, 86, 0.15) !important;
+  margin-top: 8px !important;
+}
+
+tb-timewindow-panel .tb-panel-actions button[mat-button],
+tb-timewindow-panel button[type="button"]:not(.mat-primary):not(.mat-raised-button) {
+  color: #94a3b8 !important;
+  font-weight: 600 !important;
+  transition: color 0.2s ease !important;
+}
+
+tb-timewindow-panel .tb-panel-actions button[mat-button]:hover,
+tb-timewindow-panel button[type="button"]:not(.mat-primary):not(.mat-raised-button):hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+tb-timewindow-panel .tb-panel-actions button[mat-raised-button],
+tb-timewindow-panel button.mat-primary,
+tb-timewindow-panel button[type="submit"] {
+  background: linear-gradient(135deg, #436a3c 0%, #2b4926 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(130, 195, 120, 0.4) !important;
+  border-radius: 6px !important;
+  padding: 0 18px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  transition: all 0.2s ease !important;
+}
+
+tb-timewindow-panel .tb-panel-actions button[mat-raised-button]:hover,
+tb-timewindow-panel button.mat-primary:hover,
+tb-timewindow-panel button[type="submit"]:hover {
+  background: linear-gradient(135deg, #4e7c46 0%, #355c2f 100%) !important;
+  box-shadow: 0 6px 18px rgba(100, 184, 86, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Desplegables de Opciones (Select Overlay Panels y Menús Contextuales) */
+.cdk-overlay-pane .mat-mdc-select-panel,
+.cdk-overlay-pane .mat-select-panel,
+.cdk-overlay-pane .mat-mdc-menu-panel,
+.cdk-overlay-pane .mat-menu-panel {
+  background: #101c12 !important;
+  border: 1px solid rgba(100, 184, 86, 0.35) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8) !important;
+}
+
+.cdk-overlay-pane mat-option,
+.cdk-overlay-pane .mat-mdc-option,
+.cdk-overlay-pane .mat-mdc-menu-item,
+.cdk-overlay-pane .mat-menu-item {
+  color: #e5ede4 !important;
+  font-size: 12.5px !important;
+}
+
+.cdk-overlay-pane mat-option:hover,
+.cdk-overlay-pane .mat-mdc-option:hover,
+.cdk-overlay-pane mat-option.mat-mdc-option-active,
+.cdk-overlay-pane .mat-mdc-menu-item:hover,
+.cdk-overlay-pane .mat-menu-item:hover {
+  background: rgba(100, 184, 86, 0.18) !important;
+  color: #8ce47e !important;
+}
+
+.cdk-overlay-pane mat-option.mdc-list-item--selected,
+.cdk-overlay-pane .mat-mdc-option.mdc-list-item--selected {
+  background: rgba(100, 184, 86, 0.25) !important;
+  color: #4ade80 !important;
+  font-weight: 700 !important;
+}
+
+/* Calendario Datepicker Nativo */
+.cdk-overlay-pane .mat-datepicker-content,
+.cdk-overlay-pane mat-calendar {
+  background: #101c12 !important;
+  color: #e5ede4 !important;
+  border: 1px solid rgba(100, 184, 86, 0.35) !important;
+  border-radius: 10px !important;
+}
+
+.cdk-overlay-pane .mat-calendar-body-cell-content {
+  color: #e5ede4 !important;
+}
+
+.cdk-overlay-pane .mat-calendar-body-selected {
+  background-color: #3b6534 !important;
+  color: #ffffff !important;
+}
+
+.cdk-overlay-pane .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: #4ade80 !important;
+}
+
+
+/* ========================================================================== */
+/* HYVISION SCADA THEME: VISTAS ADMINISTRATIVAS Y CENTRO DE NOTIFICACIONES     */
+/* ========================================================================== */
+
+/* Contenedor Principal de Contenido */
+mat-sidenav-content,
+.mat-drawer-content,
+mat-sidenav-content .tb-main-content,
+mat-drawer-content .tb-main-content,
+.tb-router-tabs-content {
+  background: radial-gradient(circle at 50% 12%, #1a331a 0%, #0d1a0d 50%, #070d07 100%) !important;
+  color: #e5ede4 !important;
+}
+
+/* Tarjetas y Contenedores de Tablas de Entidades (Eliminación fondo blanco) */
+.tb-entity-table .tb-entity-table-content,
+.tb-entity-table-content.tb-outlined-border,
+mat-drawer-container.tb-absolute-fill,
+mat-drawer-content .tb-entity-table {
+  background: linear-gradient(165deg, rgba(20, 36, 21, 0.95) 0%, rgba(10, 18, 11, 0.98) 100%) !important;
+  border: 1px solid rgba(100, 184, 86, 0.22) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  color: #e5ede4 !important;
+}
+
+/* Barra de Pestañas de Navegación Superior (Bandeja de entrada, Enviado, Destinatarios...) */
+nav.tb-router-tabs,
+.tb-router-tabs,
+.mat-mdc-tab-nav-bar.tb-router-tabs,
+.mat-mdc-tab-header,
+mat-tab-header {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(100, 184, 86, 0.2) !important;
+}
+
+.tb-router-tabs a.mat-mdc-tab-link,
+.tb-router-tabs a.mat-tab-link,
+.tb-router-tabs a.mat-mdc-tab-link span,
+.tb-router-tabs a.mat-tab-link span,
+.tb-router-tabs a.mat-mdc-tab-link .mdc-tab__text-label,
+.mat-mdc-tab-link,
+.mat-mdc-tab {
+  color: #92b08f !important; /* Sage green muted text */
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  transition: color 0.2s ease !important;
+}
+
+.tb-router-tabs a.mat-mdc-tab-link tb-icon,
+.tb-router-tabs a.mat-mdc-tab-link .mat-icon,
+.tb-router-tabs a.mat-tab-link tb-icon,
+.tb-router-tabs a.mat-tab-link .mat-icon,
+.mat-mdc-tab-link tb-icon,
+.mat-mdc-tab-link .mat-icon {
+  color: #92b08f !important;
+  margin-right: 8px !important;
+  fill: #92b08f !important;
+  transition: color 0.2s ease !important;
+}
+
+.tb-router-tabs a.mat-mdc-tab-link:hover,
+.tb-router-tabs a.mat-tab-link:hover,
+.tb-router-tabs a.mat-mdc-tab-link:hover span,
+.tb-router-tabs a.mat-tab-link:hover span,
+.mat-mdc-tab-link:hover,
+.mat-mdc-tab:hover {
+  color: #ffffff !important;
+}
+
+.tb-router-tabs a.mat-mdc-tab-link:hover tb-icon,
+.tb-router-tabs a.mat-mdc-tab-link:hover .mat-icon,
+.tb-router-tabs a.mat-tab-link:hover tb-icon,
+.tb-router-tabs a.mat-tab-link:hover .mat-icon {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* Pestaña Activa */
+.tb-router-tabs a.mat-mdc-tab-link.mdc-tab--active,
+.tb-router-tabs a.mat-mdc-tab-link.mat-mdc-tab-link-active,
+.tb-router-tabs a.mat-tab-link.mat-tab-label-active,
+.tb-router-tabs a.mat-mdc-tab-link.mdc-tab--active span,
+.tb-router-tabs a.mat-mdc-tab-link.mat-mdc-tab-link-active span,
+.tb-router-tabs a.mat-mdc-tab-link.mdc-tab--active .mdc-tab__text-label,
+.mat-mdc-tab-link.mdc-tab--active,
+.mat-mdc-tab.mdc-tab--active,
+.mat-mdc-tab-link.mat-mdc-tab-link-active {
+  color: #8ce47e !important; /* Menta/Esmeralda vivo */
+  font-weight: 700 !important;
+}
+
+.tb-router-tabs a.mat-mdc-tab-link.mdc-tab--active tb-icon,
+.tb-router-tabs a.mat-mdc-tab-link.mdc-tab--active .mat-icon,
+.tb-router-tabs a.mat-mdc-tab-link.mat-mdc-tab-link-active tb-icon,
+.tb-router-tabs a.mat-mdc-tab-link.mat-mdc-tab-link-active .mat-icon {
+  color: #8ce47e !important;
+  fill: #8ce47e !important;
+}
+
+.mdc-tab-indicator__content--underline,
+.mat-ink-bar {
+  border-color: #4ade80 !important;
+  border-bottom-width: 3px !important;
+}
+
+/* Botón "Enviar notificación" y Botones de Acción Primarios */
+tb-anchor + div button[mat-flat-button],
+tb-anchor + div button.mat-mdc-flat-button,
+button[mat-flat-button][color="primary"],
+.mat-mdc-flat-button.mat-primary,
+button[mat-raised-button][color="primary"],
+.mat-mdc-raised-button.mat-primary {
+  background: linear-gradient(135deg, #2e5329 0%, #1c3619 100%) !important;
+  border: 1px solid rgba(100, 184, 86, 0.45) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 6px !important;
+}
+
+button[mat-flat-button][color="primary"]:hover,
+.mat-mdc-flat-button.mat-primary:hover,
+button[mat-raised-button][color="primary"]:hover,
+.mat-mdc-raised-button.mat-primary:hover {
+  background: linear-gradient(135deg, #3b6b35 0%, #254721 100%) !important;
+  border-color: #8ce47e !important;
+  color: #ffffff !important;
+}
+
+/* Barra de Herramientas de la Tabla (Toolbar) */
+mat-toolbar.mat-mdc-table-toolbar,
+.mat-toolbar-tools {
+  background: transparent !important;
+  color: #e5ede4 !important;
+  border-bottom: 1px solid rgba(100, 184, 86, 0.18) !important;
+}
+
+/* Título de la Tabla */
+.tb-entity-table-title {
+  color: #ffffff !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Botones de Iconos de Acción en Barra (Lupa, Check all, Refresh) */
+.mat-toolbar-tools button.mat-mdc-icon-button,
+.mat-toolbar-tools button.mat-mdc-icon-button .mat-icon,
+.mat-toolbar-tools button.mat-mdc-icon-button tb-icon,
+.mat-toolbar-tools button.mat-icon-button,
+.mat-toolbar-tools button.mat-icon-button .mat-icon,
+.mat-toolbar-tools button.mat-icon-button tb-icon,
+.tb-entity-table button.mat-mdc-icon-button,
+.tb-entity-table button.mat-mdc-icon-button .mat-icon,
+.tb-entity-table button.mat-mdc-icon-button tb-icon {
+  color: #cbd5e1 !important;
+  transition: all 0.2s ease !important;
+}
+
+.mat-toolbar-tools button.mat-mdc-icon-button:hover,
+.mat-toolbar-tools button.mat-mdc-icon-button:hover .mat-icon,
+.mat-toolbar-tools button.mat-mdc-icon-button:hover tb-icon,
+.mat-toolbar-tools button.mat-icon-button:hover,
+.mat-toolbar-tools button.mat-icon-button:hover .mat-icon,
+.mat-toolbar-tools button.mat-icon-button:hover tb-icon,
+.tb-entity-table button.mat-mdc-icon-button:hover,
+.tb-entity-table button.mat-mdc-icon-button:hover .mat-icon,
+.tb-entity-table button.mat-mdc-icon-button:hover tb-icon {
+  color: #8ce47e !important;
+  background: rgba(100, 184, 86, 0.15) !important;
+  transform: scale(1.08) !important;
+}
+
+/* Toggle Option Filtro (No leído / Todos) */
+.mat-button-toggle-group.tb-toggle-header,
+tb-toggle-header .mat-button-toggle-group,
+tb-entities-table tb-toggle-select .mat-button-toggle-group,
+.tb-entity-table tb-toggle-select .mat-button-toggle-group,
+tb-toggle-select .mat-button-toggle-group {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(100, 184, 86, 0.28) !important;
+  border-radius: 100px !important;
+}
+
+.mat-button-toggle-group.tb-toggle-header .mat-button-toggle,
+.mat-button-toggle-group.tb-toggle-header .mat-button-toggle .mat-button-toggle-button,
+tb-toggle-header .mat-button-toggle .mat-button-toggle-label-content,
+tb-entities-table mat-button-toggle,
+.tb-entity-table mat-button-toggle,
+tb-toggle-select .mat-button-toggle {
+  color: #94a3b8 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+.mat-button-toggle-group.tb-toggle-header .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+tb-toggle-header .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+tb-entities-table mat-button-toggle.mat-button-toggle-checked,
+tb-entities-table mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+.tb-entity-table mat-button-toggle.mat-button-toggle-checked,
+.tb-entity-table mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+tb-toggle-select .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
+  background: linear-gradient(135deg, #305429 0%, #1e361a 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(100, 184, 86, 0.5) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Tablas de Entidades (Header, Filas, Celdas) */
+table.mat-mdc-table,
+.mat-mdc-table,
+mat-table {
+  background: transparent !important;
+  color: #e5ede4 !important;
+}
+
+/* Cabecera de Columnas (Hora de creación, Tipo, Asunto, Mensaje) */
+.mat-mdc-header-row,
+mat-header-row {
+  background: rgba(22, 42, 24, 0.75) !important;
+  border-bottom: 1px solid rgba(100, 184, 86, 0.28) !important;
+}
+
+.mat-mdc-header-cell,
+mat-header-cell,
+.mat-mdc-header-cell .mat-sort-header-content,
+mat-header-cell .mat-sort-header-content {
+  color: #92b08f !important; /* Sage green del Portafolio HyVision */
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.6px !important;
+  text-transform: uppercase !important;
+}
+
+.mat-mdc-header-cell .mat-sort-header-arrow,
+mat-header-cell .mat-sort-header-arrow {
+  color: #8ce47e !important;
+}
+
+/* Filas de Datos */
+.mat-mdc-row,
+mat-row {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(100, 184, 86, 0.1) !important;
+  transition: background 0.15s ease !important;
+}
+
+.mat-mdc-row:hover,
+mat-row:hover,
+.mat-mdc-row.tb-current-entity,
+mat-row.tb-current-entity {
+  background: rgba(100, 184, 86, 0.12) !important;
+}
+
+.mat-mdc-cell,
+mat-cell {
+  color: #e5ede4 !important; /* Blanco hueso legible */
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+/* Checkboxes en la Tabla */
+.mat-mdc-table mat-checkbox,
+mat-table mat-checkbox {
+  --mdc-checkbox-selected-icon-color: #ffffff !important;
+  --mdc-checkbox-selected-container-color: #3b6534 !important;
+  --mdc-checkbox-unselected-icon-color: rgba(100, 184, 86, 0.5) !important;
+}
+
+/* Mensaje de Estado Vacío (No se encontraron notificaciones) */
+.no-data-found,
+.table-container .no-data-found,
+span.no-data-found,
+.tb-no-data,
+.tb-no-data-text,
+.tb-empty-table,
+.table-container span:has-text,
+div:has(> .tb-no-data-text) {
+  color: #92b08f !important; /* Sage green en armonía */
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+}
+
+/* Paginador Inferior */
+mat-paginator.mat-mdc-paginator,
+.mat-mdc-paginator {
+  background: transparent !important;
+  color: #92b08f !important;
+  border-top: 1px solid rgba(100, 184, 86, 0.15) !important;
+}
+
+.mat-mdc-paginator-range-label,
+.mat-mdc-paginator-page-size-label {
+  color: #92b08f !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.mat-mdc-paginator .mat-mdc-select-value {
+  color: #e5ede4 !important;
+}
+
+.mat-mdc-paginator-navigation-next,
+.mat-mdc-paginator-navigation-previous,
+.mat-mdc-paginator-navigation-first,
+.mat-mdc-paginator-navigation-last {
+  color: #8ce47e !important;
+}
+
+.mat-mdc-paginator-navigation-next[disabled],
+.mat-mdc-paginator-navigation-previous[disabled] {
+  color: rgba(148, 163, 184, 0.3) !important;
 }
