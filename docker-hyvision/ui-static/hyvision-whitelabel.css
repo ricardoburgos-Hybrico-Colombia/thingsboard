@@ -1890,44 +1890,209 @@ tb-timewindow-panel .fixed-title-width-180 {
   text-transform: uppercase !important;
 }
 
-/* Pestañas Principales: Tiempo Real / Historial (Toggle Select) */
+/* ========================================================================== */
+/* SELECTORES TIPO PÍLDORA (TOGGLES): SIN BORDES INTERNOS NI CAJAS FLOTANTES   */
+/* ========================================================================== */
+.mat-button-toggle-group.tb-toggle-header,
+tb-toggle-header .mat-button-toggle-group,
+tb-entities-table tb-toggle-select .mat-button-toggle-group,
+.tb-entity-table tb-toggle-select .mat-button-toggle-group,
 tb-timewindow-panel tb-toggle-select .mat-button-toggle-group,
 tb-timewindow-panel .tb-toggle-select-container,
-tb-timewindow-panel .tb-toggle-container {
+tb-timewindow-panel .tb-toggle-container,
+tb-toggle-select .mat-button-toggle-group {
   background: rgba(255, 255, 255, 0.04) !important;
-  border: 1px solid rgba(100, 184, 86, 0.25) !important;
-  border-radius: 20px !important;
+  border: 1px solid rgba(100, 184, 86, 0.28) !important;
+  border-radius: 100px !important;
+  padding: 2px !important;
   overflow: hidden !important;
+  box-sizing: border-box !important;
 }
 
+/* Opciones individuales inactivas */
+.mat-button-toggle-group.tb-toggle-header .mat-button-toggle,
+tb-toggle-header .mat-button-toggle,
+tb-entities-table mat-button-toggle,
+.tb-entity-table mat-button-toggle,
 tb-timewindow-panel mat-button-toggle,
-tb-timewindow-panel .mat-button-toggle-button {
+tb-toggle-select .mat-button-toggle {
   background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  border-radius: 100px !important;
+}
+
+.mat-button-toggle-group.tb-toggle-header .mat-button-toggle .mat-button-toggle-button,
+tb-toggle-header .mat-button-toggle .mat-button-toggle-button,
+tb-entities-table mat-button-toggle .mat-button-toggle-button,
+.tb-entity-table mat-button-toggle .mat-button-toggle-button,
+tb-timewindow-panel .mat-button-toggle-button,
+tb-toggle-select .mat-button-toggle .mat-button-toggle-button {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 100px !important;
   color: #94a3b8 !important;
   font-size: 12px !important;
   font-weight: 600 !important;
+  transition: all 0.2s ease !important;
 }
 
+.mat-button-toggle-group.tb-toggle-header .mat-button-toggle:hover .mat-button-toggle-button,
+tb-toggle-header .mat-button-toggle:hover .mat-button-toggle-button,
+tb-entities-table mat-button-toggle:hover .mat-button-toggle-button,
+.tb-entity-table mat-button-toggle:hover .mat-button-toggle-button,
+tb-timewindow-panel mat-button-toggle:hover .mat-button-toggle-button,
+tb-toggle-select .mat-button-toggle:hover .mat-button-toggle-button {
+  color: #e5ede4 !important;
+}
+
+/* Opción ACTIVA: Relleno suave y limpio sin ningún borde interno */
+.mat-button-toggle-group.tb-toggle-header .mat-button-toggle.mat-button-toggle-checked,
+tb-toggle-header .mat-button-toggle.mat-button-toggle-checked,
+tb-entities-table mat-button-toggle.mat-button-toggle-checked,
+.tb-entity-table mat-button-toggle.mat-button-toggle-checked,
 tb-timewindow-panel mat-button-toggle.mat-button-toggle-checked,
-tb-timewindow-panel mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
-  background: linear-gradient(135deg, #355a30 0%, #20381d 100%) !important;
+tb-toggle-select .mat-button-toggle.mat-button-toggle-checked {
+  border: none !important;
+  outline: none !important;
+  border-radius: 100px !important;
+}
+
+.mat-button-toggle-group.tb-toggle-header .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+tb-toggle-header .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+tb-entities-table mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+.tb-entity-table mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+tb-timewindow-panel mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
+tb-toggle-select .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
+  background: linear-gradient(135deg, #32582b 0%, #1c3619 100%) !important;
   color: #ffffff !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 100px !important;
 }
 
-tb-timewindow-panel .mat-button-toggle-label-content {
-  line-height: 28px !important;
-  padding: 0 14px !important;
-}
-
-/* Sub-pestañas (Últimos / Rango / Relativo) */
+/* Variación stroked (Últimos / Relativo) */
 tb-timewindow-panel tb-toggle-select[appearance="stroked"] .mat-button-toggle-group {
-  border: 1px solid rgba(100, 184, 86, 0.3) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(100, 184, 86, 0.28) !important;
+  border-radius: 100px !important;
+  padding: 2px !important;
 }
-tb-timewindow-panel tb-toggle-select[appearance="stroked"] mat-button-toggle.mat-button-toggle-checked,
+
+tb-timewindow-panel tb-toggle-select[appearance="stroked"] mat-button-toggle .mat-button-toggle-button {
+  border: none !important;
+  outline: none !important;
+  border-radius: 100px !important;
+  color: #94a3b8 !important;
+}
+
 tb-timewindow-panel tb-toggle-select[appearance="stroked"] mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
   background: rgba(100, 184, 86, 0.22) !important;
   color: #8ce47e !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 100px !important;
+}
+
+/* ========================================================================== */
+/* FORM FIELDS (INPUTS, SELECTS, INTERVALOS): ELIMINACIÓN DE BORDES DOBLES    */
+/* ========================================================================== */
+
+/* Eliminar bordes arbitrarios de los contenedores wrapper y flex */
+tb-timewindow-panel .mat-mdc-form-field-flex,
+tb-timewindow-panel .mat-mdc-text-field-wrapper,
+.tb-entity-table .mat-mdc-form-field-flex,
+.tb-entity-table .mat-mdc-text-field-wrapper,
+mat-dialog-container .mat-mdc-form-field-flex,
+mat-dialog-container .mat-mdc-text-field-wrapper {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Fondo oscuro sutil del campo */
+tb-timewindow-panel .mat-mdc-text-field-wrapper,
+.tb-entity-table .mat-mdc-text-field-wrapper,
+mat-dialog-container .mat-mdc-text-field-wrapper {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 6px !important;
+}
+
+tb-timewindow-panel .mat-mdc-form-field-flex,
+.tb-entity-table .mat-mdc-form-field-flex {
+  background: transparent !important;
+}
+
+/* Borde ÚNICO: Controlado exclusivamente por el outline nativo de Angular Material MDC */
+tb-timewindow-panel .mdc-notched-outline__leading,
+tb-timewindow-panel .mdc-notched-outline__notch,
+tb-timewindow-panel .mdc-notched-outline__trailing,
+.tb-entity-table .mdc-notched-outline__leading,
+.tb-entity-table .mdc-notched-outline__notch,
+.tb-entity-table .mdc-notched-outline__trailing,
+mat-dialog-container .mdc-notched-outline__leading,
+mat-dialog-container .mdc-notched-outline__notch,
+mat-dialog-container .mdc-notched-outline__trailing {
+  border-color: rgba(100, 184, 86, 0.35) !important;
+  border-width: 1px !important;
+}
+
+/* Hover y Focus en campos de formulario: realce en verde menta */
+tb-timewindow-panel .mat-mdc-form-field:hover .mdc-notched-outline__leading,
+tb-timewindow-panel .mat-mdc-form-field:hover .mdc-notched-outline__notch,
+tb-timewindow-panel .mat-mdc-form-field:hover .mdc-notched-outline__trailing,
+tb-timewindow-panel .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+tb-timewindow-panel .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+tb-timewindow-panel .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing,
+.tb-entity-table .mat-mdc-form-field:hover .mdc-notched-outline__leading,
+.tb-entity-table .mat-mdc-form-field:hover .mdc-notched-outline__notch,
+.tb-entity-table .mat-mdc-form-field:hover .mdc-notched-outline__trailing,
+.tb-entity-table .mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.tb-entity-table .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.tb-entity-table .mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #8ce47e !important;
+}
+
+tb-timewindow-panel .mat-mdc-form-field-focus-overlay {
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Tipografía de valores ingresados y seleccionados */
+tb-timewindow-panel .mat-mdc-select-value,
+tb-timewindow-panel .mat-mdc-select-value-text,
+tb-timewindow-panel .mat-mdc-input-element,
+tb-timewindow-panel input.mat-mdc-input-element,
+.tb-entity-table .mat-mdc-select-value,
+.tb-entity-table .mat-mdc-input-element {
+  color: #e5ede4 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+/* Etiquetas de campos (Días, Horas, Minutos, Segundos, etc.) en Verde Salvia */
+tb-timewindow-panel .mat-mdc-floating-label,
+tb-timewindow-panel mat-label,
+.tb-entity-table .mat-mdc-floating-label,
+.tb-entity-table mat-label {
+  color: #92b08f !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.4px !important;
+  text-transform: uppercase !important;
+}
+
+/* Flechas indicadoras de desplegables */
+tb-timewindow-panel .mat-mdc-select-arrow svg,
+tb-timewindow-panel .mat-mdc-select-arrow,
+.tb-entity-table .mat-mdc-select-arrow svg,
+.tb-entity-table .mat-mdc-select-arrow {
+  color: #8ce47e !important;
+  fill: #8ce47e !important;
 }
 
 /* Chip de Zona Horaria (UTC-05:00) */
@@ -1941,38 +2106,6 @@ tb-timewindow-panel [class*="timezone"] {
   font-weight: 700 !important;
   font-size: 11px !important;
   border-radius: 6px !important;
-}
-
-/* Inputs, Selects y Menús Desplegables */
-tb-timewindow-panel .mat-mdc-form-field-flex,
-tb-timewindow-panel .mat-mdc-text-field-wrapper {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid rgba(100, 184, 86, 0.25) !important;
-  border-radius: 6px !important;
-}
-
-tb-timewindow-panel .mat-mdc-form-field-focus-overlay {
-  background: transparent !important;
-}
-
-tb-timewindow-panel .mat-mdc-select-value,
-tb-timewindow-panel .mat-mdc-select-value-text,
-tb-timewindow-panel .mat-mdc-input-element,
-tb-timewindow-panel input {
-  color: #e5ede4 !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-}
-
-tb-timewindow-panel .mat-mdc-select-arrow svg,
-tb-timewindow-panel .mat-mdc-select-arrow {
-  color: #8ce47e !important;
-  fill: #8ce47e !important;
-}
-
-tb-timewindow-panel .mat-mdc-floating-label,
-tb-timewindow-panel label {
-  color: #92b08f !important;
 }
 
 /* Slider de Valores Máximos */
@@ -2283,41 +2416,6 @@ mat-toolbar.mat-mdc-table-toolbar,
   color: #8ce47e !important;
   background: rgba(100, 184, 86, 0.15) !important;
   transform: scale(1.08) !important;
-}
-
-/* Toggle Option Filtro (No leído / Todos) */
-.mat-button-toggle-group.tb-toggle-header,
-tb-toggle-header .mat-button-toggle-group,
-tb-entities-table tb-toggle-select .mat-button-toggle-group,
-.tb-entity-table tb-toggle-select .mat-button-toggle-group,
-tb-toggle-select .mat-button-toggle-group {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(100, 184, 86, 0.28) !important;
-  border-radius: 100px !important;
-}
-
-.mat-button-toggle-group.tb-toggle-header .mat-button-toggle,
-.mat-button-toggle-group.tb-toggle-header .mat-button-toggle .mat-button-toggle-button,
-tb-toggle-header .mat-button-toggle .mat-button-toggle-label-content,
-tb-entities-table mat-button-toggle,
-.tb-entity-table mat-button-toggle,
-tb-toggle-select .mat-button-toggle {
-  color: #94a3b8 !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-}
-
-.mat-button-toggle-group.tb-toggle-header .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
-tb-toggle-header .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
-tb-entities-table mat-button-toggle.mat-button-toggle-checked,
-tb-entities-table mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
-.tb-entity-table mat-button-toggle.mat-button-toggle-checked,
-.tb-entity-table mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button,
-tb-toggle-select .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
-  background: linear-gradient(135deg, #305429 0%, #1e361a 100%) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(100, 184, 86, 0.5) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Tablas de Entidades (Header, Filas, Celdas) */
