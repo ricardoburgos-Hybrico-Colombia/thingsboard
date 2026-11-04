@@ -1810,11 +1810,11 @@
     var chipAll = hub.querySelector('[data-filter="all"]');
     if (chipAll) chipAll.innerText = 'Todos (' + totalSites + ')';
     var chipNorm = hub.querySelector('[data-filter="normal"]');
-    if (chipNorm) chipNorm.innerText = '<span class="hyv-dot-online"></span> Operativos (' + onlineCount + ')';
+    if (chipNorm) chipNorm.innerHTML = '<span class="hyv-dot-online"></span> Operativos (' + onlineCount + ')';
     var chipAlert = hub.querySelector('[data-filter="alert"]');
-    if (chipAlert) chipAlert.innerText = '<span class="hyv-dot-offline"></span> Fuera de línea (' + offlineCount + ')';
+    if (chipAlert) chipAlert.innerHTML = '<span class="hyv-dot-offline"></span> Fuera de línea (' + offlineCount + ')';
     var chipBess = hub.querySelector('[data-filter="bess"]');
-    if (chipBess) chipBess.innerText = '<span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="11" rx="2"/><line x1="21" y1="11" x2="21" y2="14"/></svg>Con BESS</span> (' + bessActiveSites.length + ')';
+    if (chipBess) chipBess.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="11" rx="2"/><line x1="21" y1="11" x2="21" y2="14"/></svg>Con BESS</span> (' + bessActiveSites.length + ')';
   }
 
   function renderFleetHubContent(hub) {
