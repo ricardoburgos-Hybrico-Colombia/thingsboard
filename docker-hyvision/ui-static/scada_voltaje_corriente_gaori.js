@@ -330,17 +330,18 @@ self.onDataUpdated = function() {
     },
     legend: {
       show: true,
-      top: 0,
-      right: 15,
-      itemWidth: 14,
+      top: 2,
+      left: 'center', // Centrado horizontalmente para evitar colisión con los ejes
+      itemWidth: 16,
       itemHeight: 4,
-      textStyle: { color: '#94a3b8', fontSize: 10 },
+      itemGap: 24,
+      textStyle: { color: '#94a3b8', fontSize: 10.5 },
       data: ['Tensión Bus DC', 'Corriente BESS', 'Voltaje Mín Celda']
     },
     grid: {
-      left: 45,
-      right: 95,
-      top: 25,
+      left: 48,
+      right: 92,
+      top: 32, // Holgura para nombres de ejes bajo la barra de KPIs
       bottom: 28,
       containLabel: false
     },
@@ -406,7 +407,7 @@ self.onDataUpdated = function() {
       {
         type: 'value',
         name: 'Bus DC (V)',
-        nameTextStyle: { color: '#38bdf8', fontSize: 9.5, padding: [0, 0, 0, 10] },
+        nameTextStyle: { color: '#38bdf8', fontSize: 9.5, align: 'left', padding: [0, 0, 4, -5] },
         position: 'left',
         scale: true,
         axisLine: { show: true, lineStyle: { color: 'rgba(56, 189, 248, 0.4)' } },
@@ -416,7 +417,7 @@ self.onDataUpdated = function() {
       {
         type: 'value',
         name: 'Corriente (A)',
-        nameTextStyle: { color: '#f59e0b', fontSize: 9.5, padding: [0, 5, 0, 0] },
+        nameTextStyle: { color: '#f59e0b', fontSize: 9.5, align: 'center', padding: [0, 0, 4, 0] },
         position: 'right',
         scale: true,
         axisLine: { show: true, lineStyle: { color: 'rgba(245, 158, 11, 0.4)' } },
@@ -426,9 +427,9 @@ self.onDataUpdated = function() {
       {
         type: 'value',
         name: 'Celda Mín (V)',
-        nameTextStyle: { color: '#ec4899', fontSize: 9.5, padding: [0, 8, 0, 0] },
+        nameTextStyle: { color: '#ec4899', fontSize: 9.5, align: 'center', padding: [0, 0, 4, 0] },
         position: 'right',
-        offset: 48,
+        offset: 46,
         scale: true,
         axisLine: { show: true, lineStyle: { color: 'rgba(236, 72, 153, 0.4)' } },
         axisLabel: {
