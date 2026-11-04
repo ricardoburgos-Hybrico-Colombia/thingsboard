@@ -379,9 +379,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "generacion_solar_kw",
@@ -402,7 +400,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -430,9 +430,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "demanda_carga_kw",
@@ -453,7 +451,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -481,9 +481,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "soc_promedio",
@@ -511,7 +509,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -539,9 +539,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "dg_potencia_activa_kw",
@@ -562,7 +560,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -590,9 +590,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "energia_solar_hoy",
@@ -627,7 +625,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -655,9 +655,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "modo_operacion",
@@ -685,7 +683,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -713,9 +713,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "temp_igbt_pcs1",
@@ -764,7 +762,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -792,9 +792,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "alarmas_activas_total",
@@ -941,7 +939,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -968,9 +968,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "soc_pcs1",
@@ -1005,7 +1003,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -1033,9 +1033,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "vbat_promedio",
@@ -1074,7 +1072,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -1098,9 +1098,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "pbd_matrix_json",
@@ -1170,7 +1168,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -1198,9 +1198,7 @@
         "config": {
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "generacion_solar_kw",
@@ -1319,7 +1317,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "showTitle": false,
@@ -1432,7 +1432,7 @@
             "fontWeight": 400,
             "padding": "5px 10px 5px 10px"
           },
-          "useDashboardTimewindow": false,
+          "useDashboardTimewindow": true,
           "showLegend": false,
           "widgetStyle": {
             "background": "linear-gradient(160deg, rgba(14, 25, 16, 0.95) 0%, rgba(8, 15, 9, 0.98) 100%)",
@@ -1488,7 +1488,7 @@
           "useDashboardTimewindow": true,
           "datasources": [
             {
-              "type": "device",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "generacion_solar_kw",
@@ -1517,8 +1517,8 @@
                   "ACTIVE"
                 ]
               },
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
-              "name": ""
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "settings": {}
@@ -1543,7 +1543,7 @@
           "useDashboardTimewindow": true,
           "datasources": [
             {
-              "type": "device",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "pac_pcs1",
@@ -1572,8 +1572,8 @@
                   "ACTIVE"
                 ]
               },
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
-              "name": ""
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "settings": {}
@@ -1598,7 +1598,7 @@
           "useDashboardTimewindow": true,
           "datasources": [
             {
-              "type": "device",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "pbd_01_kw",
@@ -1690,8 +1690,8 @@
                   "ACTIVE"
                 ]
               },
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
-              "name": ""
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ],
           "settings": {}
@@ -1721,9 +1721,7 @@
           "settings": {},
           "datasources": [
             {
-              "type": "device",
-              "name": "",
-              "deviceId": "64af58e0-be6a-11f1-a395-4fe608e17de1",
+              "type": "entity",
               "dataKeys": [
                 {
                   "name": "delta_temp_bateria",
@@ -1751,7 +1749,9 @@
                 "statusList": [
                   "ACTIVE"
                 ]
-              }
+              },
+              "entityAliasId": "68411acd-78fd-4271-bed2-9f5df57811e5",
+              "latestDataKeys": []
             }
           ]
         }
