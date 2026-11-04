@@ -373,7 +373,7 @@
       },
       "84c0eca6-e17c-48e6-cbe0-745bec95bfb7": {
         "typeFullFqn": "tenant.generacion_solar_card",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 7,
         "sizeY": 3.5,
         "config": {
@@ -416,7 +416,8 @@
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -424,7 +425,7 @@
       },
       "90ea4fdf-2231-417f-5639-d31e1194db60": {
         "typeFullFqn": "tenant.demanda_carga_card",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 7,
         "sizeY": 3.5,
         "config": {
@@ -467,7 +468,8 @@
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -475,7 +477,7 @@
       },
       "60552401-8cfd-dd1d-c01c-53af3ba7ac4c": {
         "typeFullFqn": "tenant.almacenamiento_bess_card_dyn",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 8,
         "sizeY": 3.5,
         "config": {
@@ -525,7 +527,8 @@
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -533,7 +536,7 @@
       },
       "a73d9a4a-3235-e5a0-f90b-2dc451e6065d": {
         "typeFullFqn": "tenant.respaldo_dg_card",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 8,
         "sizeY": 3.5,
         "config": {
@@ -576,7 +579,8 @@
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -650,7 +654,7 @@
       },
       "d9cde2ca-cb04-83f6-9acf-0d9fa0ee5ca8": {
         "typeFullFqn": "tenant.estado_general_card",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 8,
         "sizeY": 3.5,
         "config": {
@@ -700,7 +704,8 @@
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -708,7 +713,7 @@
       },
       "0323c11a-06a2-5d91-f1e3-a08cd882995a": {
         "typeFullFqn": "tenant.perfil_termico_pcs_scada",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 12,
         "sizeY": 4.5,
         "config": {
@@ -779,7 +784,8 @@
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -787,7 +793,7 @@
       },
       "052de3af-13b9-f603-76bb-59e4a5e4805d": {
         "typeFullFqn": "tenant.registro_eventos_fallas_gaori2",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 12,
         "sizeY": 4.5,
         "config": {
@@ -951,7 +957,8 @@
           "padding": "0px",
           "settings": {},
           "title": "SCADA GAORI - Registro de Eventos y Fallas",
-          "dropShadow": false
+          "dropShadow": false,
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -963,7 +970,7 @@
       },
       "9dd08064-4544-9977-9a67-378b60ff1129": {
         "typeFullFqn": "tenant.soc_racks_linear_scada",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 12,
         "sizeY": 4.5,
         "config": {
@@ -1020,7 +1027,8 @@
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -1093,7 +1101,7 @@
       },
       "743bfd18-efaa-5b84-3df8-74ebd640012a": {
         "typeFullFqn": "tenant.pbd_tableros_dc_scada",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 12,
         "sizeY": 4.5,
         "config": {
@@ -1185,7 +1193,8 @@
           "widgetStyle": {},
           "widgetCss": "",
           "pageSize": 1024,
-          "noDataDisplayMessage": ""
+          "noDataDisplayMessage": "",
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -1193,7 +1202,7 @@
       },
       "dd61b573-72ae-8820-8d30-08d4e0f35a57": {
         "typeFullFqn": "tenant.sinoptico_microrred_scada",
-        "type": "latest",
+        "type": "timeseries",
         "sizeX": 24,
         "sizeY": 10,
         "config": {
@@ -1329,7 +1338,8 @@
           "padding": "0px",
           "settings": {},
           "title": "Sinóptico Animado Microrred",
-          "dropShadow": false
+          "dropShadow": false,
+          "useDashboardTimewindow": true
         },
         "row": 0,
         "col": 0,
@@ -1921,6 +1931,6 @@
     }
   },
   "resources": null,
-  "version": 37,
+  "version": 38,
   "externalId": null
 }

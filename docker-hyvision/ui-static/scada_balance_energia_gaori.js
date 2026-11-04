@@ -435,3 +435,4 @@ self.onDestroy = function() {
     self.myChart = null;
   }
 };
+
