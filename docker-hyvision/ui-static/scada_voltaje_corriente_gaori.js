@@ -331,17 +331,17 @@ self.onDataUpdated = function() {
     legend: {
       show: true,
       top: 2,
-      left: 'center', // Centrado horizontalmente para evitar colisión con los ejes
-      itemWidth: 16,
+      left: 'center',
+      itemWidth: 14,
       itemHeight: 4,
-      itemGap: 24,
-      textStyle: { color: '#94a3b8', fontSize: 10.5 },
+      itemGap: 18,
+      textStyle: { color: '#94a3b8', fontSize: 10 },
       data: ['Tensión Bus DC', 'Corriente BESS', 'Voltaje Mín Celda']
     },
     grid: {
       left: 48,
-      right: 92,
-      top: 32, // Holgura para nombres de ejes bajo la barra de KPIs
+      right: 102,
+      top: 32,
       bottom: 28,
       containLabel: false
     },
@@ -407,7 +407,7 @@ self.onDataUpdated = function() {
       {
         type: 'value',
         name: 'Bus DC (V)',
-        nameTextStyle: { color: '#38bdf8', fontSize: 9.5, align: 'left', padding: [0, 0, 4, -5] },
+        nameTextStyle: { color: '#38bdf8', fontSize: 9.5, align: 'left', padding: [0, 0, 4, -4] },
         position: 'left',
         scale: true,
         axisLine: { show: true, lineStyle: { color: 'rgba(56, 189, 248, 0.4)' } },
@@ -417,7 +417,7 @@ self.onDataUpdated = function() {
       {
         type: 'value',
         name: 'Corriente (A)',
-        nameTextStyle: { color: '#f59e0b', fontSize: 9.5, align: 'center', padding: [0, 0, 4, 0] },
+        nameTextStyle: { color: '#f59e0b', fontSize: 9.5, align: 'right', padding: [0, 8, 4, 0] },
         position: 'right',
         scale: true,
         axisLine: { show: true, lineStyle: { color: 'rgba(245, 158, 11, 0.4)' } },
@@ -427,9 +427,9 @@ self.onDataUpdated = function() {
       {
         type: 'value',
         name: 'Celda Mín (V)',
-        nameTextStyle: { color: '#ec4899', fontSize: 9.5, align: 'center', padding: [0, 0, 4, 0] },
+        nameTextStyle: { color: '#ec4899', fontSize: 9.5, align: 'left', padding: [0, 0, 4, 8] },
         position: 'right',
-        offset: 46,
+        offset: 52,
         scale: true,
         axisLine: { show: true, lineStyle: { color: 'rgba(236, 72, 153, 0.4)' } },
         axisLabel: {
