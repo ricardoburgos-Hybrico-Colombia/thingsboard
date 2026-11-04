@@ -340,7 +340,7 @@ self.onDataUpdated = function() {
     },
     grid: {
       left: 48,
-      right: 102,
+      right: 100,
       top: 32,
       bottom: 28,
       containLabel: false
@@ -417,7 +417,7 @@ self.onDataUpdated = function() {
       {
         type: 'value',
         name: 'Corriente (A)',
-        nameTextStyle: { color: '#f59e0b', fontSize: 9.5, align: 'right', padding: [0, 8, 4, 0] },
+        nameTextStyle: { color: '#f59e0b', fontSize: 9.5, align: 'right', padding: [0, 12, 4, 0] },
         position: 'right',
         scale: true,
         axisLine: { show: true, lineStyle: { color: 'rgba(245, 158, 11, 0.4)' } },
@@ -427,9 +427,9 @@ self.onDataUpdated = function() {
       {
         type: 'value',
         name: 'Celda Mín (V)',
-        nameTextStyle: { color: '#ec4899', fontSize: 9.5, align: 'left', padding: [0, 0, 4, 8] },
+        nameTextStyle: { color: '#ec4899', fontSize: 9.5, align: 'center', padding: [0, 14, 4, 0] },
         position: 'right',
-        offset: 52,
+        offset: 50,
         scale: true,
         axisLine: { show: true, lineStyle: { color: 'rgba(236, 72, 153, 0.4)' } },
         axisLabel: {
