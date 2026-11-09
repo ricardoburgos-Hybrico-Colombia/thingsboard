@@ -1149,7 +1149,6 @@ tb-dashboards-table.hyvision-fleet-host mat-drawer-content {
 .hyv-btn-scada:hover {
   background: linear-gradient(135deg, #4f7d46 0%, #355c2f 100%);
   box-shadow: 0 5px 16px rgba(67, 106, 60, 0.6);
-  transform: translateY(-1px);
   color: #ffffff;
 }
 
@@ -1635,6 +1634,157 @@ html.hyvision-route-dashboard div.tb-widget .tb-widget-title .title {
 html.hyvision-route-dashboard tb-timewindow,
 html.hyvision-route-dashboard .tb-widget-title tb-timewindow {
   color: var(--hyv-text-muted) !important;
+}
+
+/* Panel overlay: Ventana de tiempo (tb-timewindow-panel en cdk-overlay) */
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel {
+  display: block;
+  background: linear-gradient(165deg, rgba(32, 54, 28, 0.98) 0%, rgba(14, 25, 14, 0.99) 100%) !important;
+  border: 1px solid var(--hyv-card-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(67, 106, 60, 0.25) !important;
+  color: var(--hyv-surface-text) !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-timewindow-form,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-form-panel {
+  background: transparent !important;
+  color: var(--hyv-surface-text) !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-form-panel.stroked {
+  border: 1px solid rgba(130, 195, 120, 0.22) !important;
+  border-radius: 10px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-form-panel-title,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-form-row,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel label,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-mdc-form-field-label,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mdc-floating-label {
+  color: var(--hyv-text-muted) !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-timewindow-form-settings-btn,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-icon {
+  color: var(--hyv-text-muted) !important;
+}
+
+/* Pestañas Tiempo real / Historial (appearance=fill → .tb-fill; TB pinta el botón en primary azul) */
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-button-toggle-group.tb-toggle-header.tb-fill,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-button-toggle-group.tb-toggle-header.tb-primary-fill {
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-timewindow-form-type-options .mat-button-toggle.mat-button-toggle-appearance-standard {
+  color: var(--hyv-text-muted) !important;
+  background: transparent !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-timewindow-form-type-options .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
+  background: linear-gradient(135deg, #5d9a52 0%, #3d6b38 100%) !important;
+  color: #f0fdf4 !important;
+  border: 1px solid rgba(140, 228, 126, 0.65) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 2px 8px rgba(67, 106, 60, 0.45) !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-timewindow-form-type-options .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-label-content {
+  color: #f0fdf4 !important;
+  font-weight: 600 !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-timewindow-form-type-options .mat-button-toggle:not(.mat-button-toggle-checked) .mat-button-toggle-label-content {
+  color: var(--hyv-text-muted) !important;
+}
+
+/* Últimos / Rango / Relativo (appearance=stroked) */
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-button-toggle-group.tb-toggle-header:not(.tb-fill) {
+  background: rgba(0, 0, 0, 0.28) !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-button-toggle-group.tb-toggle-header:not(.tb-fill) .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-button {
+  background: rgba(67, 106, 60, 0.35) !important;
+  color: var(--hyv-accent-soft) !important;
+  border: 1px solid rgba(140, 228, 126, 0.55) !important;
+  border-radius: 20px !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-button-toggle-group.tb-toggle-header:not(.tb-fill) .mat-button-toggle.mat-button-toggle-checked .mat-button-toggle-label-content {
+  color: var(--hyv-accent-soft) !important;
+  font-weight: 600 !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-button-toggle-group.tb-toggle-header:not(.tb-fill) .mat-button-toggle:not(.mat-button-toggle-checked) .mat-button-toggle-label-content {
+  color: #b8d4b5 !important;
+  -webkit-text-fill-color: #b8d4b5 !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-button-toggle-group.tb-toggle-header:not(.tb-fill) .mat-button-toggle:not(.mat-button-toggle-checked) {
+  color: #b8d4b5 !important;
+}
+
+/* Campos numéricos, selects, divisor */
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-mdc-form-field,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-mdc-text-field-wrapper {
+  --mdc-outlined-text-field-outline-color: rgba(130, 195, 120, 0.35);
+  --mdc-outlined-text-field-hover-outline-color: rgba(140, 228, 126, 0.5);
+  --mdc-outlined-text-field-focus-outline-color: rgba(140, 228, 126, 0.65);
+  --mdc-outlined-text-field-input-text-color: #ffffff;
+  --mdc-outlined-text-field-label-text-color: #b8d4b5;
+  --mat-form-field-outlined-label-text-color: #b8d4b5;
+  --mat-select-enabled-trigger-text-color: #ffffff;
+  --mat-select-enabled-arrow-color: var(--hyv-text-muted);
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel mat-label,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-mdc-form-field mat-label,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mdc-floating-label,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-mdc-floating-label {
+  color: #b8d4b5 !important;
+  -webkit-text-fill-color: #b8d4b5 !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-form-panel-title {
+  color: #e5ede4 !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel tb-timezone button,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel tb-timezone .mat-mdc-button {
+  color: #b8d4b5 !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-mdc-input-element,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-mdc-select-value {
+  color: #ffffff !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-divider {
+  border-top-color: rgba(130, 195, 120, 0.2) !important;
+}
+
+/* Slider valores máximos */
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .mat-mdc-slider {
+  --mdc-slider-handle-color: var(--hyv-accent-soft);
+  --mdc-slider-focus-handle-color: var(--hyv-accent-soft);
+  --mdc-slider-hover-handle-color: var(--hyv-accent-soft);
+  --mdc-slider-active-track-color: rgba(100, 184, 86, 0.75);
+  --mdc-slider-inactive-track-color: rgba(255, 255, 255, 0.15);
+  --mdc-slider-with-tick-marks-inactive-container-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Acciones Cancelar / Actualizar */
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-panel-actions .mat-mdc-button {
+  color: var(--hyv-text-muted) !important;
+}
+
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-panel-actions .mat-mdc-raised-button,
+html.hyvision-route-dashboard .cdk-overlay-container tb-timewindow-panel .tb-panel-actions .mat-mdc-unelevated-button {
+  background: var(--hyv-btn-scada-bg) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(130, 195, 120, 0.45) !important;
+  box-shadow: 0 3px 10px rgba(67, 106, 60, 0.4) !important;
 }
 
 html.hyvision-route-dashboard tb-dashboard-toolbar .mat-toolbar,
